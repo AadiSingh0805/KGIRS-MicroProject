@@ -234,41 +234,41 @@ Respond in strictly valid JSON:
 CRISIS_BENCHMARK_DATASET = [
     {
         "query_id": "Q1",
-        "query": "Find fastest safe ambulance route from Downtown to nearest hospital avoiding flooded streets",
+        "query": "Find fastest safe ambulance route from Chembur Naka to nearest hospital avoiding flooded streets",
         "ground_truth_relevant_reports": ["DISP-2026-001", "DISP-2026-003", "DISP-2026-006"],
         "relevance_grades": {
-            "DISP-2026-001": 3.0, # Flash flood Embarcadero
-            "DISP-2026-003": 2.0, # Harbor hospital flooded
-            "DISP-2026-006": 3.0, # Clear Geary corridor
+            "DISP-2026-001": 3.0, # Monsoon flood Shell Colony
+            "DISP-2026-003": 2.0, # Inlaks hospital flooded
+            "DISP-2026-006": 3.0, # Clear Freeway corridor
             "DISP-2026-002": 1.0,
             "DISP-2026-004": 1.0
         },
-        "hazards_to_avoid": ["E_DOWN_TO_EMBARCADERO", "N_HOSP_HARBOR"],
-        "expected_destination": "N_HOSP_STJUDE"
+        "hazards_to_avoid": ["E_CHEMBUR_TO_SHELL_COLONY", "N_HOSP_INLAKS"],
+        "expected_destination": "N_HOSP_ZEN"
     },
     {
         "query_id": "Q2",
-        "query": "Bridge inspection report and damage status on North Bay Span",
+        "query": "Bridge inspection report and damage status on Amar Mahal Flyover",
         "ground_truth_relevant_reports": ["DISP-2026-002"],
         "relevance_grades": {
             "DISP-2026-002": 3.0,
             "DISP-2026-005": 1.0,
             "DISP-2026-001": 0.0
         },
-        "hazards_to_avoid": ["E_HARBOR_TO_BRIDGE_NORTH"],
-        "expected_destination": "N_BRIDGE_BAY_NORTH"
+        "hazards_to_avoid": ["E_TILAK_TO_AMAR_MAHAL"],
+        "expected_destination": "N_BRIDGE_AMAR_MAHAL"
     },
     {
         "query_id": "Q3",
-        "query": "Emergency supply convoy from Downtown to Civic Mega-Shelter avoiding mudslides",
+        "query": "Emergency supply convoy from Chembur Naka to RCF Sports Mega-Shelter avoiding waterlogged sectors",
         "ground_truth_relevant_reports": ["DISP-2026-004", "DISP-2026-001"],
         "relevance_grades": {
             "DISP-2026-004": 3.0,
             "DISP-2026-001": 2.0,
             "DISP-2026-005": 1.0
         },
-        "hazards_to_avoid": ["E_INT_POTRERO_TO_MISSION"],
-        "expected_destination": "N_SHELTER_CIVIC"
+        "hazards_to_avoid": ["E_SUMAN_TO_SHELL"],
+        "expected_destination": "N_SHELTER_RCF"
     }
 ]
 

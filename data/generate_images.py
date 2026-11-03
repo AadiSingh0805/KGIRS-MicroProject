@@ -83,7 +83,7 @@ def generate_drone_hud_image(filepath, title, status_text, severity_color, bg_gr
     draw.text((margin + 12, margin + 24), f"STATUS: {status_text}", fill=severity_color)
 
     draw.rectangle([margin, height - margin - 35, width - margin, height - margin], fill=(15, 23, 42))
-    draw.text((margin + 12, height - margin - 28), "GPS: 37.7850 N, 122.4100 W | ALT: 145m | BEARING: 312° NW | ENCRYPTION: AES-256", fill=(148, 163, 184))
+    draw.text((margin + 12, height - margin - 28), "GPS: 19.0596 N, 72.8988 E | MUMBAI CHEMBUR | ALT: 145m | BEARING: 312° NW | ENCRYPTION: AES-256", fill=(148, 163, 184))
 
     img.save(filepath)
     print(f"Generated: {filepath}")
@@ -91,12 +91,12 @@ def generate_drone_hud_image(filepath, title, status_text, severity_color, bg_gr
 if __name__ == "__main__":
     out_dir = os.path.join(os.path.dirname(__file__), "damage_images")
     images_to_generate = [
-        ("flash_flood_embarcadero.png", "EMBARCADERO SURGE INUNDATION", "IMPASSABLE: 75cm SEAWATER SURGE", (239, 68, 68), (10, 30, 60), (5, 15, 30), "flood"),
-        ("bridge_pier_crack.png", "NORTH BAY SPAN PIER-4 INSPECTION", "CRITICAL DAMAGE: STRUCTURAL SHEAR", (239, 68, 68), (40, 20, 20), (20, 10, 10), "bridge"),
-        ("hospital_submerged_basement.png", "HARBOR PAVILION BASEMENT INUNDATION", "CRITICAL: GENERATOR GRID DROWNED", (245, 158, 11), (30, 20, 40), (15, 10, 25), "hospital"),
-        ("landslide_downed_lines.png", "16TH ST SLOPE COLLAPSE & ARCS", "ROAD BLOCK: 12kV ARCS & ROCKFALL", (239, 68, 68), (45, 30, 15), (20, 15, 10), "landslide"),
-        ("viaduct_caution_debris.png", "CENTRAL CHANNEL VIADUCT", "MODERATE CAUTION: 12cm WATER/DEBRIS", (245, 158, 11), (30, 35, 45), (15, 20, 25), "caution"),
-        ("clear_corridor_highway.png", "GEARY EXPRESSWAY GREEN CORRIDOR", "NOMINAL: 100% TRAVERSABLE HIGHWAY", (16, 185, 129), (15, 45, 25), (10, 25, 15), "clear")
+        ("flash_flood_embarcadero.png", "SHELL COLONY LOWLAND INUNDATION", "IMPASSABLE: 75cm MONSOON FLOOD SURGE", (239, 68, 68), (10, 30, 60), (5, 15, 30), "flood"),
+        ("bridge_pier_crack.png", "AMAR MAHAL FLYOVER PIER-4 INSPECTION", "CRITICAL DAMAGE: STRUCTURAL SHEAR", (239, 68, 68), (40, 20, 20), (20, 10, 10), "bridge"),
+        ("hospital_submerged_basement.png", "INLAKS HOSPITAL SUBSTATION FLOOD", "CRITICAL: GENERATOR GRID DROWNED", (245, 158, 11), (30, 20, 40), (15, 10, 25), "hospital"),
+        ("landslide_downed_lines.png", "SHELL-SUMAN 11kV CABLES DOWN", "ROAD BLOCK: 11kV ARCS & FLOOD DEBRIS", (239, 68, 68), (45, 30, 15), (20, 15, 10), "landslide"),
+        ("viaduct_caution_debris.png", "SION-TROMBAY WATERLOGGED SPAN", "MODERATE CAUTION: 15cm WATER/DEBRIS", (245, 158, 11), (30, 35, 45), (15, 20, 25), "caution"),
+        ("clear_corridor_highway.png", "EASTERN FREEWAY GREEN CORRIDOR", "NOMINAL: 100% TRAVERSABLE HIGHWAY", (16, 185, 129), (15, 45, 25), (10, 25, 15), "clear")
     ]
     for filename, title, status, color, g1, g2, hazard in images_to_generate:
         path = os.path.join(out_dir, filename)

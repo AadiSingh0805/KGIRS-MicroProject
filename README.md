@@ -1,4 +1,4 @@
-# 🧭 Aegis CrisisNav | Multimodal Geospatial Crisis Response & Infrastructure GraphRAG
+# Aegis CrisisNav | Multimodal Geospatial Crisis Response & Infrastructure GraphRAG
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Streamlit UI](https://img.shields.io/badge/UI-Sleek_Mission_Control-00F0FF.svg)](https://streamlit.io/)
@@ -11,23 +11,24 @@ Designed with a **Modern, User-Friendly Mission Control UI**, this application g
 
 ---
 
-## 🎯 Designed For Emergency Dispatchers & First Responders
+## Designed For Emergency Dispatchers & First Responders
 
 - **Zero Clutter**: Completely eliminates the restrictive sidebar in favor of an expansive command view with a unified top-level header and inline mission parameters.
 - **1-Click Crisis Presets**: Instant launch buttons for high-priority crisis scenarios:
-  - 🌊 **Flash Flood Evacuation**: Downtown to hospital bypassing submerged 75cm seawall breaches.
-  - 🌉 **Bay Span Detour**: Heavy convoy routing avoiding a 98% beam shear fracture.
-  - 🏥 **Casualty Triage**: Routing from civic shelter to hospital prioritizing available ICU beds.
+  - **Monsoon Flood Evacuation**: Chembur Naka to Zen Hospital bypassing submerged 75cm flood at Shell Colony.
+  - **Amar Mahal Detour**: Heavy emergency convoy routing avoiding a 98% beam shear fracture at Amar Mahal flyover.
+  - **Casualty Triage**: Routing from RCF Sports Mega-Shelter to Surana Sethia Hospital prioritizing available ICU beds.
 - **Vehicle Profiles**: Real-time water clearance adaptations:
-  - 🚑 **Ambulance**: $\le 20\text{cm}$ flood threshold.
-  - 🚒 **High-Clearance Rescue Truck**: $\le 60\text{cm}$ flood threshold.
-  - 🚤 **Rescue Boat**: Deep-water priority.
-  - 🚗 **Civilian Car**: $\le 15\text{cm}$ flood threshold.
+  - **Ambulance**: $\le 20\text{cm}$ flood threshold.
+  - **High-Clearance Rescue Truck**: $\le 60\text{cm}$ flood threshold.
+  - **Rescue Boat**: Deep-water priority.
+  - **Civilian Car**: $\le 15\text{cm}$ flood threshold.
 - **Explainable Decision Intelligence**: Transparently explains *why* a route was selected, lists disqualified hazard zones with water depths, and compares candidate corridors.
+- **Zero API Key Requirement**: Uses OpenStreetMap with a custom dark tactical shader for geospatial operations, requiring no third-party API keys or subscriptions.
 
 ---
 
-## 📁 Repository Directory Structure
+## Repository Directory Structure
 
 ```text
 microproject/
@@ -50,7 +51,7 @@ microproject/
 
 ---
 
-## 🧩 Core Architectural Pillars
+## Core Architectural Pillars
 
 ### 1. Resilient Graph Traversal & Dynamic Hazard Synchronization (`src/graph_store.py`, `src/agent_workflow.py`)
 - **Query Decomposer**: Extracts spatial endpoints (Origin, Destination) and triage facility intent.
@@ -73,35 +74,35 @@ microproject/
 
 ---
 
-## 🎨 Modern UI Architecture
+## Modern UI Architecture
 
 The Streamlit dashboard (`app.py`) is organized into 5 cohesive operational views:
 
-1. 🗺️ **Active Mission & Map**:
+1. **Tactical Mission & Map**:
    - Telemetry KPI strip (Corridor Status, Transit Time, Distance, AI Confidence, Hazards Bypassed).
-   - High-contrast responsive CartoDB Dark Matter map with glowing route overlay and hospital capacity markers.
+   - High-contrast responsive OpenStreetMap centered on Chembur, Mumbai with custom tactical dark shader, glowing route overlay, and hospital capacity markers.
    - Actionable field dispatch directive and turn-by-turn road navigation cards.
    - Backup contingency corridors (K-shortest paths).
 
-2. 🧠 **Decision Intelligence (Why This Route?)**:
+2. **Decision Intelligence**:
    - Disqualified hazard elimination log with water depth and structural damage details.
    - Counterfactual route analysis comparing alternative corridors.
    - Critical infrastructure bottleneck monitoring.
    - Multimodal sensor grounding citations and agent state machine trace.
 
-3. 🛰️ **Hazard & UAV Reconnaissance**:
+3. **Hazard & UAV Reconnaissance**:
    - Filterable real-time incident reports (Critical, High, Moderate) with operational actions.
    - UAV drone reconnaissance thermal/RGB imagery viewer with damage HUD overlays.
 
-4. 🕸️ **Knowledge Graph Topology**:
+4. **Knowledge Graph Topology**:
    - Force-directed interactive physics network simulation (Pyvis) highlighting the active path and facility statuses.
 
-5. 📊 **System Quality & Verification**:
+5. **System Quality & Verification**:
    - One-click benchmark runner with executive KPI scorecards, comparison charts, and detailed test case evaluations.
 
 ---
 
-## 🚀 Quickstart Guide
+## Quickstart Guide
 
 ### 1. Installation
 Ensure Python 3.10+ is available:
@@ -124,7 +125,7 @@ Open your browser at `http://localhost:8501`.
 
 ---
 
-## 🧪 Automated Testing & Verification
+## Automated Testing & Verification
 
 Run individual verification scripts or automated benchmarks directly:
 
@@ -138,7 +139,7 @@ python -c "from src.graph_store import CrisisSpatialGraph; from src.multimodal_r
 
 ---
 
-## 🗄️ Neo4j Database Export
+## Neo4j Database Export
 
 The application generates production-ready Cypher statements for graph databases. Click **"Export Cypher"** in the top navigation or execute:
 ```python

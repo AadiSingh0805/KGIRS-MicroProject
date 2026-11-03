@@ -25,14 +25,14 @@ def main():
     with open(reports_path, "r", encoding="utf-8") as f:
         reps = json.load(f)
     retriever.index_reports(reps)
-    matched = retriever.retrieve_reports("flash flood surge on Embarcadero", top_k=2)
+    matched = retriever.retrieve_reports("monsoon flood inundation at Shell Colony", top_k=2)
     print(f"Top matched report: {matched[0]['report']['report_id']} - {matched[0]['report']['incident_type']}")
     assert len(matched) > 0, "No reports retrieved"
 
-    print("\n=== TEST 3: AGENT WORKFLOW (MODULE 6.1) ===")
+    print("\n=== TEST 3: AGENT WORKFLOW ===")
     agent = CrisisResponseAgent(graph, retriever)
     state = agent.run_pipeline(
-        query="Find fastest safe ambulance route from Downtown to nearest hospital avoiding flooded streets",
+        query="Find fastest safe ambulance route from Chembur Naka to nearest hospital avoiding flooded streets",
         vehicle_type="ambulance",
         avoid_hazards=True
     )

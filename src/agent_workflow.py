@@ -95,37 +95,49 @@ class CrisisResponseAgent:
         state["subtasks"] = subtasks
 
         # Extract entities using LLM or rule-based parser
-        origin = "N_DOWNTOWN"
-        destination = "N_HOSP_GEN"
+        origin = "N_CHEMBUR_NAKA"
+        destination = "N_HOSP_ZEN"
         facility_type = None
 
         q_lower = query.lower()
 
         # Origin heuristic
-        if "downtown" in q_lower:
-            origin = "N_DOWNTOWN"
+        if "chembur" in q_lower or "naka" in q_lower or "downtown" in q_lower:
+            origin = "N_CHEMBUR_NAKA"
+        elif "acres" in q_lower:
+            origin = "N_SHELTER_ACRES"
+        elif "rcf" in q_lower:
+            origin = "N_SHELTER_RCF"
+        elif "suman" in q_lower or "surana" in q_lower:
+            origin = "N_INT_SUMAN_NAGAR"
+        elif "tilak" in q_lower:
+            origin = "N_INT_TILAK_NAGAR"
         elif "civic" in q_lower:
-            origin = "N_SHELTER_CIVIC"
-        elif "park" in q_lower or "sunset" in q_lower:
-            origin = "N_SHELTER_PARK"
-        elif "harbor" in q_lower:
-            origin = "N_HOSP_HARBOR"
+            origin = "N_SHELTER_ACRES"
 
         # Destination / Facility heuristic
-        if "nearest hospital" in q_lower or "hospital" in q_lower:
+        if "surana" in q_lower:
+            destination = "N_HOSP_SURANA"
             facility_type = "hospital"
-            destination = "N_HOSP_GEN" # Initial candidate
-        elif "nearest shelter" in q_lower or "shelter" in q_lower:
+        elif "zen" in q_lower:
+            destination = "N_HOSP_ZEN"
+            facility_type = "hospital"
+        elif "inlaks" in q_lower:
+            destination = "N_HOSP_INLAKS"
+            facility_type = "hospital"
+        elif "nearest hospital" in q_lower or "hospital" in q_lower:
+            facility_type = "hospital"
+            destination = "N_HOSP_ZEN"
+        elif "acres" in q_lower or "nearest shelter" in q_lower:
             facility_type = "shelter"
-            destination = "N_SHELTER_CIVIC"
-        elif "st. jude" in q_lower or "st jude" in q_lower:
-            destination = "N_HOSP_STJUDE"
-            facility_type = "hospital"
-        elif "general hospital" in q_lower or "metro general" in q_lower:
-            destination = "N_HOSP_GEN"
-            facility_type = "hospital"
-        elif "depot" in q_lower or "port" in q_lower:
-            destination = "N_DEPOT_PORT"
+            destination = "N_SHELTER_ACRES"
+        elif "rcf" in q_lower or "shelter" in q_lower:
+            facility_type = "shelter"
+            destination = "N_SHELTER_RCF"
+        elif "depot" in q_lower or "mankhurd" in q_lower:
+            destination = "N_DEPOT_MANKHURD"
+        elif "amar mahal" in q_lower or "bridge" in q_lower or "bay span" in q_lower:
+            destination = "N_BRIDGE_AMAR_MAHAL"
 
         state["extracted_origin"] = origin
         state["extracted_destination"] = destination
@@ -185,8 +197,8 @@ class CrisisResponseAgent:
         Executes Dijkstra/A* routing over the hazard-penalized graph.
         If user requested nearest facility, identifies reachable facility with optimal capacity.
         """
-        origin = state.get("extracted_origin", "N_DOWNTOWN")
-        destination = state.get("extracted_destination", "N_HOSP_GEN")
+        origin = state.get("extracted_origin", "N_CHEMBUR_NAKA")
+        destination = state.get("extracted_destination", "N_HOSP_ZEN")
         facility_type = state.get("facility_type_target")
         vehicle_type = state.get("vehicle_type", "ambulance")
         avoid_hazards = state.get("avoid_hazards", True)
@@ -250,7 +262,7 @@ class CrisisResponseAgent:
 
         if not route:
             synthesis = (
-                f"🚨 CRITICAL DISPATCH HALT: No safe traversable path exists from [{origin}] to [{dest}] "
+                f"CRITICAL DISPATCH HALT: No safe traversable path exists from [{origin}] to [{dest}] "
                 f"under active flood surge and structural damage constraints. Recommend aerial evacuation via helipad."
             )
             state["final_dispatch_order"] = synthesis
@@ -260,12 +272,12 @@ class CrisisResponseAgent:
         path_nodes = " ➔ ".join(route["path"])
         dist = route["total_distance_km"]
         eta = route["estimated_travel_time_min"]
-        warnings = "\n".join([f"  • ⚠️ {w}" for w in route.get("hazard_warnings", [])]) or "  • All corridor segments nominal green."
+        warnings = "\n".join([f"  • [CAUTION] {w}" for w in route.get("hazard_warnings", [])]) or "  • All corridor segments nominal green."
 
         facility_context = ""
         if facility_info:
             facility_context = (
-                f"\n🏥 TARGET FACILITY METRICS:\n"
+                f"\nTARGET FACILITY METRICS:\n"
                 f"  • Name: {facility_info.get('facility_name')} ({facility_info.get('facility_id')})\n"
                 f"  • Available Capacity: {facility_info.get('available_capacity')}/{facility_info.get('total_capacity')} beds\n"
                 f"  • ICU Beds Open: {facility_info.get('icu_beds', 'N/A')} | Helipad: {'Active' if facility_info.get('helipad') else 'None'}"
@@ -295,24 +307,34 @@ Keep it high-contrast, tactical, and strictly grounded in the verified data.
 """
         llm_response = self._call_llm(llm_prompt)
 
+        # Resolve human-readable node names
+        origin_node_data = self.graph_store.graph.nodes.get(origin, {})
+        dest_node_data = self.graph_store.graph.nodes.get(dest, {})
+        origin_name = origin_node_data.get("name", origin)
+        dest_name = dest_node_data.get("name", dest)
+        path_names = [self.graph_store.graph.nodes.get(n, {}).get("name", n) for n in route.get("path", [])]
+        path_display = " ➔ ".join(path_names)
+
         if not llm_response:
-            # Deterministic Tactical Dispatch Fallback
-            llm_response = f"""### 🛡️ CRISIS DISPATCH DIRECTIVE | PRIORITY 1 CORRIDOR
-**Origin:** `{origin}` ➔ **Destination:** `{dest}`  
-**Operational Status:** `{route.get('status', 'CLEAR')}` | **Estimated Transit:** `{eta} mins` | **Distance:** `{dist} km`
-
-#### 1. PRIMARY ROUTE TRACE
-`{path_nodes}`
-
-#### 2. INFRASTRUCTURE & HAZARD TELEMETRY
-{warnings}
-{facility_context}
-
-#### 3. TACTICAL DIRECTIVE
-• Maintain convoy speed at designated arterial limit; avoid submerged low-elevation coastal links.
-• Priority clearance granted for emergency responders across designated checkpoints.
-• Alternative bypasses pre-computed in event of secondary aftershocks.
-"""
+            # Deterministic Tactical Dispatch Fallback - Clean, Human-Readable
+            warnings_text = "\n".join([f"• {w}" for w in route.get("hazard_warnings", [])]) if route.get("hazard_warnings") else "• All segments verified clear and traversable above flood waterlines."
+            
+            facility_line = ""
+            if facility_info:
+                facility_line = f"• Destination Capacity: {facility_info.get('available_capacity')}/{facility_info.get('total_capacity')} emergency beds open (ICU beds: {facility_info.get('icu_beds', 'N/A')})."
+            
+            llm_response = (
+                f"MISSION DIRECTIVE: Resilient Route Active\n"
+                f"From: {origin_name} to {dest_name}\n"
+                f"Status: {route.get('status', 'CLEAR')} | Estimated Transit: {eta} min | Distance: {dist} km\n\n"
+                f"PRIMARY CORRIDOR:\n"
+                f"{path_display}\n\n"
+                f"OPERATIONAL INSTRUCTIONS:\n"
+                f"• Proceed along designated arterial corridor; adhere to emergency convoy speed.\n"
+                f"{warnings_text}\n"
+                f"{facility_line}\n"
+                f"• Contingency fallback corridors pre-computed in case of secondary waterlogging."
+            )
 
         state["final_dispatch_order"] = llm_response
         state["confidence_score"] = 0.94 if route.get("status") == "CLEAR" else 0.78

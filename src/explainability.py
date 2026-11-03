@@ -181,15 +181,15 @@ class ReasoningChainVisualizer:
             ntype = ndata.get("type")
             elev = ndata.get("elevation_m", 10.0)
             if ntype == "bridge":
-                bottlenecks.append(f"🌉 Bridge Node [{nid}] '{ndata.get('name')}': Single-span bottleneck; monitor for structural aftershocks.")
+                bottlenecks.append(f"[Bridge] Node [{nid}] '{ndata.get('name')}': Single-span bottleneck; monitor for structural aftershocks.")
             elif elev < 5.0:
-                bottlenecks.append(f"🌊 Low-Elevation Node [{nid}] ({elev}m): High vulnerability to advancing storm surges.")
+                bottlenecks.append(f"[Low Elevation] Node [{nid}] ({elev}m): High vulnerability to advancing storm surges.")
         return bottlenecks
 
     def format_markdown_explanation(self, explanation: Dict[str, Any]) -> str:
         """Formats the explanation as a sleek, structured Markdown dossier."""
         md = []
-        md.append("### 🧠 EXPLAINABLE REASONING CHAIN & DECISION PROVENANCE\n")
+        md.append("### EXPLAINABLE REASONING CHAIN & DECISION PROVENANCE\n")
         md.append(f"**Operational Summary:** {explanation['summary']}\n")
 
         md.append("#### 1. STEP-BY-STEP REASONING TRAJECTORY")
@@ -200,7 +200,7 @@ class ReasoningChainVisualizer:
         eliminated = explanation.get("eliminated_edges", [])
         if eliminated:
             for el in eliminated:
-                md.append(f"- ⛔ **{el['edge_id']}**: {el['disqualification_rationale']} *(Ref: {el['incident_id']})*")
+                md.append(f"- [BLOCKED] **{el['edge_id']}**: {el['disqualification_rationale']} *(Ref: {el['incident_id']})*")
         else:
             md.append("- No edges disqualified along this specific arterial query.")
 
@@ -208,13 +208,13 @@ class ReasoningChainVisualizer:
         cf = explanation.get("counterfactual_analysis", {})
         if isinstance(cf, dict) and "details" in cf and cf["details"]:
             for d in cf["details"]:
-                md.append(f"- ⚖️ **Alternative {d['alternative_rank']}**: `{d['path']}`  \n  {d['rejection_rationale']}")
+                md.append(f"- [Alternative {d['alternative_rank']}]: `{d['path']}`  \n  {d['rejection_rationale']}")
         else:
             md.append("- Primary route is the singularly viable corridor under active disaster constraints.")
 
         md.append("\n#### 4. MULTIMODAL EVIDENCE GROUNDING")
         for cit in explanation.get("evidence_citations", []):
-            md.append(f"- 📡 **{cit['report_id']}** (`{cit['source']}`): *\"{cit['evidence_summary']}\"* [Image Sensor: `{cit['image_evidence']}`]")
+            md.append(f"- [Sensor {cit['report_id']}] (`{cit['source']}`): *\"{cit['evidence_summary']}\"* [Image Sensor: `{cit['image_evidence']}`]")
 
         bottlenecks = explanation.get("bottlenecks", [])
         if bottlenecks:
