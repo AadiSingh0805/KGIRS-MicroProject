@@ -133,7 +133,7 @@ class CrisisResponseAgent:
 
         trace.append({
             "step": "Query Decomposition",
-            "module": "6.1 Agentic Decomposition",
+            "module": "Agentic Decomposition",
             "details": f"Decomposed query '{query}'. Identified Origin: [{origin}], Destination: [{destination}], Facility Intent: [{facility_type}]."
         })
         return state
@@ -174,7 +174,7 @@ class CrisisResponseAgent:
 
         trace.append({
             "step": "Multimodal Hazard Assessment",
-            "module": "6.1 Dynamic Graph Synchronization",
+            "module": "Dynamic Graph Synchronization",
             "details": f"Retrieved {len(matched_reports)} incident dispatches and {len(matched_imgs)} aerial imagery matches. Dynamically updated {len(graph_updates)} graph edges with real-time hazard constraints."
         })
         return state
@@ -232,7 +232,7 @@ class CrisisResponseAgent:
         route_status = primary_route.get("status") if primary_route else "NO_ROUTE_FOUND"
         trace.append({
             "step": "Spatial Graph Traversal",
-            "module": "6.1 Resilient Traversal Engine",
+            "module": "Resilient Traversal Engine",
             "details": f"Computed primary path [{origin} -> {destination}] with status [{route_status}]. Evaluated {len(alt_paths)} viable contingency corridors."
         })
         return state
@@ -319,7 +319,7 @@ Keep it high-contrast, tactical, and strictly grounded in the verified data.
 
         trace.append({
             "step": "Tactical Dispatch Synthesis",
-            "module": "6.1 Mission Order Generation",
+            "module": "Mission Order Generation",
             "details": f"Generated final dispatch order with confidence {state['confidence_score']:.2f}. ETA: {eta} min over {dist} km."
         })
         return state
