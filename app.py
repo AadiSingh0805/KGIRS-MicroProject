@@ -379,6 +379,368 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+# ==============================================================================
+# AEGIS CRISISNAV - PREMIUM UI OVERRIDES
+# ==============================================================================
+st.markdown("""
+<style>
+/* Smooth interface */
+html, body, [class*="css"] {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Main canvas */
+.stApp {
+    background:
+        radial-gradient(ellipse at 15% 0%, rgba(14,165,233,0.12), transparent 40%),
+        radial-gradient(ellipse at 85% 10%, rgba(37,99,235,0.08), transparent 35%),
+        #060B14 !important;
+}
+
+/* Main content spacing */
+.block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1600px !important;
+}
+
+/* Premium glass cards */
+div[data-testid="stMetric"] {
+    background: linear-gradient(145deg, #101C2D, #0B1422);
+    border: 1px solid rgba(56,189,248,0.20);
+    padding: 18px 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    transition: all 0.25s ease;
+}
+
+div[data-testid="stMetric"]:hover {
+    border-color: rgba(56,189,248,0.55);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(14,165,233,0.12);
+}
+
+[data-testid="stMetricLabel"] {
+    color: #94A3B8 !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
+[data-testid="stMetricValue"] {
+    color: #E0F2FE !important;
+    font-size: 1.9rem !important;
+    font-weight: 800 !important;
+}
+
+/* Section headings */
+h1, h2, h3 {
+    color: #F1F5F9 !important;
+    letter-spacing: -0.5px;
+}
+
+h1 {
+    font-weight: 850 !important;
+}
+
+h2 {
+    font-weight: 750 !important;
+}
+
+h3 {
+    font-weight: 700 !important;
+}
+
+/* Tabs */
+button[data-baseweb="tab"] {
+    color: #94A3B8 !important;
+    font-weight: 650 !important;
+    padding: 12px 22px !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #38BDF8 !important;
+    border-bottom-color: #38BDF8 !important;
+}
+
+div[data-baseweb="tab-highlight"] {
+    background-color: #38BDF8 !important;
+}
+
+/* Buttons */
+.stButton > button {
+    border-radius: 10px !important;
+    min-height: 42px;
+    font-weight: 650 !important;
+    border: 1px solid rgba(56,189,248,0.25) !important;
+    background: linear-gradient(135deg, #0F2238, #102A43) !important;
+    color: #E0F2FE !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 20px rgba(56,189,248,0.18);
+    transform: translateY(-1px);
+}
+
+/* Primary buttons */
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #0284C7, #2563EB) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 5px 20px rgba(37,99,235,0.25);
+}
+
+/* Inputs and select boxes */
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea {
+    background-color: #0B1524 !important;
+    color: #E2E8F0 !important;
+    border-radius: 10px !important;
+}
+
+div[data-baseweb="select"] > div {
+    background-color: #0B1524 !important;
+    border-color: #23364D !important;
+    border-radius: 10px !important;
+}
+
+/* Expanders */
+details[data-testid="stExpander"] {
+    background: rgba(15,28,45,0.65);
+    border: 1px solid #1E334A;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Dataframes */
+[data-testid="stDataFrame"] {
+    border: 1px solid #1E334A;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Alerts */
+div[data-testid="stAlert"] {
+    border-radius: 12px;
+    border: 1px solid rgba(56,189,248,0.2);
+}
+
+/* Horizontal separators */
+hr {
+    border-color: rgba(56,189,248,0.15) !important;
+}
+
+/* Download button */
+[data-testid="stDownloadButton"] button {
+    border-radius: 10px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #060B14;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1E3A5F;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0284C7;
+}
+
+/* Subtle animation */
+@keyframes aegisFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.block-container {
+    animation: aegisFadeIn 0.45s ease-out;
+}
+
+/* ==========================================
+   AEGIS TELEMETRY CARDS - PREMIUM REDESIGN
+   ========================================== */
+
+.metric-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 142px;
+    padding: 22px 20px;
+    background: linear-gradient(145deg, #101D30 0%, #0A1220 100%);
+    border: 1px solid rgba(56, 189, 248, 0.20);
+    border-radius: 16px;
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255,255,255,0.025);
+    transition: all 0.28s ease;
+}
+
+.metric-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #38BDF8,
+        #6366F1,
+        transparent
+    );
+    opacity: 0.75;
+}
+
+.metric-card::after {
+    content: "";
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    right: -40px;
+    bottom: -45px;
+    background: radial-gradient(
+        circle,
+        rgba(56,189,248,0.12),
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(56,189,248,0.55);
+    box-shadow:
+        0 14px 35px rgba(0,0,0,0.35),
+        0 0 22px rgba(56,189,248,0.07);
+}
+
+.metric-caption {
+    color: #94A3B8;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.metric-number {
+    font-size: 28px;
+    font-weight: 850;
+    letter-spacing: -0.8px;
+    line-height: 1.15;
+    color: #F1F5F9;
+    text-shadow: 0 0 18px rgba(56,189,248,0.08);
+    white-space: nowrap;
+}
+
+.metric-unit {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748B;
+    margin-left: 6px;
+    letter-spacing: 0;
+}
+
+.metric-sub {
+    color: #64748B;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 12px;
+    letter-spacing: 0.15px;
+}
+
+/* ==========================================
+   AEGIS FINAL VISUAL POLISH
+   ========================================== */
+
+/* Fix download buttons: PDF and graph export */
+[data-testid="stDownloadButton"] button {
+    background: linear-gradient(135deg, #0F2238, #102A43) !important;
+    color: #E0F2FE !important;
+    border: 1px solid rgba(56,189,248,0.35) !important;
+    font-weight: 700 !important;
+    min-height: 42px !important;
+    transition: all 0.25s ease !important;
+}
+
+[data-testid="stDownloadButton"] button:hover {
+    background: linear-gradient(135deg, #075985, #1D4ED8) !important;
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 22px rgba(56,189,248,0.22) !important;
+    transform: translateY(-2px);
+}
+
+/* Improve all navigation tab contrast */
+button[data-baseweb="tab"] {
+    color: #A8B9CF !important;
+    transition: all 0.2s ease !important;
+}
+
+button[data-baseweb="tab"]:hover {
+    color: #38BDF8 !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #38BDF8 !important;
+    background: rgba(14,165,233,0.08) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+/* Better labels and help text contrast */
+label, [data-testid="stWidgetLabel"] {
+    color: #CBD5E1 !important;
+}
+
+/* Scenario buttons: refined hover */
+.stButton > button {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.025);
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, #12304D, #153B59) !important;
+}
+
+/* Better panel heading */
+.panel-heading {
+    color: #38BDF8 !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase;
+}
+
+/* Subtle glow around map and reconnaissance panels */
+iframe {
+    border-radius: 14px !important;
+}
+
+/* More readable secondary text */
+.metric-sub {
+    color: #94A3B8 !important;
+}
+
+.metric-unit {
+    color: #94A3B8 !important;
+}
+
+/* Reduce harsh white borders on focused controls */
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="select"]:focus-within {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 0 1px rgba(56,189,248,0.25) !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
 incident_reports_path = os.getenv("INCIDENT_REPORTS_PATH", "").strip() or os.path.join(current_dir, "data", "incident_reports.json")
