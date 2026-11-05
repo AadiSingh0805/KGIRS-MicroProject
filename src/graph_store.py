@@ -338,12 +338,13 @@ class CrisisSpatialGraph:
     def export_pyvis_network(
         self,
         highlight_path: Optional[List[str]] = None,
-        height: str = "550px",
+        is_aerial: bool = False,
+        height: str = "580px",
         width: str = "100%"
     ) -> str:
         """
         Generates Pyvis interactive HTML string with Dark Mode First /
-        Tech Forward styling (obsidian backdrop, glowing nodes, neon corridors).
+        Tech Forward styling (obsidian backdrop, glowing nodes, neon corridors, and active Air Force vectors).
         """
         try:
             from pyvis.network import Network
@@ -351,73 +352,85 @@ class CrisisSpatialGraph:
             return "<div style='color:white;padding:20px;'>Pyvis is not installed</div>"
 
         net = Network(height=height, width=width, bgcolor="#0B0F19", font_color="#F8FAFC", directed=True)
-        net.force_atlas_2based(
-            gravity=-65,
-            central_gravity=0.012,
-            spring_length=135,
-            spring_strength=0.07,
-            damping=0.45
-        )
 
         path_set = set(highlight_path) if highlight_path else set()
+        active_origin = highlight_path[0] if highlight_path else None
+        active_target = highlight_path[-1] if highlight_path else None
         path_edges = set()
-        if highlight_path and len(highlight_path) > 1:
+        if highlight_path and len(highlight_path) > 1 and not is_aerial:
             for i in range(len(highlight_path) - 1):
                 path_edges.add((highlight_path[i], highlight_path[i+1]))
 
-        # Add Nodes
+        # Add Nodes with vibrant, tactical styling strictly matching Folium
         for nid, data in self.graph.nodes(data=True):
             ntype = data.get("type", "intersection")
             full_name = data.get("name", nid)
-            # Create a clean concise label (up to 2-3 words)
             words = full_name.split()
             short_label = " ".join(words[:2]) if len(words) > 2 else full_name
             status = data.get("operational_status", "active")
+            is_origin = bool(active_origin and nid == active_origin)
+            is_target = bool(active_target and nid == active_target)
 
-            # Color scheme - distinct, high-contrast palette (zero ugly grey)
-            if nid in path_set:
-                color = "#00F0FF" # Neon Cyan for active route
-                size = 28
+            # Node role identification & palette
+            if is_origin:
+                color = "#00F0FF" # Cyan Extraction Origin Beacon
                 border_color = "#FFFFFF"
+                size = 32
+                short_label = f"[ORIGIN] {short_label}"
+            elif is_target:
+                color = "#10B981" # Emerald Target Arrival Beacon
+                border_color = "#FEF08A"
+                size = 34
+                short_label = f"[TARGET] {short_label}"
+            elif nid == "N_INT_VN_PURAV":
+                color = "#0284C7" # Water Inundation Hazard
+                border_color = "#67E8F9"
+                size = 28
+                short_label = "VN Purav [FLOOD]"
+            elif nid == "N_INT_SUMAN_NAGAR":
+                color = "#EF4444" # Critical Structural Shear Failure
+                border_color = "#FCA5A5"
+                size = 28
+                short_label = "Suman Nagar [SEVERED]"
             elif ntype == "campus":
-                color = "#A855F7" # Royal Purple for Educational Campus (VESIT)
-                size = 25
+                color = "#A855F7" # Royal Purple (VESIT Campus)
                 border_color = "#C084FC"
-            elif ntype == "transit_hub" or nid == "N_CHEMBUR_NAKA":
-                color = "#0284C7" # Ocean Cyan for Major Transit Hub
-                size = 25
-                border_color = "#38BDF8"
+                size = 26
+                short_label = "VESIT Campus"
             elif ntype == "hospital":
-                color = "#10B981" if status == "active" else "#EF4444" # Emerald Green / Red
-                size = 24
+                color = "#059669" # Emerald Medical Triage Center
                 border_color = "#34D399"
+                size = 26
             elif ntype == "shelter":
-                color = "#F59E0B" # Sunburst Amber for Community Shelters
-                size = 22
+                color = "#D97706" # Sunburst Amber Community Shelter
                 border_color = "#FCD34D"
+                size = 24
             elif ntype == "bridge":
-                color = "#EC4899" if status == "active" else "#EF4444" # Magenta Rose for Elevated Bridges
-                size = 22
-                border_color = "#F472B6"
+                color = "#6366F1" # Cyber Indigo Elevated Span (Amar Mahal / Panjarpol)
+                border_color = "#A5B4FC"
+                size = 24
+            elif ntype == "transit_hub" or nid == "N_CHEMBUR_NAKA":
+                color = "#0284C7" # Ocean Transit Hub
+                border_color = "#38BDF8"
+                size = 26
             elif ntype == "supply_depot":
-                color = "#6366F1" # Electric Indigo for Supply Depots
+                color = "#2563EB" # Deep Blue Supply Depot
+                border_color = "#60A5FA"
                 size = 22
-                border_color = "#818CF8"
-            elif "shell" in nid.lower() or status in ["partially_flooded", "flooded"]:
-                color = "#06B6D4" # Flood Water Teal for Inundated Junctions (Shell Colony)
-                size = 20
-                border_color = "#22D3EE"
             else:
-                color = "#F97316" # Vivid Tangerine Orange for Arterial Road Junctions
-                size = 18
-                border_color = "#FB923C"
+                # Open Road Intersections (Shell Colony, Tilak Nagar, Sindhi Society, Govandi)
+                color = "#EA580C" # Vivid Tangerine
+                border_color = "#FDBA74"
+                size = 20
+                if "shell" in nid.lower():
+                    short_label = "Shell Colony [OPEN]"
 
             title_html = (
                 f"<b>{full_name}</b> ({nid})<br/>"
-                f"Type: {ntype.upper()}<br/>"
-                f"Status: {status}<br/>"
-                f"Elevation: {data.get('elevation_m')}m<br/>"
-                f"Capacity Avail: {data.get('available_capacity')}/{data.get('capacity')}"
+                f"Classification: {ntype.upper()}<br/>"
+                f"Status: {status.upper()}<br/>"
+                f"Elevation: {data.get('elevation_m', 0)}m<br/>"
+                f"Intake Capacity: {data.get('available_capacity', 0)}/{data.get('capacity', 0)} beds (ICU: {data.get('icu_beds', 0)})"
             )
 
             net.add_node(
@@ -430,7 +443,7 @@ class CrisisSpatialGraph:
                 font={"color": "#F1F5F9", "size": 13, "face": "Inter, system-ui, sans-serif", "strokeWidth": 2, "strokeColor": "#080C14"}
             )
 
-        # Add Edges
+        # Add Edges with high-contrast tactical visibility
         for u, v, data in self.graph.edges(data=True):
             # Avoid duplicate reverse visualization clutter
             if data.get("id", "").endswith("_REV"):
@@ -443,29 +456,29 @@ class CrisisSpatialGraph:
             is_in_path = (u, v) in path_edges or (v, u) in path_edges
 
             if is_in_path:
-                edge_color = "#00F0FF" # Glowing route
-                width_val = 5
+                edge_color = "#00F0FF" # Neon Cyan active corridor
+                width_val = 6
                 dashes = False
-            elif status in ["severely_damaged", "blocked"]:
-                edge_color = "#EF4444"
-                width_val = 3
-                dashes = True
-            elif status == "flooded":
-                edge_color = "#3B82F6"
-                width_val = 3
-                dashes = True
+            elif status in ["severely_damaged", "blocked"] or damage >= 0.7:
+                edge_color = "#EF4444" # Red dashed blocked
+                width_val = 3.5
+                dashes = [6, 6]
+            elif status == "flooded" or flood >= 25:
+                edge_color = "#38BDF8" # Cyan dashed flood
+                width_val = 4
+                dashes = [6, 6]
             elif status == "caution":
                 edge_color = "#F59E0B"
-                width_val = 2
+                width_val = 2.5
                 dashes = False
             else:
-                edge_color = "#1E293B"
-                width_val = 1
+                edge_color = "#475569" # High-contrast slate-blue road edge (crisply visible)
+                width_val = 2.0
                 dashes = False
 
             title_edge = (
                 f"<b>{data.get('name')}</b><br/>"
-                f"Status: {status}<br/>"
+                f"Status: {status.upper()}<br/>"
                 f"Distance: {data.get('distance_km')} km<br/>"
                 f"Damage: {int(damage*100)}% | Flood: {flood}cm"
             )
@@ -479,6 +492,56 @@ class CrisisSpatialGraph:
                 dashes=dashes,
                 arrows="to"
             )
+
+        # Direct Tactical Aerial Flight Vector if ground routing is severed
+        if is_aerial and active_origin and active_target:
+            net.add_edge(
+                active_origin,
+                active_target,
+                title="<b>IAF Rotary Tactical Air Corridor</b><br/>Squadron: IAF 121 Helicopter Unit<br/>Asset: Mil Mi-17 V5 / HAL Dhruv ALH<br/>Status: ACTIVE ROTARY AIR-LIFT",
+                color="#F59E0B",
+                width=6,
+                dashes=[10, 8],
+                arrows="to",
+                label="IAF ROTARY AIR VECTOR"
+            )
+
+        # Fine-tune ForceAtlas2 physics for stable, non-overlapping node distribution
+        options = {
+            "physics": {
+                "forceAtlas2Based": {
+                    "gravitationalConstant": -110,
+                    "centralGravity": 0.015,
+                    "springLength": 155,
+                    "springStrength": 0.08,
+                    "damping": 0.45,
+                    "avoidOverlap": 0.55
+                },
+                "minVelocity": 0.75,
+                "solver": "forceAtlas2Based",
+                "stabilization": {"enabled": True, "iterations": 120}
+            },
+            "nodes": {
+                "font": {
+                    "size": 13,
+                    "color": "#F8FAFC",
+                    "face": "Inter, -apple-system, sans-serif"
+                },
+                "borderWidth": 2,
+                "shadow": {"enabled": True, "color": "rgba(0,0,0,0.6)", "size": 8}
+            },
+            "edges": {
+                "smooth": {"type": "continuous", "roundness": 0.15},
+                "font": {"size": 10, "color": "#94A3B8", "strokeWidth": 2, "strokeColor": "#080C14"}
+            },
+            "interaction": {
+                "hover": True,
+                "tooltipDelay": 80,
+                "navigationButtons": True,
+                "keyboard": False
+            }
+        }
+        net.set_options(json.dumps(options))
 
         raw_html = net.generate_html()
         # Clean Pyvis default white styling and border artifacts

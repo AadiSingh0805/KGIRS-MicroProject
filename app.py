@@ -1881,13 +1881,67 @@ with tab_decision:
 with tab_graph:
     st.markdown('<div class="panel-heading">Interactive Knowledge Subgraph Topology (Physics Simulation)</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-size: 12px; color: #94A3B8; margin-bottom: 12px;">
-        Force-directed spatial knowledge graph of Chembur, Mumbai. Traversed emergency corridor is highlighted in <b>Cyber Cyan (#00F0FF)</b>. 
-        Active hospitals in <b>Emerald Green</b>, mega-shelters in <b>Amber Gold</b>, VESIT academic campus in <b>Royal Purple</b>, transit hubs in <b>Ocean Cyan</b>, elevated bridges in <b>Magenta</b>, inundated sectors in <b>Water Teal</b>, and open road junctions in <b>Vivid Orange</b>.
+    <div style="font-size: 12px; color: #94A3B8; margin-bottom: 10px;">
+        Force-directed spatial knowledge graph of Chembur, Mumbai. Traversed emergency corridor is highlighted in <b>Cyber Cyan (#00F0FF)</b>, 
+        and emergency aerial medevac flight vectors in <b>Dashed Gold (#F59E0B)</b>. Real-time physics engine dynamically balances nodes and edges based on topological tension.
     </div>
     """, unsafe_allow_html=True)
 
-    pyvis_html = graph_store.export_pyvis_network(highlight_path=route_nodes, height="580px")
+    # Tactical HUD Legend Pill Bar for Knowledge Graph
+    st.markdown("""
+    <div style="background: rgba(11, 17, 30, 0.9); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 11px; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #00F0FF; border: 1.5px solid #FFFFFF;"></span>
+            <span style="color: #00F0FF; font-weight: 700;">Extraction Origin</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10B981; border: 1.5px solid #FEF08A;"></span>
+            <span style="color: #34D399; font-weight: 700;">Target Destination</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0284C7; border: 1.5px solid #67E8F9;"></span>
+            <span style="color: #38BDF8;">Central Flood (VN Purav)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #EF4444; border: 1.5px solid #FCA5A5;"></span>
+            <span style="color: #F87171;">Structural Shear (Suman)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #A855F7; border: 1.5px solid #C084FC;"></span>
+            <span style="color: #C084FC;">VESIT Campus</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: #059669; border: 1px solid #34D399;"></span>
+            <span style="color: #34D399;">Hospital (Zen / Surana)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: #D97706; border: 1px solid #FCD34D;"></span>
+            <span style="color: #FBBF24;">Relief Shelter (Acres / RCF)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: #6366F1; border: 1px solid #A5B4FC;"></span>
+            <span style="color: #A5B4FC;">Flyover (Amar Mahal / Panjarpol)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #EA580C; border: 1px solid #FDBA74;"></span>
+            <span style="color: #FB923C;">Open Junction (Shell Colony, etc.)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 16px; height: 3px; background: #00F0FF; border-radius: 2px;"></span>
+            <span style="color: #00F0FF;">Active Safe Corridor</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #F59E0B;"></span>
+            <span style="color: #F59E0B;">IAF Rotary Air Vector</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 16px; height: 0; border-top: 2px dashed #EF4444;"></span>
+            <span style="color: #EF4444;">Blocked / Severed</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    pyvis_html = graph_store.export_pyvis_network(highlight_path=route_nodes, is_aerial=is_air_evac, height="580px")
     components.html(pyvis_html, height=590, scrolling=False)
 
     # Subgraph Stats
@@ -1907,10 +1961,11 @@ with tab_graph:
         </div>
         """, unsafe_allow_html=True)
     with sg3:
+        transit_unit = "vector" if is_air_evac else "nodes"
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-caption">Traversed Path Length</div>
-            <div class="metric-number">{len(route_nodes)} <span class="metric-unit">nodes</span></div>
+            <div class="metric-number">{len(route_nodes)} <span class="metric-unit">{transit_unit}</span></div>
         </div>
         """, unsafe_allow_html=True)
     with sg4:
@@ -1920,6 +1975,83 @@ with tab_graph:
             <div class="metric-number" style="font-size: 18px; color: #10B981;">{graph_store.graph.nodes.get(primary_route.get('target', ''), {}).get('name', 'N/A') if primary_route else 'N/A'}</div>
         </div>
         """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="panel-heading">Semantic Knowledge Graph Entities & GraphRAG Triples</div>', unsafe_allow_html=True)
+    
+    kg_tab1, kg_tab2 = st.tabs(["Active Knowledge Triples & Semantic Relations", "Geospatial Entity Node Registry"])
+    
+    with kg_tab1:
+        st.markdown("""
+        <div style="font-size: 11.5px; color: #94A3B8; margin-bottom: 10px;">
+            Verified crisis infrastructure triples loaded in the GraphRAG store. Nodes and dynamic hazard states dynamically penalize edge traversal cost in Dijkstra / A*.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display semantic triples in a clean tactical table
+        triples_data = []
+        for u, v, data in graph_store.graph.edges(data=True):
+            if data.get("id", "").endswith("_REV"):
+                continue
+            u_name = graph_store.graph.nodes.get(u, {}).get("name", u)
+            v_name = graph_store.graph.nodes.get(v, {}).get("name", v)
+            status = data.get("status", "open")
+            dmg = int(data.get("damage_severity", 0) * 100)
+            fld = data.get("flood_depth_cm", 0)
+            dist = data.get("distance_km", 0)
+            
+            if status == "flooded" or fld > 25:
+                pred = "INUNDATED_CORRIDOR"
+                badge = f'<span class="badge-critical" style="background: rgba(56,189,248,0.2); color: #38BDF8; border-color: #38BDF8;">FLOOD {fld}cm</span>'
+            elif status in ["severely_damaged", "blocked"] or dmg > 50:
+                pred = "STRUCTURAL_SEVERANCE"
+                badge = f'<span class="badge-critical">DAMAGE {dmg}%</span>'
+            elif status == "caution":
+                pred = "RESTRICTED_ACCESS"
+                badge = '<span class="badge-caution">CAUTION</span>'
+            else:
+                pred = "ROAD_CONNECTS"
+                badge = '<span class="badge-clear">TRAVERSABLE</span>'
+                
+            triples_data.append({
+                "Subject (Source)": f"{u_name} ({u})",
+                "Predicate (Relationship)": pred,
+                "Object (Target)": f"{v_name} ({v})",
+                "Distance": f"{dist} km",
+                "Status": badge
+            })
+            
+        triples_df = pd.DataFrame(triples_data)
+        st.write(triples_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+
+    with kg_tab2:
+        st.markdown("""
+        <div style="font-size: 11.5px; color: #94A3B8; margin-bottom: 10px;">
+            Canonical spatial entities within the Mumbai Chembur metropolitan disaster zone.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        nodes_data = []
+        for nid, data in graph_store.graph.nodes(data=True):
+            ntype = data.get("type", "intersection").upper()
+            status = data.get("operational_status", "active")
+            cap = f"{data.get('available_capacity', 0)}/{data.get('capacity', 0)}" if data.get('capacity') else "N/A"
+            icu = str(data.get("icu_beds", "N/A")) if data.get("icu_beds") is not None else "N/A"
+            helipad = "Yes (Rooftop)" if data.get("helipad") else "No"
+            
+            nodes_data.append({
+                "Canonical ID": nid,
+                "Entity Name": data.get("name", nid),
+                "Classification": ntype,
+                "Status": status.upper(),
+                "Elevation": f"{data.get('elevation_m', 0)} m",
+                "Capacity (Avail/Total)": cap,
+                "ICU Beds": icu,
+                "Helipad LZ": helipad
+            })
+            
+        nodes_df = pd.DataFrame(nodes_data)
+        st.dataframe(nodes_df, use_container_width=True, hide_index=True)
 
 
 # ==============================================================================
