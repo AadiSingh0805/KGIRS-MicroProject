@@ -413,7 +413,7 @@ if (
     graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(get_data_fingerprint() + "_sync_v2")
 
 # ==============================================================================
-# SESSION STATE AUTO-SANITIZER (Purge stale routes that traverse hazards)
+# SESSION STATE AUTO-SANITIZER (Purge stale legacy session memory)
 # ==============================================================================
 need_reset = False
 if "current_state" in st.session_state:
@@ -425,8 +425,6 @@ if "current_state" in st.session_state:
         origin_check not in graph_store.graph.nodes
         or "DOWNTOWN" in str(origin_check)
         or any("DOWNTOWN" in str(n) or "VANNESS" in str(n) or "STJUDE" in str(n) for n in path_nodes)
-        or "N_INT_VN_PURAV" in path_nodes  # Purge any stale route traversing the 75cm flood!
-        or "N_INT_SUMAN_NAGAR" in path_nodes  # Purge any stale route traversing the 98% shear damage!
     ):
         need_reset = True
 
@@ -1033,6 +1031,20 @@ with tab_mission:
         """
         fmap.get_root().html.add_child(folium.Element(fmap_css))
 
+        # Resolve active extraction origin and designated target from routing telemetry
+        active_origin = (
+            (primary_route.get("origin") if primary_route else None)
+            or (primary_route.get("source") if primary_route else None)
+            or current_state.get("extracted_origin")
+            or "N_CHEMBUR_NAKA"
+        )
+        active_target = (
+            (primary_route.get("target") if primary_route else None)
+            or (primary_route.get("destination") if primary_route else None)
+            or current_state.get("extracted_destination")
+            or "N_HOSP_ZEN"
+        )
+
         # Plot Nodes with Vibrant, High-Tech Tactical Glowing Beacons
         for nid, ndata in graph_store.graph.nodes(data=True):
             lat = ndata.get("lat")
@@ -1050,9 +1062,9 @@ with tab_mission:
             total = ndata.get("capacity", 0)
             icu = ndata.get("icu_beds", 0)
 
-            # Node role identification
-            is_origin = bool(primary_route and nid == primary_route.get("origin"))
-            is_target = bool(primary_route and nid == primary_route.get("target"))
+            # Node role identification - dynamically anchored to active query source and destination
+            is_origin = bool(active_origin and nid == active_origin)
+            is_target = bool(active_target and nid == active_target)
             
             # Central hazards (Shell Colony and Amar Mahal are strictly excluded from hazards)
             is_flood_hazard = (nid == "N_INT_VN_PURAV" or ("vn_purav" in nid.lower() and status in ["partially_flooded", "flooded"]))
@@ -1108,7 +1120,7 @@ with tab_mission:
                     </svg>
                 </div>
                 """
-            elif ntype == "hospital":
+            elif ntype == "hospital" and not is_target:
                 size = 28
                 icon_html = """
                 <div style="width: 26px; height: 26px; border-radius: 6px; background: #064E3B; border: 1.5px solid #10B981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.55); display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -1117,7 +1129,7 @@ with tab_mission:
                     </svg>
                 </div>
                 """
-            elif ntype == "shelter":
+            elif ntype == "shelter" and not is_target:
                 size = 26
                 icon_html = """
                 <div style="width: 24px; height: 24px; border-radius: 6px; background: #451A03; border: 1.5px solid #F59E0B; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -1127,7 +1139,7 @@ with tab_mission:
                     </svg>
                 </div>
                 """
-            elif ntype == "campus":
+            elif ntype == "campus" and not is_origin:
                 size = 26
                 icon_html = """
                 <div style="width: 24px; height: 24px; border-radius: 6px; background: #3B0764; border: 1.5px solid #A855F7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.55); display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -1137,7 +1149,7 @@ with tab_mission:
                     </svg>
                 </div>
                 """
-            elif ntype == "transit_hub" or nid == "N_CHEMBUR_NAKA":
+            elif (ntype == "transit_hub" or nid == "N_CHEMBUR_NAKA") and not is_origin:
                 size = 28
                 icon_html = """
                 <div style="width: 26px; height: 26px; border-radius: 50%; background: #082F49; border: 1.5px solid #0284C7; box-shadow: 0 0 8px rgba(2, 132, 199, 0.6); display: flex; align-items: center; justify-content: center; cursor: pointer;">

@@ -126,6 +126,10 @@ class CrisisSpatialGraph:
                 return float("inf")
             if damage >= 0.85: # Structural collapse / severed span
                 return float("inf")
+            # If traversing through a designated hazard node, block passage
+            for endpoint in [u, v]:
+                if endpoint in ["N_INT_VN_PURAV", "N_INT_SUMAN_NAGAR"]:
+                    return float("inf")
 
         # Dynamic penalty multiplier
         # Cost = base_time * (1 + 8*damage + 4*risk + flood_penalty)
@@ -221,7 +225,9 @@ class CrisisSpatialGraph:
 
         return {
             "source": source,
+            "origin": source,
             "target": target,
+            "destination": target,
             "path": path_nodes,
             "effective_cost_score": round(cost, 2),
             "total_distance_km": round(total_distance_km, 2),

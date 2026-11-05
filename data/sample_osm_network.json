@@ -1096,6 +1096,74 @@
           72.9095
         ]
       ]
+    },
+    {
+      "id": "E_FREEWAY_TO_ZEN",
+      "source": "N_BRIDGE_FREEWAY",
+      "target": "N_HOSP_ZEN",
+      "name": "Eastern Freeway Zen Hospital Elevated Link",
+      "road_type": "motorway_link",
+      "lanes": 2,
+      "distance_km": 0.88,
+      "base_speed_kmh": 45,
+      "elevation_m": 17.5,
+      "status": "open",
+      "damage_severity": 0.01,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.01,
+      "traversable": true,
+      "geometry": [
+        [
+          19.0518,
+          72.9085
+        ],
+        [
+          19.0545,
+          72.9065
+        ],
+        [
+          19.0568,
+          72.905
+        ],
+        [
+          19.0582,
+          72.9035
+        ]
+      ]
+    },
+    {
+      "id": "E_SURANA_TO_SHELL",
+      "source": "N_HOSP_SURANA",
+      "target": "N_INT_SHELL_COLONY",
+      "name": "Swastik Park Western Arterial",
+      "road_type": "secondary",
+      "lanes": 2,
+      "distance_km": 1.25,
+      "base_speed_kmh": 35,
+      "elevation_m": 15.0,
+      "status": "open",
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
+      "traversable": true,
+      "geometry": [
+        [
+          19.0542,
+          72.8912
+        ],
+        [
+          19.0575,
+          72.8898
+        ],
+        [
+          19.061,
+          72.8885
+        ],
+        [
+          19.0652,
+          72.8875
+        ]
+      ]
     }
   ]
 }
