@@ -341,8 +341,18 @@ st.markdown("""
 # ==============================================================================
 # SYSTEM INITIALIZATION & CACHING (Chembur, Mumbai Network Mesh)
 # ==============================================================================
+def get_data_fingerprint() -> str:
+    """Computes a hash of the OSM network and disaster reports data files to auto-invalidate stale caches."""
+    h = hashlib.sha256()
+    for fname in ["sample_osm_network.json", "disaster_reports.json"]:
+        p = os.path.join(current_dir, "data", fname)
+        if os.path.exists(p):
+            with open(p, "rb") as f:
+                h.update(f.read())
+    return h.hexdigest()[:16]
+
 @st.cache_resource(show_spinner=False)
-def load_crisis_system(mesh_version: str = "chembur_mumbai_v2026_11_03"):
+def load_crisis_system(mesh_fingerprint: str):
     data_dir = os.path.join(current_dir, "data")
     osm_path = os.path.join(data_dir, "sample_osm_network.json")
     reports_path = os.path.join(data_dir, "disaster_reports.json")
@@ -385,16 +395,24 @@ def load_crisis_system(mesh_version: str = "chembur_mumbai_v2026_11_03"):
 
     return graph, retriever, agent, visualizer, reports_data
 
-graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system()
+graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(get_data_fingerprint())
 
-# Fail-safe Cache Verification: ensure 16 Chembur nodes including VESIT are active
-if "N_CHEMBUR_NAKA" not in graph_store.graph.nodes or "N_CAMPUS_VESIT" not in graph_store.graph.nodes or "N_DOWNTOWN" in graph_store.graph.nodes or len(graph_store.graph.nodes) < 16:
+# Fail-safe Cache Verification: ensure central hazards (VN Purav flood and Suman Nagar shear) are actively loaded in memory
+e_vn = graph_store.graph.get_edge_data("N_CHEMBUR_NAKA", "N_INT_VN_PURAV") or {}
+e_suman = graph_store.graph.get_edge_data("N_CHEMBUR_NAKA", "N_INT_SUMAN_NAGAR") or {}
+if (
+    "N_CHEMBUR_NAKA" not in graph_store.graph.nodes
+    or "N_CAMPUS_VESIT" not in graph_store.graph.nodes
+    or len(graph_store.graph.nodes) < 16
+    or e_vn.get("status") != "flooded"
+    or e_suman.get("status") != "severely_damaged"
+):
     st.cache_resource.clear()
     st.cache_data.clear()
-    graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(mesh_version="chembur_mumbai_v_vesit_16nodes_active")
+    graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(get_data_fingerprint() + "_sync_v2")
 
 # ==============================================================================
-# SESSION STATE AUTO-SANITIZER (Purge any stale San Francisco session memory)
+# SESSION STATE AUTO-SANITIZER (Purge stale routes that traverse hazards)
 # ==============================================================================
 need_reset = False
 if "current_state" in st.session_state:
@@ -406,6 +424,8 @@ if "current_state" in st.session_state:
         origin_check not in graph_store.graph.nodes
         or "DOWNTOWN" in str(origin_check)
         or any("DOWNTOWN" in str(n) or "VANNESS" in str(n) or "STJUDE" in str(n) for n in path_nodes)
+        or "N_INT_VN_PURAV" in path_nodes  # Purge any stale route traversing the 75cm flood!
+        or "N_INT_SUMAN_NAGAR" in path_nodes  # Purge any stale route traversing the 98% shear damage!
     ):
         need_reset = True
 

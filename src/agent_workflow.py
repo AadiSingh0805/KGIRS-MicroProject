@@ -330,7 +330,10 @@ class CrisisResponseAgent:
         elif "ambulance" in q_lower:
             state["vehicle_type"] = "ambulance"
 
-        if "avoid" in q_lower or "safe" in q_lower or "bypass" in q_lower:
+        # By default in crisis navigation, all emergency dispatch avoids impassable hazards
+        if any(w in q_lower for w in ["ignore hazard", "unconstrained", "force direct", "allow flood"]):
+            state["avoid_hazards"] = False
+        else:
             state["avoid_hazards"] = True
 
         state["extracted_origin"] = origin
