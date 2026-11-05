@@ -182,6 +182,8 @@ class CrisisSpatialGraph:
         try:
             path_nodes = nx.dijkstra_path(self.graph, source, target, weight=weight_func)
             cost = nx.dijkstra_path_length(self.graph, source, target, weight=weight_func)
+            if cost == float("inf") or math.isinf(cost):
+                return None
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return None
 
@@ -195,6 +197,13 @@ class CrisisSpatialGraph:
             u_node = path_nodes[i]
             v_node = path_nodes[i + 1]
             edge_data = self.graph.get_edge_data(u_node, v_node)
+            if not edge_data:
+                return None
+            
+            # Strict safety check: if any segment is impassable, invalidate ground route
+            edge_w = self.calculate_edge_weight(u_node, v_node, edge_data, vehicle_type, avoid_hazards)
+            if edge_w == float("inf") or math.isinf(edge_w):
+                return None
             
             dist = edge_data.get("distance_km", 0.0)
             base_t = edge_data.get("base_time_min", 0.0)

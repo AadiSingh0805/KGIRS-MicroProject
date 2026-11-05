@@ -610,7 +610,7 @@ st.markdown(f"""
 # ==============================================================================
 # 1. Preset Crisis Scenarios (Quick 1-Click Launch for Mumbai Chembur)
 st.markdown('<div class="panel-heading">Rapid Crisis Scenarios (Mumbai Chembur)</div>', unsafe_allow_html=True)
-p_col1, p_col2, p_col3, p_col4, p_col5 = st.columns([1.0, 1.0, 1.1, 1.0, 0.7])
+p_col1, p_col2, p_col3, p_col4, p_col5, p_col6 = st.columns([1.0, 1.0, 1.0, 1.0, 1.15, 0.75])
 
 with p_col1:
     if st.button("Flood: Central VN Purav Bypass", use_container_width=True, help="Chembur Naka to Zen Hospital avoiding 75cm flood on central VN Purav Marg"):
@@ -681,6 +681,24 @@ with p_col4:
         st.rerun()
 
 with p_col5:
+    if st.button("Air Force: Severed Corridor", use_container_width=True, help="Simulate total ground corridor severance from flooded VN Purav to Zen Hospital triggering IAF rotary medevac"):
+        st.session_state.active_scenario = "air_force_medevac"
+        st.session_state.directive_input = "Critical emergency evacuation from submerged VN Purav intersection to Zen Hospital rooftop helipad"
+        st.session_state.vehicle_type = "ambulance"
+        st.session_state.avoid_hazards = True
+        st.session_state.selected_image_name = "sat_disaster_shell_colony_flood.png"
+        img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_shell_colony_flood.png")
+        st.session_state.current_state = agent.run_pipeline(
+            query=st.session_state.directive_input,
+            image_path=img_p if os.path.exists(img_p) else None,
+            vehicle_type="ambulance",
+            avoid_hazards=True
+        )
+        st.session_state.recon_marker_selector = "N_INT_VN_PURAV"
+        st.session_state.selected_recon_node = "N_INT_VN_PURAV"
+        st.rerun()
+
+with p_col6:
     cypher_code = graph_store.generate_neo4j_cypher()
     st.download_button(
         label="Cypher",
@@ -825,32 +843,48 @@ with tab_mission:
     r_dist = primary_route.get("total_distance_km", 0.0) if primary_route else 0.0
     r_conf = int(current_state.get("confidence_score", 0.0) * 100)
     bypassed_count = len(current_state.get("retrieved_incidents", []))
+    is_air_evac = bool(primary_route and primary_route.get("is_aerial_evacuation"))
+
+    origin_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
+    dest_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
+    origin_label = graph_store.graph.nodes.get(origin_id, {}).get("name", origin_id)
+    dest_label = graph_store.graph.nodes.get(dest_id, {}).get("name", dest_id)
     
     with kpi1:
-        status_color = "#34D399" if r_status == "CLEAR" else ("#FBBF24" if r_status == "CAUTION" else "#F87171")
+        if is_air_evac:
+            status_color = "#F59E0B"
+            status_text = "AIR FORCE EVAC"
+            status_sub = "Ground severed -> Air-lift active"
+        else:
+            status_color = "#34D399" if r_status == "CLEAR" else ("#FBBF24" if r_status == "CAUTION" else "#F87171")
+            status_text = r_status
+            status_sub = "Verified safe passage" if r_status == "CLEAR" else "Transit restricted"
+
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-caption">Corridor Status</div>
-            <div class="metric-number" style="color: {status_color}; font-size: 22px;">{r_status}</div>
-            <div class="metric-sub">Verified safe passage</div>
+            <div class="metric-number" style="color: {status_color}; font-size: 20px;">{status_text}</div>
+            <div class="metric-sub">{status_sub}</div>
         </div>
         """, unsafe_allow_html=True)
 
     with kpi2:
+        time_sub = "IAF flight transit time" if is_air_evac else "Optimal Dijkstra travel time"
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-caption">Transit Time</div>
             <div class="metric-number" style="color: #38BDF8;">{r_time}<span class="metric-unit">min</span></div>
-            <div class="metric-sub">Optimal Dijkstra travel time</div>
+            <div class="metric-sub">{time_sub}</div>
         </div>
         """, unsafe_allow_html=True)
 
     with kpi3:
+        dist_sub = "Direct flight vector" if is_air_evac else "Physical road length"
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-caption">Corridor Distance</div>
             <div class="metric-number" style="color: #F8FAFC;">{r_dist}<span class="metric-unit">km</span></div>
-            <div class="metric-sub">Physical road length</div>
+            <div class="metric-sub">{dist_sub}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -873,6 +907,38 @@ with tab_mission:
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+
+    # High-Visibility Tactical Defense Alert Banner for Corridor Severance & Air Force Protocol
+    if is_air_evac or (not primary_route and r_status == "HALTED"):
+        st.markdown(f"""
+        <div style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid #EF4444; border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; background: #EF4444; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 14px #EF4444;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-family: monospace; font-size: 13.5px; font-weight: 800; color: #FCA5A5; letter-spacing: 0.5px;">
+                        CRITICAL ALERT: TOTAL TERRESTRIAL CORRIDOR SEVERANCE
+                    </div>
+                    <div style="font-size: 12px; color: #E2E8F0; margin-top: 4px; line-height: 1.4;">
+                        All ground road arteries between <b>{origin_label}</b> and <b>{dest_label}</b> are completely submerged (>75cm flood depth) or structurally fractured. Terrestrial ambulance transit is disqualified under vehicle safety clearance limits.
+                    </div>
+                    <div style="font-size: 11.5px; color: #F59E0B; margin-top: 5px; font-weight: 600;">
+                        Tactical Action: Activated emergency <b>Indian Air Force (IAF) 121 Helicopter Unit / INS Shikra Rotary-Wing Air Evacuation</b> to <b>{dest_label} Helipad</b>.
+                    </div>
+                </div>
+            </div>
+            <div style="min-width: 175px; text-align: right;">
+                <span style="display: inline-block; background: #DC2626; color: #FFFFFF; font-family: monospace; font-size: 11px; font-weight: 800; padding: 7px 14px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 0 12px rgba(220, 38, 38, 0.8);">
+                    IAF MEDEVAC ACTIVE
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # 2. Interactive Map & Tactical Satellite Surveillance Hub (Side-by-Side)
     map_col, recon_col = st.columns([1.65, 1.0])
@@ -969,18 +1035,61 @@ with tab_mission:
                     popup=folium.Popup(popup_html, max_width=250)
                 ).add_to(fmap)
 
-        # Overlay Glowing Active Safe Route
+        # Overlay Glowing Active Safe Route or Tactical Aerial Corridor
         if primary_route and primary_route.get("segments"):
             for seg in primary_route["segments"]:
                 seg_coords = seg.get("geometry", [])
                 if seg_coords and (18.5 <= seg_coords[0][0] <= 19.5 and 72.5 <= seg_coords[0][1] <= 73.5):
-                    folium.PolyLine(
-                        locations=seg_coords,
-                        color="#00F0FF",
-                        weight=7.0,
-                        opacity=0.95,
-                        tooltip=f"Selected Safe Corridor: {seg.get('road_name')} ({seg.get('distance_km')} km)"
-                    ).add_to(fmap)
+                    if is_air_evac:
+                        # Halo line for glowing flight vector
+                        folium.PolyLine(
+                            locations=seg_coords,
+                            color="#F59E0B",
+                            weight=9.0,
+                            opacity=0.35,
+                            dash_array="10, 10"
+                        ).add_to(fmap)
+                        # Core tactical flight line
+                        folium.PolyLine(
+                            locations=seg_coords,
+                            color="#FBBF24",
+                            weight=4.5,
+                            opacity=0.95,
+                            dash_array="10, 10",
+                            tooltip=f"IAF Tactical Rotary Flight Vector: {seg.get('road_name')} ({seg.get('distance_km')} km)"
+                        ).add_to(fmap)
+                        
+                        # Add midway airborne helicopter beacon
+                        if len(seg_coords) >= 2:
+                            mid_lat = (seg_coords[0][0] + seg_coords[-1][0]) / 2.0
+                            mid_lon = (seg_coords[0][1] + seg_coords[-1][1]) / 2.0
+                            air_icon_html = """
+                            <div style="width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle, #F59E0B 0%, #B45309 70%, #78350F 100%); border: 2px solid #FEF08A; box-shadow: 0 0 16px #F59E0B, 0 0 30px rgba(245, 158, 11, 0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; animation: pulse-flood 1.5s infinite;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v4M4 6h16M7 10h10a4 4 0 0 1 4 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a4 4 0 0 1 4-4zM8 18v2M16 18v2M5 20h14"></path>
+                                </svg>
+                            </div>
+                            """
+                            folium.Marker(
+                                location=[mid_lat, mid_lon],
+                                popup=folium.Popup(f"<div style='font-family: sans-serif; color: #E2E8F0; padding: 3px;'><b style='color: #F59E0B;'>IAF Rotary-Wing Flight Vector</b><br><span style='font-size: 11px;'>Flight ETA: {r_time} min | Air Dist: {r_dist} km</span><br><span style='font-size: 10px; color: #94A3B8;'>Asset: Mil Mi-17 V5 Tactical Medevac</span></div>", max_width=240),
+                                tooltip="IAF Tactical Air Ambulance Flight Vector",
+                                icon=folium.DivIcon(
+                                    html=air_icon_html,
+                                    icon_size=(34, 34),
+                                    icon_anchor=(17, 17),
+                                    popup_anchor=(0, -17),
+                                    class_name="tactical-div-icon"
+                                )
+                            ).add_to(fmap)
+                    else:
+                        folium.PolyLine(
+                            locations=seg_coords,
+                            color="#00F0FF",
+                            weight=7.0,
+                            opacity=0.95,
+                            tooltip=f"Selected Safe Corridor: {seg.get('road_name')} ({seg.get('distance_km')} km)"
+                        ).add_to(fmap)
 
         # Inject Custom CSS for Glowing Tactical Beacons and Dark Glass Popups
         fmap_css = """
@@ -1258,6 +1367,10 @@ with tab_mission:
                 <span style="font-weight: 700; color: #FFFFFF;">Active Safe Corridor</span>
             </div>
             <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 18px; height: 0; border-top: 3px dashed #F59E0B; box-shadow: 0 0 6px #F59E0B;"></span>
+                <span style="font-weight: 700; color: #F59E0B;">IAF Rotary Air Corridor</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
                 <span style="display: inline-block; width: 18px; height: 2px; background: #10B981; border-radius: 2px;"></span>
                 <span>Traversable Road (Clear)</span>
             </div>
@@ -1437,40 +1550,76 @@ with tab_mission:
         corridor_path_nodes = [graph_store.graph.nodes.get(n, {}).get("name", n) for n in route_nodes]
         corridor_path_str = " -> ".join(corridor_path_nodes) if corridor_path_nodes else "Direct Arterial Path"
         
-        st.markdown(f"""
-        <div class="directive-card">
-            <div class="directive-header">
-                <span>MISSION DIRECTIVE</span>
-                <span class="badge-clear">{r_status} CORRIDOR</span>
+        if is_air_evac:
+            st.markdown(f"""
+            <div class="directive-card">
+                <div class="directive-header">
+                    <span>TACTICAL AIR-LIFT DIRECTIVE</span>
+                    <span class="badge-critical" style="background: #DC2626; color: white;">IAF MEDEVAC</span>
+                </div>
+                <div class="directive-route">
+                    {origin_label} [Ground LZ] ==> {dest_label} [Rooftop Helipad]
+                </div>
+                <div class="directive-stats">
+                    <span>Flight Time: <b style="color: #F59E0B;">{r_time} min</b></span>
+                    <span>Air Distance: <b style="color: #F8FAFC;">{r_dist} km</b></span>
+                    <span>Safety Readiness: <b style="color: #34D399;">96%</b></span>
+                </div>
+                <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700; margin-bottom: 4px;">
+                    Direct Tactical Air Corridor (IAF Flight Vector):
+                </div>
+                <div style="font-size: 11px; color: #F59E0B; font-family: monospace; line-height: 1.4; margin-bottom: 10px;">
+                    {origin_label} [Extraction Perimeter LZ] ==> {dest_label} [Certified Rooftop Helipad]
+                </div>
+                <div class="directive-item">
+                    <span style="color: #EF4444; font-weight: bold;">[SEVERED]</span>
+                    <span>All terrestrial road corridors disqualified due to 75cm flood inundation and bridge structural fracture.</span>
+                </div>
+                <div class="directive-item">
+                    <span style="color: #F59E0B; font-weight: bold;">[AIR FORCE]</span>
+                    <span>Dispatched Indian Air Force 121 Helicopter Unit (Mil Mi-17 V5 / HAL Dhruv ALH) with tactical hoist extraction.</span>
+                </div>
+                <div class="directive-item">
+                    <span style="color: #34D399; font-weight: bold;">[HELIPAD]</span>
+                    <span>Direct rotary approach coordinated with {dest_label} rooftop helipad and trauma resuscitation team.</span>
+                </div>
             </div>
-            <div class="directive-route">
-                {origin_label} -> {dest_label}
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="directive-card">
+                <div class="directive-header">
+                    <span>MISSION DIRECTIVE</span>
+                    <span class="badge-clear">{r_status} CORRIDOR</span>
+                </div>
+                <div class="directive-route">
+                    {origin_label} -> {dest_label}
+                </div>
+                <div class="directive-stats">
+                    <span>Transit: <b style="color: #38BDF8;">{r_time} min</b></span>
+                    <span>Distance: <b style="color: #F8FAFC;">{r_dist} km</b></span>
+                    <span>Safety: <b style="color: #34D399;">{r_conf}%</b></span>
+                </div>
+                <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700; margin-bottom: 4px;">
+                    Verified Corridor Path:
+                </div>
+                <div style="font-size: 11px; color: #A78BFA; font-family: monospace; line-height: 1.4; margin-bottom: 10px;">
+                    {corridor_path_str}
+                </div>
+                <div class="directive-item">
+                    <span style="color: #34D399; font-weight: bold;">[OK]</span>
+                    <span>Traversing verified high-elevation arterial spine above active flood waterlines.</span>
+                </div>
+                <div class="directive-item">
+                    <span style="color: #FBBF24; font-weight: bold;">[BYPASS]</span>
+                    <span>Bypassed Central VN Purav Marg (75cm flood) and fractured Central Suman Nagar Flyover.</span>
+                </div>
+                <div class="directive-item">
+                    <span style="color: #38BDF8; font-weight: bold;">[TRIAGE]</span>
+                    <span>Emergency reception and bed allocation alerted at {dest_label}.</span>
+                </div>
             </div>
-            <div class="directive-stats">
-                <span>Transit: <b style="color: #38BDF8;">{r_time} min</b></span>
-                <span>Distance: <b style="color: #F8FAFC;">{r_dist} km</b></span>
-                <span>Safety: <b style="color: #34D399;">{r_conf}%</b></span>
-            </div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700; margin-bottom: 4px;">
-                Verified Corridor Path:
-            </div>
-            <div style="font-size: 11px; color: #A78BFA; font-family: monospace; line-height: 1.4; margin-bottom: 10px;">
-                {corridor_path_str}
-            </div>
-            <div class="directive-item">
-                <span style="color: #34D399; font-weight: bold;">[OK]</span>
-                <span>Traversing verified high-elevation arterial spine above active flood waterlines.</span>
-            </div>
-            <div class="directive-item">
-                <span style="color: #FBBF24; font-weight: bold;">[BYPASS]</span>
-                <span>Bypassed Central VN Purav Marg (75cm flood) and fractured Central Suman Nagar Flyover.</span>
-            </div>
-            <div class="directive-item">
-                <span style="color: #38BDF8; font-weight: bold;">[TRIAGE]</span>
-                <span>Emergency reception and bed allocation alerted at {dest_label}.</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
     with disp_col2:
         st.markdown('<div class="panel-heading">Turn-by-Turn Corridor Navigation</div>', unsafe_allow_html=True)
@@ -1478,22 +1627,32 @@ with tab_mission:
             st.markdown('<div style="max-height: 185px; overflow-y: auto;">', unsafe_allow_html=True)
             for idx, seg in enumerate(primary_route["segments"], 1):
                 seg_status = seg.get("status", "open")
-                tag_class = "badge-clear" if seg_status == "open" else ("badge-caution" if seg_status == "caution" else "badge-critical")
+                if is_air_evac:
+                    tag_class = "badge-critical"
+                    status_lbl = "AIR CORRIDOR"
+                    tag_style = 'style="background: #F59E0B; color: #000; font-weight: 800;"'
+                else:
+                    tag_class = "badge-clear" if seg_status == "open" else ("badge-caution" if seg_status == "caution" else "badge-critical")
+                    status_lbl = seg_status.upper()
+                    tag_style = ''
                 
                 from_label = graph_store.graph.nodes.get(seg.get('from_node'), {}).get('name', seg.get('from_node'))
                 to_label = graph_store.graph.nodes.get(seg.get('to_node'), {}).get('name', seg.get('to_node'))
+                if is_air_evac:
+                    from_label += " [Extraction LZ]"
+                    to_label += " [Helipad Reception]"
                 
                 st.markdown(f"""
                 <div class="turn-item">
                     <div>
-                        <span style="font-family: monospace; color: #38BDF8; font-size: 11px; font-weight: 700;">#{idx}</span>
+                        <span style="font-family: monospace; color: {'#F59E0B' if is_air_evac else '#38BDF8'}; font-size: 11px; font-weight: 700;">#{idx}</span>
                         <b style="color: #F1F5F9; font-size: 12px; margin-left: 6px;">{seg.get('road_name')}</b>
                         <div style="font-size: 11px; color: #64748B; margin-top: 2px;">
                             {from_label} -> {to_label}
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <span class="{tag_class}">{seg_status.upper()}</span>
+                        <span class="{tag_class}" {tag_style}>{status_lbl}</span>
                         <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{seg.get('distance_km')} km</div>
                     </div>
                 </div>
