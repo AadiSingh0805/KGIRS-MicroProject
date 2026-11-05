@@ -58,7 +58,7 @@ class ReasoningChainVisualizer:
             edge_data = self.graph_store.graph.get_edge_data(u, v) or {}
             steps.append({
                 "step_index": i + 2,
-                "decision": f"Traverse Segment [{u} ➔ {v}]",
+                "decision": f"Traverse Segment [{u} -> {v}]",
                 "details": (
                     f"Selected '{edge_data.get('name')}' (Dist: {edge_data.get('distance_km')}km, "
                     f"Elevation: {edge_data.get('elevation_m')}m). "
@@ -120,19 +120,26 @@ class ReasoningChainVisualizer:
         )
 
     def _get_eliminated_edges(self, retrieved_incidents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Identifies edges that were disqualified and explains why."""
+        """Identifies edges that were disqualified and explains why with readable road names."""
         eliminated = []
+        edge_name_map = {}
+        for u, v, data in self.graph_store.graph.edges(data=True):
+            if "id" in data and "name" in data:
+                edge_name_map[data["id"]] = data["name"]
+
         for inc in retrieved_incidents:
             for eid in inc.get("affected_edges", []):
+                r_name = edge_name_map.get(eid, eid)
                 eliminated.append({
                     "edge_id": eid,
+                    "road_name": r_name,
                     "incident_id": inc.get("report_id"),
                     "reason": inc.get("incident_type"),
                     "flood_depth": f"{inc.get('flood_depth_cm', 0)} cm",
                     "damage_severity": f"{int(inc.get('damage_severity', 0)*100)}%",
                     "disqualification_rationale": (
-                        f"Road {eid} disqualified: {inc.get('incident_type')} reported by {inc.get('source')}. "
-                        f"Exceeds safe clearance thresholds for rapid emergency transit."
+                        f"{r_name} disqualified: {inc.get('incident_type')} reported by {inc.get('source')}. "
+                        f"Exceeds safe clearance thresholds for emergency transit."
                     )
                 })
         return eliminated
@@ -142,33 +149,36 @@ class ReasoningChainVisualizer:
         primary_route: Dict[str, Any],
         alternative_routes: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
-        """Provides 'Why not Path B?' contrastive analysis."""
+        """Provides 'Why not Path B?' contrastive analysis with readable landmark names."""
         if len(alternative_routes) <= 1:
             return {
                 "comparison": "Only one viable topological corridor connects origin and destination under current hazard state.",
                 "details": []
             }
 
+        node_name_map = {nid: data.get("name", nid) for nid, data in self.graph_store.graph.nodes(data=True)}
         primary_eta = primary_route["estimated_travel_time_min"]
         primary_dist = primary_route["total_distance_km"]
+        primary_names = [node_name_map.get(n, n) for n in primary_route.get("path", [])]
 
         alt_comparisons = []
         for alt in alternative_routes[1:]:
             diff_eta = round(alt["eta_min"] - primary_eta, 1)
             diff_dist = round(alt["distance_km"] - primary_dist, 1)
+            alt_names = [node_name_map.get(n, n) for n in alt.get("path", [])]
             alt_comparisons.append({
                 "alternative_rank": alt["rank"],
-                "path": " ➔ ".join(alt["path"]),
+                "path": " -> ".join(alt_names),
                 "eta_penalty_min": diff_eta,
                 "distance_penalty_km": diff_dist,
                 "rejection_rationale": (
-                    f"Candidate Path {alt['rank']} rejected: Incurs a +{diff_eta} min delay (+{diff_dist} km detour) "
-                    f"and encounters higher cumulative elevation/congestion risk."
+                    f"Candidate Corridor #{alt['rank']} rejected: Incurs a +{diff_eta} min delay (+{diff_dist} km detour) "
+                    f"and encounters higher cumulative elevation and water accumulation risk."
                 )
             })
 
         return {
-            "primary_route": " ➔ ".join(primary_route["path"]),
+            "primary_route": " -> ".join(primary_names),
             "alternatives_evaluated": len(alternative_routes),
             "details": alt_comparisons
         }

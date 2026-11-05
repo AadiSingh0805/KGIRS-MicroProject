@@ -335,8 +335,14 @@ class CrisisSpatialGraph:
         except ImportError:
             return "<div style='color:white;padding:20px;'>Pyvis is not installed</div>"
 
-        net = Network(height=height, width=width, bgcolor="#0B0F19", font_color="#F3F4F6", directed=True)
-        net.barnes_hut(gravity=-3500, central_gravity=0.3, spring_length=120, damping=0.09)
+        net = Network(height=height, width=width, bgcolor="#0B0F19", font_color="#F8FAFC", directed=True)
+        net.force_atlas_2based(
+            gravity=-65,
+            central_gravity=0.012,
+            spring_length=135,
+            spring_strength=0.07,
+            damping=0.45
+        )
 
         path_set = set(highlight_path) if highlight_path else set()
         path_edges = set()
@@ -347,37 +353,52 @@ class CrisisSpatialGraph:
         # Add Nodes
         for nid, data in self.graph.nodes(data=True):
             ntype = data.get("type", "intersection")
-            label = data.get("name", nid)
+            full_name = data.get("name", nid)
+            # Create a clean concise label (up to 2-3 words)
+            words = full_name.split()
+            short_label = " ".join(words[:2]) if len(words) > 2 else full_name
             status = data.get("operational_status", "active")
 
-            # Color scheme
+            # Color scheme - distinct, high-contrast palette (zero ugly grey)
             if nid in path_set:
                 color = "#00F0FF" # Neon Cyan for active route
                 size = 28
                 border_color = "#FFFFFF"
+            elif ntype == "campus":
+                color = "#A855F7" # Royal Purple for Educational Campus (VESIT)
+                size = 25
+                border_color = "#C084FC"
+            elif ntype == "transit_hub" or nid == "N_CHEMBUR_NAKA":
+                color = "#0284C7" # Ocean Cyan for Major Transit Hub
+                size = 25
+                border_color = "#38BDF8"
             elif ntype == "hospital":
-                color = "#10B981" if status == "active" else "#EF4444"
+                color = "#10B981" if status == "active" else "#EF4444" # Emerald Green / Red
                 size = 24
                 border_color = "#34D399"
             elif ntype == "shelter":
-                color = "#F59E0B"
+                color = "#F59E0B" # Sunburst Amber for Community Shelters
                 size = 22
                 border_color = "#FCD34D"
             elif ntype == "bridge":
-                color = "#6366F1" if status == "active" else "#EF4444"
-                size = 20
-                border_color = "#A5B4FC"
-            elif ntype == "supply_depot":
-                color = "#8B5CF6"
+                color = "#EC4899" if status == "active" else "#EF4444" # Magenta Rose for Elevated Bridges
                 size = 22
-                border_color = "#C4B5FD"
+                border_color = "#F472B6"
+            elif ntype == "supply_depot":
+                color = "#6366F1" # Electric Indigo for Supply Depots
+                size = 22
+                border_color = "#818CF8"
+            elif "shell" in nid.lower() or status in ["partially_flooded", "flooded"]:
+                color = "#06B6D4" # Flood Water Teal for Inundated Junctions (Shell Colony)
+                size = 20
+                border_color = "#22D3EE"
             else:
-                color = "#374151"
-                size = 14
-                border_color = "#6B7280"
+                color = "#F97316" # Vivid Tangerine Orange for Arterial Road Junctions
+                size = 18
+                border_color = "#FB923C"
 
             title_html = (
-                f"<b>{label}</b> ({nid})<br/>"
+                f"<b>{full_name}</b> ({nid})<br/>"
                 f"Type: {ntype.upper()}<br/>"
                 f"Status: {status}<br/>"
                 f"Elevation: {data.get('elevation_m')}m<br/>"
@@ -386,12 +407,12 @@ class CrisisSpatialGraph:
 
             net.add_node(
                 nid,
-                label=data.get("name", nid).split()[0],
+                label=short_label,
                 title=title_html,
                 color={"background": color, "border": border_color, "highlight": {"background": "#38BDF8", "border": "#FFFFFF"}},
                 size=size,
                 shape="dot",
-                font={"color": "#E5E7EB", "size": 12, "face": "Inter, sans-serif"}
+                font={"color": "#F1F5F9", "size": 13, "face": "Inter, system-ui, sans-serif", "strokeWidth": 2, "strokeColor": "#080C14"}
             )
 
         # Add Edges
@@ -444,7 +465,12 @@ class CrisisSpatialGraph:
                 arrows="to"
             )
 
-        return net.generate_html()
+        raw_html = net.generate_html()
+        # Clean Pyvis default white styling and border artifacts
+        clean_html = raw_html.replace("border: 1px solid lightgray;", "border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;")
+        clean_html = clean_html.replace("background-color: white;", "background-color: #0B0F19;")
+        clean_html = clean_html.replace("<div class=\"card-body\">", "<div style=\"background-color: #0B0F19; border-radius: 12px; overflow: hidden;\">")
+        return clean_html
 
     def generate_neo4j_cypher(self) -> str:
         """Generates ready-to-run Neo4j Cypher statements for graph database import."""

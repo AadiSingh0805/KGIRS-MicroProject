@@ -6,6 +6,8 @@ and tactical synthesis using an extensible StateGraph machine.
 
 import os
 import json
+import re
+import difflib
 from typing import Dict, Any, List, Optional, TypedDict
 from .graph_store import CrisisSpatialGraph
 from .multimodal_retriever import MultimodalRetriever
@@ -75,11 +77,115 @@ class CrisisResponseAgent:
                 print(f"LLM API Call notice: {e}. Switching to deterministic engine.")
         return None
 
+    def _resolve_landmark(self, text: str) -> Optional[str]:
+        """
+        Dynamically resolves natural language landmark strings to canonical graph node IDs
+        using alias matching, token overlap, and Levenshtein similarity.
+        Handles variations, typos (e.g. 'Sunita' -> 'Surana'), and real Chembur landmarks.
+        """
+        if not text:
+            return None
+        
+        t_clean = re.sub(r"[^\w\s]", " ", text.lower()).strip()
+        if not t_clean:
+            return None
+
+        # 1. Alias & Phonetic Mapping for Chembur Landmarks
+        aliases = {
+            "N_CAMPUS_VESIT": [
+                "vesit", "vivekanand education society", "vivekanand", "ves", 
+                "collector colony campus", "collectors colony", "hashu advani",
+                "engineering college", "ves campus", "vivekanand institute", "vesit campus"
+            ],
+            "N_HOSP_SURANA": [
+                "surana", "surana sethia", "surana hospital", "sunita hospital", "sunita",
+                "suman nagar hospital", "surana trauma centre", "surana sethia hospital"
+            ],
+            "N_HOSP_ZEN": [
+                "zen", "zen hospital", "zen multi speciality", "zen speciality", "zen chembur", "zen multi"
+            ],
+            "N_HOSP_INLAKS": [
+                "inlaks", "inlaks hospital", "inlaks general", "postal colony hospital"
+            ],
+            "N_CHEMBUR_NAKA": [
+                "chembur naka", "chembur circle", "naka", "chembur junction", "chembur", "downtown", "naka hub"
+            ],
+            "N_BRIDGE_AMAR_MAHAL": [
+                "amar mahal", "amar mahal flyover", "amar mahal junction", "amar flyover", "amar bridge"
+            ],
+            "N_BRIDGE_FREEWAY": [
+                "eastern freeway", "panjarpol", "freeway ramp", "panjarpol elevated", "elevated span"
+            ],
+            "N_SHELTER_ACRES": [
+                "acres", "the acres club", "acres club", "sindhi society gymkhana", "civic center", "acres mega shelter"
+            ],
+            "N_SHELTER_RCF": [
+                "rcf", "rcf sports club", "rcf shelter", "rcf ground", "rcf community shelter", "rcf sports complex"
+            ],
+            "N_INT_SUMAN_NAGAR": [
+                "suman nagar", "suman nagar junction", "suman nagar flyover", "suman"
+            ],
+            "N_INT_TILAK_NAGAR": [
+                "tilak nagar", "tilak nagar station", "tilak nagar cross", "tilak"
+            ],
+            "N_INT_SINDHI_SOC": [
+                "sindhi society", "sindhi society central", "sindhi society cross", "sindhi cross"
+            ],
+            "N_INT_SHELL_COLONY": [
+                "shell colony", "shell colony ground", "shell colony postal cross", "shell"
+            ],
+            "N_INT_VN_PURAV": [
+                "vn purav", "v n purav", "vn purav marg", "purav marg", "vn purav corridor"
+            ],
+            "N_INT_GOVANDI": [
+                "govandi", "govandi station", "govandi west", "deonar depot link"
+            ],
+            "N_DEPOT_MANKHURD": [
+                "mankhurd", "mankhurd depot", "mankhurd logistics", "supply depot", "mankhurd supply"
+            ]
+        }
+
+        # Check exact alias match
+        for node_id, alias_list in aliases.items():
+            for al in alias_list:
+                if al == t_clean or (len(al) > 3 and al in t_clean):
+                    return node_id
+
+        # 2. Check Node Name substrings in graph
+        for node_id, node_data in self.graph_store.graph.nodes(data=True):
+            n_name = node_data.get("name", "").lower()
+            if t_clean in n_name or (len(t_clean) > 3 and n_name in t_clean):
+                return node_id
+
+        # 3. Fuzzy matching using SequenceMatcher
+        best_score = 0.0
+        best_node = None
+
+        for node_id, alias_list in aliases.items():
+            for al in alias_list:
+                ratio = difflib.SequenceMatcher(None, t_clean, al).ratio()
+                if ratio > best_score:
+                    best_score = ratio
+                    best_node = node_id
+
+        for node_id, node_data in self.graph_store.graph.nodes(data=True):
+            n_name = node_data.get("name", "").lower()
+            ratio = difflib.SequenceMatcher(None, t_clean, n_name).ratio()
+            if ratio > best_score:
+                best_score = ratio
+                best_node = node_id
+
+        if best_score >= 0.55:
+            return best_node
+
+        return None
+
     # --- Node 1: Decompose Query ---
     def decompose_query_node(self, state: CrisisAgentState) -> CrisisAgentState:
         """
         Deconstructs complex user dispatch request into atomic subtasks
-        and extracts spatial entities (origin, destination or facility type).
+        and extracts spatial entities (origin, destination or facility type)
+        dynamically using linguistic clause parsing and landmark resolution.
         """
         query = state.get("user_query", "").strip()
         trace = state.setdefault("reasoning_trace", [])
@@ -87,66 +193,96 @@ class CrisisResponseAgent:
         # Subtask decomposition
         subtasks = [
             "Decompose crisis directive into origin, destination, and vehicle constraints",
-            "Retrieve multimodal flood/damage telemetry and update graph edge traversability",
+            "Retrieve multimodal flood/damage satellite telemetry and update graph edge traversability",
             "Execute spatial graph traversal with hazard-penalized Dijkstra / A*",
             "Compute K-shortest alternate contingency corridors",
             "Synthesize tactical field order and explain decision rationale"
         ]
         state["subtasks"] = subtasks
 
-        # Extract entities using LLM or rule-based parser
-        origin = "N_CHEMBUR_NAKA"
-        destination = "N_HOSP_ZEN"
-        facility_type = None
-
         q_lower = query.lower()
 
-        # Origin heuristic
-        if "chembur" in q_lower or "naka" in q_lower or "downtown" in q_lower:
-            origin = "N_CHEMBUR_NAKA"
-        elif "acres" in q_lower:
-            origin = "N_SHELTER_ACRES"
-        elif "rcf" in q_lower:
-            origin = "N_SHELTER_RCF"
-        elif "suman" in q_lower or "surana" in q_lower:
-            origin = "N_INT_SUMAN_NAGAR"
-        elif "tilak" in q_lower:
-            origin = "N_INT_TILAK_NAGAR"
-        elif "civic" in q_lower:
-            origin = "N_SHELTER_ACRES"
+        extracted_origin = None
+        extracted_dest = None
+        facility_type = None
 
-        # Destination / Facility heuristic
-        if "surana" in q_lower:
-            destination = "N_HOSP_SURANA"
-            facility_type = "hospital"
-        elif "zen" in q_lower:
-            destination = "N_HOSP_ZEN"
-            facility_type = "hospital"
-        elif "inlaks" in q_lower:
-            destination = "N_HOSP_INLAKS"
-            facility_type = "hospital"
-        elif "nearest hospital" in q_lower or "hospital" in q_lower:
-            facility_type = "hospital"
-            destination = "N_HOSP_ZEN"
-        elif "acres" in q_lower or "nearest shelter" in q_lower:
-            facility_type = "shelter"
-            destination = "N_SHELTER_ACRES"
-        elif "rcf" in q_lower or "shelter" in q_lower:
-            facility_type = "shelter"
-            destination = "N_SHELTER_RCF"
-        elif "depot" in q_lower or "mankhurd" in q_lower:
-            destination = "N_DEPOT_MANKHURD"
-        elif "amar mahal" in q_lower or "bridge" in q_lower or "bay span" in q_lower:
-            destination = "N_BRIDGE_AMAR_MAHAL"
+        # Natural language regex patterns for origin and destination clauses
+        patterns = [
+            r"from\s+(.+?)\s+to\s+(.+?)(?:\s+(?:avoiding|via|with|for|\.|$)|$)",
+            r"(?:route|corridor|path)\s+(?:from|between)\s+(.+?)\s+(?:to|and)\s+(.+?)(?:\s+(?:avoiding|via|with|for|\.|$)|$)",
+            r"(?:to|towards)\s+(.+?)\s+(?:from|starting at)\s+(.+?)(?:\s+(?:avoiding|via|with|for|\.|$)|$)"
+        ]
+
+        for p_idx, pat in enumerate(patterns):
+            m = re.search(pat, q_lower)
+            if m:
+                if p_idx == 2:
+                    cand_dest_raw = m.group(1).strip()
+                    cand_orig_raw = m.group(2).strip()
+                else:
+                    cand_orig_raw = m.group(1).strip()
+                    cand_dest_raw = m.group(2).strip()
+
+                extracted_origin = self._resolve_landmark(cand_orig_raw)
+
+                # Check if destination is generic vs explicit location
+                if "nearest hospital" in cand_dest_raw or "closest hospital" in cand_dest_raw or cand_dest_raw in ["hospital", "nearest"]:
+                    facility_type = "hospital"
+                    extracted_dest = None
+                elif "nearest shelter" in cand_dest_raw or "closest shelter" in cand_dest_raw or cand_dest_raw in ["shelter", "relief shelter"]:
+                    facility_type = "shelter"
+                    extracted_dest = None
+                else:
+                    extracted_dest = self._resolve_landmark(cand_dest_raw)
+                break
+
+        # Fallback clause scanning across key landmark tokens if pattern didn't capture both
+        if not extracted_origin:
+            for word in ["vesit", "vivekanand", "sunita", "surana", "chembur naka", "chembur", "amar mahal", "acres", "rcf", "suman", "tilak", "inlaks", "govandi", "mankhurd"]:
+                if word in q_lower:
+                    extracted_origin = self._resolve_landmark(word)
+                    break
+
+        if not extracted_dest and not facility_type:
+            if "nearest hospital" in q_lower or "closest hospital" in q_lower:
+                facility_type = "hospital"
+            elif "nearest shelter" in q_lower or "closest shelter" in q_lower:
+                facility_type = "shelter"
+            else:
+                for word in ["zen", "surana", "sunita", "inlaks", "rcf", "acres", "vesit", "amar mahal", "mankhurd"]:
+                    if word in q_lower:
+                        cand = self._resolve_landmark(word)
+                        if cand != extracted_origin:
+                            extracted_dest = cand
+                            break
+
+        origin = extracted_origin or "N_CHEMBUR_NAKA"
+        destination = extracted_dest or ("N_HOSP_ZEN" if not facility_type else None)
+
+        # Dynamic vehicle type extraction from text
+        if any(w in q_lower for w in ["boat", "zodiac", "raft"]):
+            state["vehicle_type"] = "rescue_boat"
+        elif any(w in q_lower for w in ["truck", "heavy vehicle", "unimog"]):
+            state["vehicle_type"] = "heavy_truck"
+        elif any(w in q_lower for w in ["car", "sedan", "civilian"]):
+            state["vehicle_type"] = "civilian_car"
+        elif "ambulance" in q_lower:
+            state["vehicle_type"] = "ambulance"
+
+        if "avoid" in q_lower or "safe" in q_lower or "bypass" in q_lower:
+            state["avoid_hazards"] = True
 
         state["extracted_origin"] = origin
         state["extracted_destination"] = destination
         state["facility_type_target"] = facility_type
 
+        origin_name = self.graph_store.graph.nodes.get(origin, {}).get("name", origin)
+        dest_name = self.graph_store.graph.nodes.get(destination, {}).get("name", destination) if destination else f"Nearest {facility_type.title()}"
+
         trace.append({
             "step": "Query Decomposition",
             "module": "Agentic Decomposition",
-            "details": f"Decomposed query '{query}'. Identified Origin: [{origin}], Destination: [{destination}], Facility Intent: [{facility_type}]."
+            "details": f"Decomposed query '{query}'. Identified Origin: [{origin_name}], Destination: [{dest_name}], Facility Intent: [{facility_type or 'Explicit Corridor'}]."
         })
         return state
 
@@ -207,8 +343,8 @@ class CrisisResponseAgent:
         primary_route = None
         facility_info = None
 
-        if facility_type:
-            # Multi-facility capacity & reachability search
+        if facility_type and not destination:
+            # Multi-facility capacity & reachability search ONLY when destination is unspecified
             facility_choice = self.graph_store.find_nearest_facility(
                 source=origin,
                 facility_type=facility_type,
@@ -220,8 +356,26 @@ class CrisisResponseAgent:
                 state["extracted_destination"] = destination
                 primary_route = facility_choice["route"]
                 facility_info = facility_choice
+        elif destination:
+            primary_route = self.graph_store.compute_route(
+                source=origin,
+                target=destination,
+                vehicle_type=vehicle_type,
+                avoid_hazards=avoid_hazards
+            )
+            if destination in self.graph_store.graph.nodes:
+                d_node = self.graph_store.graph.nodes[destination]
+                facility_info = {
+                    "facility_id": destination,
+                    "facility_name": d_node.get("name", destination),
+                    "type": d_node.get("type", "facility"),
+                    "available_capacity": d_node.get("available_capacity", 0),
+                    "total_capacity": d_node.get("capacity", 0),
+                    "icu_beds": d_node.get("icu_beds", 0),
+                    "operational_status": d_node.get("operational_status", "active")
+                }
 
-        if not primary_route:
+        if not primary_route and destination:
             primary_route = self.graph_store.compute_route(
                 source=origin,
                 target=destination,
@@ -269,7 +423,7 @@ class CrisisResponseAgent:
             state["confidence_score"] = 0.20
             return state
 
-        path_nodes = " ➔ ".join(route["path"])
+        path_nodes = " -> ".join(route["path"])
         dist = route["total_distance_km"]
         eta = route["estimated_travel_time_min"]
         warnings = "\n".join([f"  • [CAUTION] {w}" for w in route.get("hazard_warnings", [])]) or "  • All corridor segments nominal green."
@@ -313,7 +467,7 @@ Keep it high-contrast, tactical, and strictly grounded in the verified data.
         origin_name = origin_node_data.get("name", origin)
         dest_name = dest_node_data.get("name", dest)
         path_names = [self.graph_store.graph.nodes.get(n, {}).get("name", n) for n in route.get("path", [])]
-        path_display = " ➔ ".join(path_names)
+        path_display = " -> ".join(path_names)
 
         if not llm_response:
             # Deterministic Tactical Dispatch Fallback - Clean, Human-Readable
