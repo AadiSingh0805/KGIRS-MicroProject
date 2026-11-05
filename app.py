@@ -435,10 +435,10 @@ def get_node_satellite_image(node_id: str) -> str:
         "N_INT_TILAK_NAGAR": "sat_tilak_nagar.png",
         "N_DEPOT_MANKHURD": "sat_mankhurd_depot.png",
         "N_SHELTER_ACRES": "sat_surana_hospital.png",
-        "N_INT_SUMAN_NAGAR": "sat_surana_hospital.png",
+        "N_INT_SUMAN_NAGAR": "sat_disaster_amar_mahal_collapse.png",
         "N_INT_VN_PURAV": "sat_disaster_shell_colony_flood.png",
         "N_INT_SINDHI_SOC": "sat_vesit_campus.png",
-        "N_BRIDGE_FREEWAY": "sat_disaster_amar_mahal_collapse.png",
+        "N_BRIDGE_FREEWAY": "sat_rcf_shelter.png",
         "N_INT_GOVANDI": "sat_mankhurd_depot.png"
     }
     return mapping.get(node_id, "sat_chembur_naka.png")
@@ -612,9 +612,9 @@ with p_col1:
         st.rerun()
 
 with p_col2:
-    if st.button("Bridge: Freeway Ramp Detour", use_container_width=True, help="Convoy from Chembur Naka to RCF Shelter avoiding 98% shear damage on Panjarpol elevated ramp"):
+    if st.button("Bridge: Suman Nagar Detour", use_container_width=True, help="Convoy from Chembur Naka to Surana Hospital avoiding 98% shear damage on Suman Nagar flyover"):
         st.session_state.active_scenario = "bridge_detour"
-        st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to RCF Community Shelter avoiding damaged elevated bridges"
+        st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to Surana Sethia Hospital avoiding fractured Suman Nagar flyover"
         st.session_state.vehicle_type = "high_clearance_truck"
         st.session_state.avoid_hazards = True
         st.session_state.selected_image_name = "sat_disaster_amar_mahal_collapse.png"
@@ -625,8 +625,8 @@ with p_col2:
             vehicle_type="high_clearance_truck",
             avoid_hazards=True
         )
-        st.session_state.recon_marker_selector = "N_BRIDGE_FREEWAY"
-        st.session_state.selected_recon_node = "N_BRIDGE_FREEWAY"
+        st.session_state.recon_marker_selector = "N_INT_SUMAN_NAGAR"
+        st.session_state.selected_recon_node = "N_INT_SUMAN_NAGAR"
         st.rerun()
 
 with p_col3:
@@ -722,7 +722,7 @@ with st.form("dispatch_directive_form", clear_on_submit=False):
             format_func=lambda x: {
                 "None": "None (Sensor Mesh)",
                 "sat_disaster_shell_colony_flood.png": "VN Purav Marg Central Arterial (75cm Flood Hazard)",
-                "sat_disaster_amar_mahal_collapse.png": "Panjarpol Elevated Freeway Ramp (Expansion Shear Hazard)",
+                "sat_disaster_amar_mahal_collapse.png": "Suman Nagar Flyover (Expansion Shear Hazard)",
                 "sat_inlaks_hospital.png": "Inlaks Hospital (Postal Colony)",
                 "sat_vesit_campus.png": "VESIT Campus (Collector Colony Safe Zone)",
                 "sat_surana_hospital.png": "Surana Sethia Hospital (Trauma ICU)",
@@ -763,7 +763,7 @@ if calc_submitted:
             "sat_surana_hospital.png": "N_HOSP_SURANA",
             "sat_inlaks_hospital.png": "N_HOSP_INLAKS",
             "sat_disaster_shell_colony_flood.png": "N_INT_VN_PURAV",
-            "sat_disaster_amar_mahal_collapse.png": "N_BRIDGE_FREEWAY",
+            "sat_disaster_amar_mahal_collapse.png": "N_INT_SUMAN_NAGAR",
             "sat_vesit_campus.png": "N_CAMPUS_VESIT",
             "sat_rcf_shelter.png": "N_SHELTER_RCF",
             "sat_chembur_naka.png": "N_CHEMBUR_NAKA",
@@ -1124,8 +1124,8 @@ with tab_mission:
             ntype = nd.get("type", "").upper()
             if nid == "N_INT_VN_PURAV":
                 return f"{name} [CENTRAL FLOOD HAZARD]"
-            elif nid == "N_BRIDGE_FREEWAY":
-                return f"{name} [STRUCTURAL HAZARD]"
+            elif nid == "N_INT_SUMAN_NAGAR":
+                return f"{name} [CENTRAL FLYOVER COLLAPSE]"
             elif nid == "N_CAMPUS_VESIT":
                 return f"{name} [ACADEMIC CAMPUS]"
             elif nd.get("type") == "hospital":
@@ -1153,7 +1153,7 @@ with tab_mission:
         
         # Telemetry styling & badges
         is_flood = (sel_node_id == "N_INT_VN_PURAV")
-        is_struct = (sel_node_id == "N_BRIDGE_FREEWAY")
+        is_struct = (sel_node_id == "N_INT_SUMAN_NAGAR")
         is_campus = (sel_node_id == "N_CAMPUS_VESIT")
         is_hosp = (sel_data.get("type") == "hospital")
         

@@ -122,7 +122,7 @@ class ReasoningChainVisualizer:
                 f"You are the Tactical Decision Intelligence AI for Chembur Disaster Operations. "
                 f"The selected emergency corridor is [{path_str}]. Distance: {primary_route['total_distance_km']} km, "
                 f"ETA: {primary_route['estimated_travel_time_min']} mins. Disqualified hazards bypassed: {len(eliminated)} road segments "
-                f"including VN Purav Marg central corridor (75cm flood) and Panjarpol Freeway Ramp (98% shear damage). Target: {target_name}. "
+                f"including VN Purav Marg central corridor (75cm flood) and Suman Nagar Flyover (98% shear damage). Target: {target_name}. "
                 f"Explain in exactly 3 short bullet points: 1) Why this corridor is physically optimal. "
                 f"2) Why hazard zones were eliminated. 3) Medical triage assessment. Strict: zero emojis."
             )
@@ -168,7 +168,7 @@ class ReasoningChainVisualizer:
             active_llm_source = "DETERMINISTIC REASONING ENGINE"
             llm_attribution = (
                 f"• Physical Elevation Advantage: Corridor [{path_str}] preserves high-elevation transit (avg 15.2m), delivering an optimal {primary_route['estimated_travel_time_min']} min ETA over {primary_route['total_distance_km']} km without entering flood collection basins.\n"
-                f"• Causal Hazard Elimination: Successfully bypassed {len(eliminated)} critical zones including central VN Purav Marg (75cm flood depth, exceeding ambulance clearance) and Panjarpol Freeway Ramp (severe expansion joint shear risk).\n"
+                f"• Causal Hazard Elimination: Successfully bypassed {len(eliminated)} critical zones including central VN Purav Marg (75cm flood depth, exceeding ambulance clearance) and Suman Nagar Flyover (severe expansion joint shear risk).\n"
                 f"• Reception Triage Readiness: Targeted [{target_name}] based on confirmed operational intake capacity ({avail_beds} beds, {icu_beds} ICU units available on active generator backup)."
             )
 

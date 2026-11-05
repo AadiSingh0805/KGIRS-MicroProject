@@ -18,16 +18,16 @@
     "report_id": "DISP-2026-002",
     "timestamp": "2026-11-05T08:24:00Z",
     "source": "MMRDA Structural Sensor & PWD Satellite Recon",
-    "incident_type": "Expansion Joint Shear Slip on Panjarpol Elevated Freeway Ramp",
+    "incident_type": "Expansion Joint Shear Slip on Suman Nagar Flyover",
     "severity": "CRITICAL",
-    "location_ref": "E_VN_PURAV_TO_FREEWAY",
-    "affected_nodes": ["N_INT_VN_PURAV", "N_BRIDGE_FREEWAY"],
-    "affected_edges": ["E_VN_PURAV_TO_FREEWAY"],
+    "location_ref": "E_CHEMBUR_TO_SUMAN",
+    "affected_nodes": ["N_CHEMBUR_NAKA", "N_INT_SUMAN_NAGAR"],
+    "affected_edges": ["E_CHEMBUR_TO_SUMAN"],
     "flood_depth_cm": 0,
     "damage_severity": 0.98,
-    "text": "STRUCTURAL ALERT: Panjarpol Elevated Freeway Ramp southern expansion joint has sheared 14cm with severe transverse pier displacement. Complete bridge deck collapse hazard under dynamic vehicular loads.",
+    "text": "STRUCTURAL ALERT: Suman Nagar elevated flyover southern expansion joint has sheared 14cm with severe transverse pier displacement. Complete bridge deck collapse hazard under dynamic vehicular loads.",
     "image_ref": "data/damage_images/sat_disaster_amar_mahal_collapse.png",
-    "action_required": "Immediate total closure of Panjarpol elevated ramp. Prohibit emergency crossings. Reroute heavy convoys via ground-level arterials."
+    "action_required": "Immediate total closure of Suman Nagar flyover ramp. Prohibit emergency crossings. Reroute heavy convoys via northern arterials."
   },
   {
     "report_id": "DISP-2026-003",
