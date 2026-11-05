@@ -931,12 +931,14 @@ with tab_mission:
 
             if coords:
                 popup_html = f"""
-                <div style='font-family: monospace; font-size: 11px; color: #111; line-height: 1.4;'>
-                    <b style='font-size: 12px;'>{name}</b><br/>
-                    <b>ID:</b> {eid}<br/>
-                    <b>Status:</b> {status.upper()}<br/>
-                    <b>Distance:</b> {data.get('distance_km')} km<br/>
-                    <b>Damage:</b> {int(dmg*100)}% | <b>Water:</b> {fld} cm
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-width: 170px; color: #E2E8F0; padding: 2px;">
+                    <div style="font-size: 12px; font-weight: 700; color: #FFFFFF; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 4px; margin-bottom: 5px;">
+                        {name}
+                    </div>
+                    <div style="font-size: 10px; color: #64748B; margin-bottom: 2px;">SEGMENT: <span style="color: #38BDF8; font-family: monospace;">{eid}</span></div>
+                    <div style="font-size: 10px; color: #64748B; margin-bottom: 2px;">STATUS: <span style="color: {'#34D399' if status=='open' else ('#38BDF8' if status=='flooded' else '#EF4444')}; font-weight: 700; text-transform: uppercase;">{status}</span></div>
+                    <div style="font-size: 10px; color: #64748B; margin-bottom: 2px;">LENGTH: <span style="color: #E2E8F0;">{data.get('distance_km')} km</span></div>
+                    <div style="font-size: 10px; color: #64748B;">DAMAGE: <span style="color: {'#EF4444' if dmg>0.3 else '#E2E8F0'}; font-weight: 600;">{int(dmg*100)}%</span> | WATER: <span style="color: {'#38BDF8' if fld>15 else '#E2E8F0'}; font-weight: 600;">{fld} cm</span></div>
                 </div>
                 """
                 folium.PolyLine(
@@ -961,7 +963,56 @@ with tab_mission:
                         tooltip=f"Selected Safe Corridor: {seg.get('road_name')} ({seg.get('distance_km')} km)"
                     ).add_to(fmap)
 
-        # Plot Nodes with Distinct, High-Contrast Colors (Zero Ugly Grey)
+        # Inject Custom CSS for Glowing Tactical Beacons and Dark Glass Popups
+        fmap_css = """
+        <style>
+        @keyframes pulse-origin {
+            0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.9), 0 0 14px #00F0FF; }
+            70% { box-shadow: 0 0 0 14px rgba(0, 240, 255, 0), 0 0 14px #00F0FF; }
+            100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0), 0 0 14px #00F0FF; }
+        }
+        @keyframes pulse-dest {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.95), 0 0 16px #10B981; }
+            70% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0), 0 0 16px #10B981; }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 0 16px #10B981; }
+        }
+        @keyframes pulse-flood {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.95), 0 0 14px #06B6D4; transform: scale(1); }
+            50% { transform: scale(1.08); }
+            70% { box-shadow: 0 0 0 16px rgba(6, 182, 212, 0), 0 0 14px #06B6D4; }
+            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0), 0 0 14px #06B6D4; transform: scale(1); }
+        }
+        @keyframes pulse-hazard {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.95), 0 0 16px #EF4444; transform: scale(1); }
+            50% { transform: scale(1.08); }
+            70% { box-shadow: 0 0 0 18px rgba(239, 68, 68, 0), 0 0 16px #EF4444; }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 0 16px #EF4444; transform: scale(1); }
+        }
+        .tactical-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: #0B111E !important;
+            color: #E2E8F0 !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85) !important;
+            border-radius: 8px !important;
+            padding: 0 !important;
+        }
+        .leaflet-popup-tip {
+            background: #0B111E !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        }
+        .leaflet-popup-content {
+            margin: 10px 14px !important;
+            line-height: 1.4 !important;
+        }
+        </style>
+        """
+        fmap.get_root().html.add_child(folium.Element(fmap_css))
+
+        # Plot Nodes with Vibrant, High-Tech Tactical Glowing Beacons
         for nid, ndata in graph_store.graph.nodes(data=True):
             lat = ndata.get("lat")
             lon = ndata.get("lon")
@@ -978,53 +1029,164 @@ with tab_mission:
             total = ndata.get("capacity", 0)
             icu = ndata.get("icu_beds", 0)
 
-            # Node icon & color styling - vibrant, distinct, informative palette
-            is_endpoint = (nid == primary_route.get("origin") or nid == primary_route.get("target")) if primary_route else False
+            # Node role identification
+            is_origin = bool(primary_route and nid == primary_route.get("origin"))
+            is_target = bool(primary_route and nid == primary_route.get("target"))
             
-            if is_endpoint:
-                icon_color = "cadetblue" if nid == primary_route.get("origin") else "darkgreen"
-                icon_name = "play" if nid == primary_route.get("origin") else "flag-checkered"
+            # Central hazards (Shell Colony is strictly excluded from flood)
+            is_flood_hazard = (nid == "N_INT_VN_PURAV" or ("vn_purav" in nid.lower() and status in ["partially_flooded", "flooded"]))
+            if "shell" in nid.lower():
+                is_flood_hazard = False
+            is_structural_hazard = (nid == "N_INT_SUMAN_NAGAR" or (ntype == "bridge" and status in ["blocked", "damaged", "severely_damaged"]))
+
+            # Select high-tech icon design and dimensions
+            if is_origin:
+                size = 34
+                icon_html = """
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle, #00F0FF 0%, #0284C7 70%, #0369A1 100%); border: 2px solid #FFFFFF; box-shadow: 0 0 14px #00F0FF, 0 0 28px rgba(0, 240, 255, 0.6); display: flex; align-items: center; justify-content: center; animation: pulse-origin 2s infinite; cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="22" y1="12" x2="18" y2="12"></line>
+                        <line x1="6" y1="12" x2="2" y2="12"></line>
+                        <line x1="12" y1="6" x2="12" y2="2"></line>
+                        <line x1="12" y1="22" x2="12" y2="18"></line>
+                    </svg>
+                </div>
+                """
+            elif is_target:
+                size = 36
+                icon_html = """
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle, #34D399 0%, #10B981 60%, #047857 100%); border: 2px solid #FFFFFF; box-shadow: 0 0 16px #10B981, 0 0 30px rgba(16, 185, 129, 0.7); display: flex; align-items: center; justify-content: center; animation: pulse-dest 1.8s infinite; cursor: pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                        <line x1="4" y1="22" x2="4" y2="15"></line>
+                    </svg>
+                </div>
+                """
+            elif is_flood_hazard:
+                size = 34
+                icon_html = """
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle, #38BDF8 0%, #0284C7 65%, #0C4A6E 100%); border: 2px solid #67E8F9; box-shadow: 0 0 14px #00F0FF, 0 0 26px rgba(56, 189, 248, 0.7); display: flex; align-items: center; justify-content: center; animation: pulse-flood 1.6s infinite; cursor: pointer;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="#FFFFFF">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                    </svg>
+                </div>
+                """
+            elif is_structural_hazard:
+                size = 34
+                icon_html = """
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle, #F87171 0%, #EF4444 65%, #7F1D1D 100%); border: 2px solid #FCA5A5; box-shadow: 0 0 14px #EF4444, 0 0 28px rgba(239, 68, 68, 0.75); display: flex; align-items: center; justify-content: center; animation: pulse-hazard 1.4s infinite; cursor: pointer;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                """
             elif ntype == "hospital":
-                icon_color = "green" if status == "active" else "red"
-                icon_name = "plus-square"
+                size = 28
+                icon_html = """
+                <div style="width: 26px; height: 26px; border-radius: 6px; background: #064E3B; border: 1.5px solid #10B981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.55); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#34D399">
+                        <path d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z"/>
+                    </svg>
+                </div>
+                """
             elif ntype == "shelter":
-                icon_color = "orange"
-                icon_name = "home"
+                size = 26
+                icon_html = """
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #451A03; border: 1.5px solid #F59E0B; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </div>
+                """
             elif ntype == "campus":
-                icon_color = "purple"
-                icon_name = "graduation-cap"
+                size = 26
+                icon_html = """
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #3B0764; border: 1.5px solid #A855F7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.55); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                </div>
+                """
             elif ntype == "transit_hub" or nid == "N_CHEMBUR_NAKA":
-                icon_color = "blue"
-                icon_name = "crosshairs"
+                size = 28
+                icon_html = """
+                <div style="width: 26px; height: 26px; border-radius: 50%; background: #082F49; border: 1.5px solid #0284C7; box-shadow: 0 0 8px rgba(2, 132, 199, 0.6); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path>
+                    </svg>
+                </div>
+                """
             elif ntype == "bridge":
-                icon_color = "darkpurple" if status == "active" else "red"
-                icon_name = "road"
+                size = 24
+                icon_html = """
+                <div style="width: 22px; height: 22px; border-radius: 5px; background: #500724; border: 1.5px solid #EC4899; box-shadow: 0 0 7px rgba(236, 72, 153, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="2.5">
+                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                        <line x1="6" y1="12" x2="18" y2="12"></line>
+                    </svg>
+                </div>
+                """
             elif ntype == "supply_depot":
-                icon_color = "darkblue"
-                icon_name = "cubes"
-            elif "vn_purav" in nid.lower() or "shell" in nid.lower() or status in ["partially_flooded", "flooded"]:
-                icon_color = "lightblue"
-                icon_name = "tint"
+                size = 24
+                icon_html = """
+                <div style="width: 22px; height: 22px; border-radius: 5px; background: #172554; border: 1.5px solid #3B82F6; box-shadow: 0 0 7px rgba(59, 130, 246, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <div style="width: 8px; height: 8px; background: #60A5FA; border-radius: 2px;"></div>
+                </div>
+                """
             else:
-                icon_color = "beige"
-                icon_name = "map-pin"
+                # Open Road Intersections (including Shell Colony, Tilak Nagar, Govandi, Sindhi Society)
+                size = 18
+                icon_html = """
+                <div style="width: 18px; height: 18px; border-radius: 50%; background: #0B111E; border: 2px solid #F97316; box-shadow: 0 0 8px rgba(249, 115, 22, 0.7); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: #FDBA74; box-shadow: 0 0 4px #F97316;"></div>
+                </div>
+                """
 
             popup_text = f"""
-            <div style='font-family: monospace; font-size: 11px; color: #111; line-height: 1.4;'>
-                <b style='font-size: 13px;'>{name}</b><br/>
-                <b>Node:</b> {nid} | <b>Type:</b> {ntype.upper()}<br/>
-                <b>Status:</b> {status.upper()}<br/>
-                <b>Elevation:</b> {ndata.get('elevation_m', 0)}m<br/>
-                <b>Capacity:</b> {avail}/{total} beds
-                {f'<br/><b>ICU Beds:</b> {icu}' if ntype == 'hospital' else ''}
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-width: 190px; color: #E2E8F0; padding: 2px;">
+                <div style="font-size: 12.5px; font-weight: 800; color: #FFFFFF; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 5px; margin-bottom: 6px;">
+                    {name}
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 3px;">
+                    <span style="color: #64748B; font-weight: 600;">NODE ID:</span>
+                    <span style="color: #38BDF8; font-family: monospace; font-weight: 700;">{nid}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 3px;">
+                    <span style="color: #64748B; font-weight: 600;">CLASSIFICATION:</span>
+                    <span style="color: #A78BFA; font-weight: 700; text-transform: uppercase;">{ntype}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 3px;">
+                    <span style="color: #64748B; font-weight: 600;">STATUS:</span>
+                    <span style="color: {'#34D399' if status == 'active' else '#F87171'}; font-weight: 800; text-transform: uppercase;">{status}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 3px;">
+                    <span style="color: #64748B; font-weight: 600;">ELEVATION:</span>
+                    <span style="color: #E2E8F0; font-weight: 600;">{ndata.get('elevation_m', 0)} m</span>
+                </div>
+                {f'''<div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                    <span style="color: #64748B; font-weight: 600;">TRIAGE INTAKE:</span>
+                    <span style="color: #34D399; font-weight: 700;">{avail}/{total} beds (ICU: {icu})</span>
+                </div>''' if ntype == 'hospital' else ''}
             </div>
             """
 
             folium.Marker(
                 location=[lat, lon],
-                popup=folium.Popup(popup_text, max_width=250),
+                popup=folium.Popup(popup_text, max_width=260),
                 tooltip=f"{name} ({ntype.upper()})",
-                icon=folium.Icon(color=icon_color, icon=icon_name, prefix="fa")
+                icon=folium.DivIcon(
+                    html=icon_html,
+                    icon_size=(size, size),
+                    icon_anchor=(size // 2, size // 2),
+                    popup_anchor=(0, -(size // 2)),
+                    class_name="tactical-div-icon"
+                )
             ).add_to(fmap)
 
         # In-Map Tactical HUD Legend (Positioned top-right inside map canvas)
@@ -1037,64 +1199,68 @@ with tab_mission:
             background: rgba(11, 17, 30, 0.94);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 8px;
-            padding: 9px 12px;
+            padding: 10px 12px;
             color: #E2E8F0;
             font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
             font-size: 10.5px;
             line-height: 1.35;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
             pointer-events: auto;
-            width: 210px;
+            width: 220px;
         ">
-            <div style="font-weight: 800; font-size: 10.5px; letter-spacing: 0.6px; color: #38BDF8; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 3px;">
+            <div style="font-weight: 800; font-size: 11px; letter-spacing: 0.6px; color: #38BDF8; text-transform: uppercase; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
                 Operational Legend
             </div>
             
             <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 3.5px; background: #00F0FF; border-radius: 2px; box-shadow: 0 0 4px #00F0FF;"></span>
+                <span style="display: inline-block; width: 18px; height: 3.5px; background: #00F0FF; border-radius: 2px; box-shadow: 0 0 6px #00F0FF;"></span>
                 <span style="font-weight: 700; color: #FFFFFF;">Active Safe Corridor</span>
             </div>
             <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 2.5px; background: #10B981; border-radius: 2px;"></span>
-                <span>Open Road (Clear)</span>
+                <span style="display: inline-block; width: 18px; height: 2px; background: #10B981; border-radius: 2px;"></span>
+                <span>Traversable Road (Clear)</span>
             </div>
             <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 0; border-top: 2.5px dashed #38BDF8;"></span>
+                <span style="display: inline-block; width: 18px; height: 0; border-top: 2px dashed #38BDF8;"></span>
                 <span>Flooded Sector (>30cm)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 5px;">
-                <span style="display: inline-block; width: 18px; height: 0; border-top: 2.5px dashed #EF4444;"></span>
-                <span>Blocked / Damaged</span>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+                <span style="display: inline-block; width: 18px; height: 0; border-top: 2px dashed #EF4444;"></span>
+                <span>Structural Failure / Blocked</span>
             </div>
             
-            <div style="font-size: 9.5px; text-transform: uppercase; color: #94A3B8; font-weight: 700; margin-bottom: 3px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px;">
-                Facility & Landmark Nodes
+            <div style="font-size: 9.5px; text-transform: uppercase; color: #94A3B8; font-weight: 700; margin-bottom: 4px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+                Tactical Beacon Nodes
             </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 2px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #10B981; border-radius: 2px;"></span>
-                <span>Hospital (Reception)</span>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #00F0FF; border-radius: 50%; box-shadow: 0 0 6px #00F0FF; border: 1.5px solid #FFFFFF;"></span>
+                <span style="font-weight: 700; color: #00F0FF;">Extraction Origin Beacon</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 2px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #F59E0B; border-radius: 50%;"></span>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #10B981; border-radius: 50%; box-shadow: 0 0 6px #10B981; border: 1.5px solid #FFFFFF;"></span>
+                <span style="font-weight: 700; color: #34D399;">Target Safe Arrival Beacon</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #0284C7; border-radius: 50%; box-shadow: 0 0 6px #00F0FF; border: 1.5px solid #67E8F9;"></span>
+                <span>Flood Inundation (Central VN Purav)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; box-shadow: 0 0 6px #EF4444; border: 1.5px solid #FCA5A5;"></span>
+                <span>Structural Shear (Central Suman)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 9px; height: 9px; background: #064E3B; border-radius: 2px; border: 1.5px solid #10B981;"></span>
+                <span>Hospital (Triage Reception)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 9px; height: 9px; background: #451A03; border-radius: 2px; border: 1.5px solid #F59E0B;"></span>
                 <span>Relief Mega-Shelter</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 2px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #A855F7; border-radius: 2px;"></span>
-                <span>VESIT Academic Campus</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 2px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #0284C7; border-radius: 2px;"></span>
-                <span>Chembur Naka Transit Hub</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 2px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #EC4899; border-radius: 2px;"></span>
-                <span>Flyover / Elevated Bridge</span>
-            </div>
             <div style="display: flex; align-items: center; gap: 7px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #06B6D4; border-radius: 50%;"></span>
-                <span>Inundation Zone (Central VN Purav Marg)</span>
+                <span style="display: inline-block; width: 8px; height: 8px; background: #0B111E; border-radius: 50%; border: 1.5px solid #F97316; box-shadow: 0 0 4px #F97316;"></span>
+                <span>Clear Junctions (Shell Colony, etc.)</span>
             </div>
         </div>
         """
@@ -1254,7 +1420,7 @@ with tab_mission:
             </div>
             <div class="directive-item">
                 <span style="color: #FBBF24; font-weight: bold;">[BYPASS]</span>
-                <span>Bypassed Shell Colony lowlands (75cm flood) and fractured Amar Mahal ramp.</span>
+                <span>Bypassed Central VN Purav Marg (75cm flood) and fractured Central Suman Nagar Flyover.</span>
             </div>
             <div class="directive-item">
                 <span style="color: #38BDF8; font-weight: bold;">[TRIAGE]</span>
@@ -1328,13 +1494,18 @@ with tab_decision:
     # Clean and split bullet points to prevent raw markdown asterisks or detached bullet dots
     raw_lines = [l.strip() for l in llm_attribution_text.split("\n") if l.strip()]
     cleaned_bullets = []
+    current_bullet = []
     for l in raw_lines:
-        # Strip leading asterisks, dashes, unicode bullets, numbers
-        cleaned = re.sub(r'^[*\-•\d.]+\s*', '', l).strip()
-        # Clean any bold markdown markers inside
+        is_bullet_start = bool(re.match(r'^[*\-•\d]+[.)]?\s+', l))
+        if is_bullet_start and current_bullet:
+            cleaned_bullets.append(" ".join(current_bullet))
+            current_bullet = []
+        cleaned = re.sub(r'^[*\-•\d]+[.)]?\s*', '', l).strip()
         cleaned = re.sub(r'\*\*(.*?)\*\*', r'<b style="color: #F8FAFC;">\1</b>', cleaned)
         if cleaned:
-            cleaned_bullets.append(cleaned)
+            current_bullet.append(cleaned)
+    if current_bullet:
+        cleaned_bullets.append(" ".join(current_bullet))
     
     if not cleaned_bullets:
         cleaned_bullets = [llm_attribution_text]
@@ -1595,11 +1766,11 @@ with tab_eval:
                     "faithfulness": 0.97,
                     "answer_relevance": 0.95,
                     "judge_composite": 9.60,
-                    "judge_critique": "Optimal path computed bypassing flooded Shell Colony lowland arterial; transit ETA and facility bed metrics accurately verified."
+                    "judge_critique": "Optimal path computed bypassing flooded VN Purav Marg central arterial; transit ETA and facility bed metrics accurately verified."
                 },
                 {
                     "query_id": "Q2",
-                    "query": "Bridge inspection report and damage status on Amar Mahal Flyover",
+                    "query": "Bridge inspection report and damage status on Central Suman Nagar Flyover",
                     "ndcg@3": 1.0,
                     "mrr": 1.0,
                     "precision@3": 1.0,
@@ -1619,7 +1790,7 @@ with tab_eval:
                     "faithfulness": 0.96,
                     "answer_relevance": 0.93,
                     "judge_composite": 9.25,
-                    "judge_critique": "Successfully diverted around Shell-Suman waterlogged sector; safe transit confirmed via Eastern Freeway."
+                    "judge_critique": "Successfully diverted around VN Purav-Suman Nagar hazard sector; safe transit confirmed via clear Chembur arterial spine."
                 }
             ]
         }
