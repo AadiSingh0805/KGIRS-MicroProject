@@ -51,6 +51,7 @@ from src.incident_repository import IncidentRepository
 from src.incident_ui import render_incident_manager
 from src.vehicle_profiles import VEHICLE_PROFILES
 from src.presentation import render_about
+from src.dispatch_brief import build_dispatch_brief
 
 # ==============================================================================
 # STREAMLIT CONFIGURATION - CLEAN FULL-CANVAS LAYOUT (NO SIDEBAR, NO EMOJIS)
@@ -90,6 +91,17 @@ st.markdown("""
         max-width: 1480px !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
+    }
+
+    /* Prominent Route Planner PDF export action */
+    [data-testid="stDownloadButton"] button[kind="secondary"] {
+        min-height: 44px;
+        border: 1px solid #F59E0B !important;
+        border-radius: 8px !important;
+        background: linear-gradient(135deg, #92400E 0%, #B45309 100%) !important;
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.28);
     }
 
     /* 2. Top Executive Header Bar */
@@ -905,7 +917,28 @@ with tab_mission:
     map_col, recon_col = st.columns([2.2, 1.0])
 
     with map_col:
-        st.markdown('<div class="panel-heading">Route map · Chembur, Mumbai</div>', unsafe_allow_html=True)
+        map_heading_col, dispatch_button_col = st.columns([2.0, 1.0], vertical_alignment="center")
+        with map_heading_col:
+            st.markdown('<div class="panel-heading">Route map · Chembur, Mumbai</div>', unsafe_allow_html=True)
+        with dispatch_button_col:
+            dispatch_pdf = build_dispatch_brief(
+                current_state,
+                graph_store,
+                {
+                    "vehicle_type": current_state.get("vehicle_type", st.session_state.vehicle_type),
+                    "avoid_hazards": st.session_state.avoid_hazards,
+                    "query": st.session_state.directive_input,
+                },
+            )
+            st.download_button(
+                label="Download PDF report",
+                data=dispatch_pdf,
+                file_name="aegis_crisisnav_dispatch_brief.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+                help="Download the current route map, directions, settings, and supporting evidence as a PDF",
+                key="download_dispatch_pdf_report",
+            )
 
         # Center on Chembur, Mumbai
         center_lat, center_lon = 19.0575, 72.8988
@@ -1425,6 +1458,9 @@ with tab_mission:
         </div>
         """, unsafe_allow_html=True)
 
+        if evidence_count == 0:
+            st.info("No supporting incident reports were retrieved. The route is based on the current graph and incident registry snapshot.")
+
         origin_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
         dest_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
         origin_label = graph_store.graph.nodes.get(origin_id, {}).get("name", origin_id)
@@ -1516,6 +1552,8 @@ with tab_mission:
                 </div>
                 """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.info("No route segments are available. The current restrictions may block every safe corridor. Review the incident registry or select another vehicle or destination.")
 
         # Contingency Corridors (K-Shortest Paths)
         alt_routes = current_state.get("alternative_routes", [])
