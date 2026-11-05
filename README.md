@@ -243,8 +243,10 @@ Paste into Neo4j Browser or run via `cypher-shell` to instantiate the spatial gr
 
 ## Demo interface
 
-The dashboard opens on **Route planner**, with the request, vehicle selection,
-reference-image option, scenario shortcuts, and map together. **Incidents** holds
+The dashboard opens on **About** to introduce the project before the demo.
+Tabs follow **About → Route planner → Incidents → Evidence → Network → Evaluation**.
+**Route planner** keeps the request, vehicle selection, reference-image option,
+scenario shortcuts, and map together. **Incidents** holds
 the report editor; **Evidence** and **Network** explain the result. **Evaluation**
 shows results only after **Run benchmark** is selected. **About** explains the
 sample dataset, implementation limits, and SDG alignment. Evidence counts replace

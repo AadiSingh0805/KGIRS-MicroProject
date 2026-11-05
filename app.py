@@ -586,8 +586,8 @@ with top_col_right:
             st.rerun()
 
 # Navigation separates planning, data editing, and project context.
-tab_mission, tab_incidents, tab_decision, tab_graph, tab_eval, tab_about = st.tabs([
-    "Route planner", "Incidents", "Evidence", "Network", "Evaluation", "About"
+tab_about, tab_mission, tab_incidents, tab_decision, tab_graph, tab_eval = st.tabs([
+    "About", "Route planner", "Incidents", "Evidence", "Network", "Evaluation"
 ])
 
 with tab_incidents:
