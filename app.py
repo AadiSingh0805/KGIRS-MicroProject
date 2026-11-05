@@ -6,7 +6,9 @@ A clean, modern, user-friendly mission control app for crisis dispatchers and fi
 
 import os
 import sys
+import re
 import json
+import base64
 from typing import Dict, Any, List, Optional
 import streamlit as st
 import folium
@@ -529,26 +531,66 @@ st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # UN Sustainable Development Goals (SDG) Alignment Strip
 st.markdown("""
-<div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+<div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
     <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-family: monospace; font-size: 10.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">UN SUSTAINABLE DEVELOPMENT GOALS MAPPING:</span>
+        <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">UN SUSTAINABLE DEVELOPMENT GOALS (SDGs):</span>
     </div>
-    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 6px; background: rgba(76, 159, 56, 0.15); border: 1px solid rgba(76, 159, 56, 0.4); border-radius: 5px; padding: 3px 8px;">
-            <span style="background: #4C9F38; color: #FFFFFF; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 3</span>
-            <span style="color: #86EFAC; font-size: 11.5px; font-weight: 600;">Good Health & Well-Being (3.6 / 3.d)</span>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <!-- SDG 3 -->
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(76, 159, 56, 0.14); border: 1px solid rgba(76, 159, 56, 0.4); border-radius: 6px; padding: 4px 10px;">
+            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
+                <rect width="32" height="32" rx="4" fill="#4C9F38"/>
+                <text x="5" y="11" fill="#FFFFFF" font-size="9" font-weight="900" font-family="system-ui, sans-serif">3</text>
+                <path d="M4 22 H10 L12 16 L15 26 L18 18 L20 23 L22 20 L24 22 H28" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+                <div style="color: #86EFAC; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 3: Good Health</div>
+                <div style="color: #6EE7B7; font-size: 10px; opacity: 0.85;">Target 3.6 / 3.d (Emergency Triage)</div>
+            </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px; background: rgba(253, 105, 37, 0.15); border: 1px solid rgba(253, 105, 37, 0.4); border-radius: 5px; padding: 3px 8px;">
-            <span style="background: #FD6925; color: #FFFFFF; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 9</span>
-            <span style="color: #FDBA74; font-size: 11.5px; font-weight: 600;">Resilient Infrastructure & Innovation (9.1)</span>
+        <!-- SDG 9 -->
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(253, 105, 37, 0.14); border: 1px solid rgba(253, 105, 37, 0.4); border-radius: 6px; padding: 4px 10px;">
+            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
+                <rect width="32" height="32" rx="4" fill="#FD6925"/>
+                <text x="5" y="11" fill="#FFFFFF" font-size="9" font-weight="900" font-family="system-ui, sans-serif">9</text>
+                <circle cx="16" cy="21" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.6"/>
+                <circle cx="16" cy="21" r="2.2" fill="#FFFFFF"/>
+                <path d="M16 14 V16 M16 26 V28 M9 21 H11 M21 21 H23 M11 16 L12.5 17.5 M19.5 24.5 L21 26 M11 26 L12.5 24.5 M19.5 17.5 L21 16" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <div>
+                <div style="color: #FDBA74; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 9: Resilient Infrastructure</div>
+                <div style="color: #FED7AA; font-size: 10px; opacity: 0.85;">Target 9.1 (Spatial Graph Defense)</div>
+            </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px; background: rgba(253, 157, 36, 0.15); border: 1px solid rgba(253, 157, 36, 0.4); border-radius: 5px; padding: 3px 8px;">
-            <span style="background: #FD9D24; color: #000000; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 11</span>
-            <span style="color: #FDE68A; font-size: 11.5px; font-weight: 600;">Sustainable Cities & Communities (11.5)</span>
+        <!-- SDG 11 -->
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(253, 157, 36, 0.14); border: 1px solid rgba(253, 157, 36, 0.4); border-radius: 6px; padding: 4px 10px;">
+            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
+                <rect width="32" height="32" rx="4" fill="#FD9D24"/>
+                <text x="5" y="11" fill="#000000" font-size="9" font-weight="900" font-family="system-ui, sans-serif">11</text>
+                <path d="M7 27 V19 H11 V15 H16 V18 H21 V21 H25 V27 Z" fill="#FFFFFF"/>
+                <rect x="9" y="21" width="1.2" height="1.8" fill="#FD9D24"/>
+                <rect x="13" y="17" width="1.2" height="1.8" fill="#FD9D24"/>
+                <rect x="18" y="20" width="1.2" height="1.8" fill="#FD9D24"/>
+                <rect x="23" y="23" width="1.2" height="1.8" fill="#FD9D24"/>
+            </svg>
+            <div>
+                <div style="color: #FDE68A; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 11: Sustainable Cities</div>
+                <div style="color: #FEF08A; font-size: 10px; opacity: 0.85;">Target 11.5 (Urban Disaster Protection)</div>
+            </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px; background: rgba(63, 126, 68, 0.15); border: 1px solid rgba(63, 126, 68, 0.4); border-radius: 5px; padding: 3px 8px;">
-            <span style="background: #3F7E44; color: #FFFFFF; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 13</span>
-            <span style="color: #86EFAC; font-size: 11.5px; font-weight: 600;">Climate Action & Flood Defense (13.1)</span>
+        <!-- SDG 13 -->
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(63, 126, 68, 0.14); border: 1px solid rgba(63, 126, 68, 0.4); border-radius: 6px; padding: 4px 10px;">
+            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
+                <rect width="32" height="32" rx="4" fill="#3F7E44"/>
+                <text x="5" y="11" fill="#FFFFFF" font-size="9" font-weight="900" font-family="system-ui, sans-serif">13</text>
+                <circle cx="16" cy="21" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+                <ellipse cx="16" cy="21" rx="2.5" ry="5" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+                <line x1="11" y1="21" x2="21" y2="21" stroke="#FFFFFF" stroke-width="1"/>
+            </svg>
+            <div>
+                <div style="color: #86EFAC; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 13: Climate Action</div>
+                <div style="color: #A7F3D0; font-size: 10px; opacity: 0.85;">Target 13.1 (Extreme Flood Adaptation)</div>
+            </div>
         </div>
     </div>
 </div>
