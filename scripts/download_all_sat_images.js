@@ -68,6 +68,24 @@ const targets = [
         lat: 19.0565,
         lon: 72.9315,
         name: "Mankhurd Supply Depot"
+    },
+    {
+        filename: 'sat_shell_underpass.png',
+        lat: 19.0665,
+        lon: 72.8942,
+        name: "Shell Colony Railway Subway (Flooded)"
+    },
+    {
+        filename: 'sat_diamond_garden.png',
+        lat: 19.0558,
+        lon: 72.9015,
+        name: "Diamond Garden Central Circle"
+    },
+    {
+        filename: 'sat_mithi_culvert.png',
+        lat: 19.0520,
+        lon: 72.8850,
+        name: "Mithi River Stormwater Culvert"
     }
 ];
 

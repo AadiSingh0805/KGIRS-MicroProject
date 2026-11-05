@@ -8,7 +8,8 @@ import os
 import json
 import re
 import difflib
-from typing import Dict, Any, List, Optional, TypedDict
+import urllib.request
+from typing import Dict, Any, List, Optional, TypedDict, Tuple
 from .graph_store import CrisisSpatialGraph
 from .multimodal_retriever import MultimodalRetriever
 
@@ -54,27 +55,53 @@ class CrisisResponseAgent:
         self.graph_store = graph_store
         self.retriever = retriever
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.candidate_models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest", "gemini-3.8-flash"]
         self.model = None
 
         if self.api_key and _GENAI_AVAILABLE:
             try:
                 genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel("gemini-2.5-flash")
             except Exception:
-                try:
-                    self.model = genai.GenerativeModel("gemini-1.5-flash")
-                except Exception:
-                    self.model = None
+                pass
 
     def _call_llm(self, prompt: str) -> Optional[str]:
-        """Calls Gemini API with graceful error handling."""
-        if self.model:
+        """Calls Gemini API via direct REST or SDK with graceful fallback."""
+        if not self.api_key:
+            return None
+
+        # 1. Direct REST via standard library (robust across environments)
+        for m_name in self.candidate_models:
             try:
-                response = self.model.generate_content(prompt)
-                if response and response.text:
-                    return response.text.strip()
-            except Exception as e:
-                print(f"LLM API Call notice: {e}. Switching to deterministic engine.")
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{m_name}:generateContent?key={self.api_key}"
+                payload = {"contents": [{"parts": [{"text": prompt}]}]}
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    if resp.status == 200:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        cands = data.get("candidates", [])
+                        if cands:
+                            parts = cands[0].get("content", {}).get("parts", [])
+                            if parts and parts[0].get("text"):
+                                return parts[0]["text"].strip()
+            except Exception:
+                continue
+
+        # 2. Try google.generativeai SDK if available
+        if _GENAI_AVAILABLE:
+            for m_name in self.candidate_models:
+                try:
+                    m = genai.GenerativeModel(m_name)
+                    response = m.generate_content(prompt)
+                    if response and response.text:
+                        self.model = m
+                        return response.text.strip()
+                except Exception:
+                    continue
+
         return None
 
     def _resolve_landmark(self, text: str) -> Optional[str]:
@@ -89,6 +116,40 @@ class CrisisResponseAgent:
         t_clean = re.sub(r"[^\w\s]", " ", text.lower()).strip()
         if not t_clean:
             return None
+
+        # 0. High-Priority Direct Canonical Fast-Paths
+        if "vesit" in t_clean or "vivekanand" in t_clean or "collector" in t_clean or "hashu advani" in t_clean:
+            return "N_CAMPUS_VESIT"
+        if "zen" in t_clean:
+            return "N_HOSP_ZEN"
+        if "surana" in t_clean or "sunita" in t_clean or "sethia" in t_clean:
+            return "N_HOSP_SURANA"
+        if "inlaks" in t_clean or "postal colony hosp" in t_clean:
+            return "N_HOSP_INLAKS"
+        if "rcf" in t_clean:
+            return "N_SHELTER_RCF"
+        if "acres" in t_clean:
+            return "N_SHELTER_ACRES"
+        if "amar mahal" in t_clean:
+            return "N_BRIDGE_AMAR_MAHAL"
+        if "freeway" in t_clean or "panjarpol" in t_clean:
+            return "N_BRIDGE_FREEWAY"
+        if "shell colony" in t_clean or t_clean == "shell":
+            return "N_INT_SHELL_COLONY"
+        if "tilak nagar" in t_clean or t_clean == "tilak":
+            return "N_INT_TILAK_NAGAR"
+        if "suman nagar" in t_clean or t_clean == "suman":
+            return "N_INT_SUMAN_NAGAR"
+        if "sindhi society" in t_clean or t_clean == "sindhi":
+            return "N_INT_SINDHI_SOC"
+        if "vn purav" in t_clean or "purav" in t_clean:
+            return "N_INT_VN_PURAV"
+        if "govandi" in t_clean:
+            return "N_INT_GOVANDI"
+        if "mankhurd" in t_clean:
+            return "N_DEPOT_MANKHURD"
+        if "naka" in t_clean or "chembur naka" in t_clean or t_clean == "chembur":
+            return "N_CHEMBUR_NAKA"
 
         # 1. Alias & Phonetic Mapping for Chembur Landmarks
         aliases = {

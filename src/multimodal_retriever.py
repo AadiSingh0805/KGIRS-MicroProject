@@ -51,23 +51,30 @@ class MultimodalRetriever:
         falling back to deterministic semantic hashing and vocabulary term vector.
         """
         if self.api_key and _GENAI_AVAILABLE:
-            try:
-                response = genai.embed_content(
-                    model="models/text-embedding-004",
-                    content=text,
-                    task_type="retrieval_document"
-                )
-                emb = np.array(response["embedding"], dtype=np.float32)
-                # Resample or truncate to self.embedding_dim if needed
-                if len(emb) != self.embedding_dim:
-                    if len(emb) > self.embedding_dim:
-                        emb = emb[:self.embedding_dim]
+            for m_name in ["models/gemini-embedding-001", "models/text-embedding-004"]:
+                try:
+                    response = genai.embed_content(
+                        model=m_name,
+                        content=text,
+                        task_type="retrieval_document"
+                    )
+                    raw_emb = response.get("embedding", {})
+                    if isinstance(raw_emb, dict) and "values" in raw_emb:
+                        emb = np.array(raw_emb["values"], dtype=np.float32)
+                    elif isinstance(raw_emb, list):
+                        emb = np.array(raw_emb, dtype=np.float32)
                     else:
-                        emb = np.pad(emb, (0, self.embedding_dim - len(emb)))
-                norm = np.linalg.norm(emb)
-                return emb / (norm + 1e-8)
-            except Exception:
-                pass
+                        emb = np.array(response.get("embedding", []), dtype=np.float32)
+                        
+                    if len(emb) != self.embedding_dim:
+                        if len(emb) > self.embedding_dim:
+                            emb = emb[:self.embedding_dim]
+                        else:
+                            emb = np.pad(emb, (0, self.embedding_dim - len(emb)))
+                    norm = np.linalg.norm(emb)
+                    return emb / (norm + 1e-8)
+                except Exception:
+                    continue
 
         # Robust High-Dimension Semantic Fallback Vector
         vec = np.zeros(self.embedding_dim, dtype=np.float32)

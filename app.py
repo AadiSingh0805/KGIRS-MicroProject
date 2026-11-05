@@ -19,6 +19,25 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(current_dir, ".env"))
+except Exception:
+    pass
+
+import importlib
+import src.graph_store as gs_mod
+import src.agent_workflow as aw_mod
+import src.explainability as exp_mod
+import src.multimodal_retriever as mr_mod
+try:
+    importlib.reload(gs_mod)
+    importlib.reload(aw_mod)
+    importlib.reload(exp_mod)
+    importlib.reload(mr_mod)
+except Exception:
+    pass
+
 from src.graph_store import CrisisSpatialGraph
 from src.multimodal_retriever import MultimodalRetriever
 from src.agent_workflow import CrisisResponseAgent
@@ -329,8 +348,9 @@ def load_crisis_system(mesh_version: str = "chembur_mumbai_v2026_11_03"):
     # 1. Spatial Graph Engine
     graph = CrisisSpatialGraph(osm_path)
 
-    # 2. Multimodal Telemetry Retriever
-    retriever = MultimodalRetriever(embedding_dim=128)
+    # 2. Multimodal Telemetry Retriever & Agent
+    api_key = os.getenv("GEMINI_API_KEY")
+    retriever = MultimodalRetriever(embedding_dim=128, api_key=api_key)
     if os.path.exists(reports_path):
         with open(reports_path, "r", encoding="utf-8") as f:
             reports_data = json.load(f)
@@ -355,18 +375,21 @@ def load_crisis_system(mesh_version: str = "chembur_mumbai_v2026_11_03"):
         reports_data = []
 
     # 3. Agent & Reasoning Engine
-    agent = CrisisResponseAgent(graph, retriever)
-    visualizer = ReasoningChainVisualizer(graph)
+    agent = CrisisResponseAgent(graph, retriever, api_key=api_key)
+    try:
+        visualizer = ReasoningChainVisualizer(graph, api_key=api_key)
+    except TypeError:
+        visualizer = ReasoningChainVisualizer(graph)
 
     return graph, retriever, agent, visualizer, reports_data
 
 graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system()
 
-# Fail-safe Cache Verification: ensure old San Francisco memory is evicted
-if "N_CHEMBUR_NAKA" not in graph_store.graph.nodes or "N_DOWNTOWN" in graph_store.graph.nodes:
+# Fail-safe Cache Verification: ensure 16 Chembur nodes including VESIT are active
+if "N_CHEMBUR_NAKA" not in graph_store.graph.nodes or "N_CAMPUS_VESIT" not in graph_store.graph.nodes or "N_DOWNTOWN" in graph_store.graph.nodes or len(graph_store.graph.nodes) < 16:
     st.cache_resource.clear()
     st.cache_data.clear()
-    graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(mesh_version="chembur_mumbai_v_forced_sync")
+    graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(mesh_version="chembur_mumbai_v_vesit_16nodes_active")
 
 # ==============================================================================
 # SESSION STATE AUTO-SANITIZER (Purge any stale San Francisco session memory)
@@ -403,10 +426,10 @@ def get_node_satellite_image(node_id: str) -> str:
         "N_HOSP_ZEN": "sat_zen_hospital.png",
         "N_HOSP_SURANA": "sat_surana_hospital.png",
         "N_CHEMBUR_NAKA": "sat_chembur_naka.png",
-        "N_BRIDGE_AMAR_MAHAL": "sat_amar_mahal.png",
+        "N_BRIDGE_AMAR_MAHAL": "sat_disaster_amar_mahal_collapse.png",
         "N_SHELTER_RCF": "sat_rcf_shelter.png",
         "N_HOSP_INLAKS": "sat_inlaks_hospital.png",
-        "N_INT_SHELL_COLONY": "sat_shell_colony.png",
+        "N_INT_SHELL_COLONY": "sat_disaster_shell_colony_flood.png",
         "N_INT_TILAK_NAGAR": "sat_tilak_nagar.png",
         "N_DEPOT_MANKHURD": "sat_mankhurd_depot.png",
         "N_SHELTER_ACRES": "sat_surana_hospital.png",
@@ -446,12 +469,37 @@ if "current_state" not in st.session_state:
 # ==============================================================================
 # TOP EXECUTIVE HEADER BAR (Clean, Modern, Chembur Mission Control)
 # ==============================================================================
-top_col1, top_col2, top_col3 = st.columns([2.5, 1.4, 0.5])
+top_col_left, top_col_right = st.columns([1.35, 1.65])
 
-with top_col1:
+with top_col_left:
     st.markdown("""
-    <div style="display: flex; align-items: center; gap: 14px; padding: 4px 0;">
-        <div class="brand-icon">AG</div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 2px 0;">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55)); flex-shrink: 0;">
+            <defs>
+                <linearGradient id="shieldGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#0284C7"/>
+                    <stop offset="50%" stop-color="#0EA5E9"/>
+                    <stop offset="100%" stop-color="#38BDF8"/>
+                </linearGradient>
+                <linearGradient id="coreGrad" x1="16" y1="16" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#38BDF8"/>
+                    <stop offset="100%" stop-color="#0284C7"/>
+                </linearGradient>
+            </defs>
+            <path d="M24 3L42 9V22C42 33.2 34.3 43.1 24 46C13.7 43.1 6 33.2 6 22V9L24 3Z" fill="#0A1120" stroke="url(#shieldGrad)" stroke-width="2.2" stroke-linejoin="round"/>
+            <circle cx="24" cy="24" r="13" stroke="rgba(56, 189, 248, 0.28)" stroke-width="1.2" stroke-dasharray="2 3"/>
+            <line x1="24" y1="11" x2="24" y2="37" stroke="rgba(56, 189, 248, 0.45)" stroke-width="1.2"/>
+            <line x1="11" y1="24" x2="37" y2="24" stroke="rgba(56, 189, 248, 0.45)" stroke-width="1.2"/>
+            <line x1="24" y1="24" x2="33" y2="15" stroke="#38BDF8" stroke-width="1.8"/>
+            <line x1="24" y1="24" x2="15" y2="31" stroke="#FBBF24" stroke-width="1.8"/>
+            <line x1="24" y1="24" x2="31" y2="31" stroke="#34D399" stroke-width="1.8"/>
+            <circle cx="33" cy="15" r="2.8" fill="#38BDF8" stroke="#FFFFFF" stroke-width="1"/>
+            <circle cx="15" cy="31" r="2.8" fill="#FBBF24" stroke="#FFFFFF" stroke-width="1"/>
+            <circle cx="31" cy="31" r="2.8" fill="#34D399" stroke="#FFFFFF" stroke-width="1"/>
+            <circle cx="24" cy="11" r="2" fill="#38BDF8"/>
+            <circle cx="24" cy="24" r="5" fill="url(#coreGrad)" stroke="#FFFFFF" stroke-width="1.5"/>
+            <circle cx="24" cy="24" r="2" fill="#FFFFFF"/>
+        </svg>
         <div>
             <div class="brand-title">Aegis CrisisNav</div>
             <div class="brand-subtitle">Multimodal Geospatial GraphRAG | Mumbai Chembur Operations Control</div>
@@ -459,23 +507,23 @@ with top_col1:
     </div>
     """, unsafe_allow_html=True)
 
-with top_col2:
-    st.markdown(f"""
-    <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; height: 100%; padding-top: 6px;">
-        <span class="status-pill pill-green">CHEMBUR MESH ONLINE</span>
-        <span class="status-pill pill-cyan">{len(graph_store.graph.nodes)} NODES</span>
-        <span class="status-pill pill-amber">{len(disaster_reports)} HAZARD ALERTS</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-with top_col3:
-    st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
-    if st.button("Resync Mesh", help="Purge cached state and force-reload Mumbai Chembur network", use_container_width=True):
-        st.cache_resource.clear()
-        st.cache_data.clear()
-        for k in list(st.session_state.keys()):
-            del st.session_state[k]
-        st.rerun()
+with top_col_right:
+    pills_box, btn_box = st.columns([3.4, 1.1])
+    with pills_box:
+        st.markdown(f"""
+        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; height: 100%; padding-top: 5px;">
+            <span class="status-pill pill-green"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34D399; box-shadow: 0 0 6px #34D399;"></span>CHEMBUR MESH ONLINE</span>
+            <span class="status-pill pill-cyan"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #38BDF8;"></span>{len(graph_store.graph.nodes)} NODES</span>
+            <span class="status-pill pill-amber"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #FBBF24;"></span>{len(disaster_reports)} HAZARD ALERTS</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with btn_box:
+        if st.button("Resync Mesh", help="Purge cached state and force-reload Mumbai Chembur network", use_container_width=True):
+            st.cache_resource.clear()
+            st.cache_data.clear()
+            for k in list(st.session_state.keys()):
+                del st.session_state[k]
+            st.rerun()
 
 st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -493,8 +541,8 @@ with p_col1:
         st.session_state.directive_input = "Find fastest safe ambulance route from Chembur Naka to Zen Multi Speciality Hospital avoiding flooded streets"
         st.session_state.vehicle_type = "ambulance"
         st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_shell_colony.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_shell_colony.png")
+        st.session_state.selected_image_name = "sat_disaster_shell_colony_flood.png"
+        img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_shell_colony_flood.png")
         st.session_state.current_state = agent.run_pipeline(
             query=st.session_state.directive_input,
             image_path=img_p if os.path.exists(img_p) else None,
@@ -509,8 +557,8 @@ with p_col2:
         st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to Mankhurd Logistics Depot avoiding fractured Amar Mahal flyover"
         st.session_state.vehicle_type = "high_clearance_truck"
         st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_amar_mahal.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_amar_mahal.png")
+        st.session_state.selected_image_name = "sat_disaster_amar_mahal_collapse.png"
+        img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_amar_mahal_collapse.png")
         st.session_state.current_state = agent.run_pipeline(
             query=st.session_state.directive_input,
             image_path=img_p if os.path.exists(img_p) else None,
@@ -564,117 +612,99 @@ with p_col5:
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
-# 2. Custom Directive Input & Parameter Bar
-cmd_col1, cmd_col2, cmd_col3, cmd_col4 = st.columns([3.2, 1.2, 1.3, 0.9])
+# 2. Custom Directive Input & Parameter Bar (Form-backed for guaranteed input synchronization)
+with st.form("dispatch_directive_form", clear_on_submit=False):
+    cmd_col1, cmd_col2, cmd_col3, cmd_col4 = st.columns([3.2, 1.2, 1.3, 0.9])
 
-with cmd_col1:
-    query_val = st.text_input(
-        "Incident Dispatch Directive:",
-        value=st.session_state.directive_input,
-        placeholder="e.g. Route ambulance from VESIT to Zen Hospital avoiding flooded streets..."
-    )
-    st.session_state.directive_input = query_val
-    
-with cmd_col2:
-    vehicle_opts = ["ambulance", "high_clearance_truck", "rescue_boat", "civilian_car"]
-    v_idx = vehicle_opts.index(st.session_state.vehicle_type) if st.session_state.vehicle_type in vehicle_opts else 0
-    v_val = st.selectbox(
-        "Vehicle Profile:",
-        options=vehicle_opts,
-        index=v_idx,
-        format_func=lambda x: {
-            "ambulance": "Ambulance (<= 20cm flood)",
-            "high_clearance_truck": "Rescue Truck (<= 60cm flood)",
-            "rescue_boat": "Rescue Boat (Deep water)",
-            "civilian_car": "Civilian Car (<= 15cm flood)"
-        }.get(x, x)
-    )
-    st.session_state.vehicle_type = v_val
-
-with cmd_col3:
-    sat_imgs = [
-        "None",
-        "sat_shell_colony.png",
-        "sat_amar_mahal.png",
-        "sat_inlaks_hospital.png",
-        "sat_vesit_campus.png",
-        "sat_surana_hospital.png",
-        "sat_zen_hospital.png",
-        "sat_chembur_naka.png",
-        "sat_rcf_shelter.png",
-        "sat_tilak_nagar.png",
-        "sat_mankhurd_depot.png"
-    ]
-    img_idx = sat_imgs.index(st.session_state.selected_image_name) if st.session_state.selected_image_name in sat_imgs else 0
-    img_val = st.selectbox(
-        "Satellite Surveillance Feed:",
-        options=sat_imgs,
-        index=img_idx,
-        format_func=lambda x: {
-            "None": "None (Sensor Mesh)",
-            "sat_shell_colony.png": "Shell Colony Sector (75cm Flood)",
-            "sat_amar_mahal.png": "Amar Mahal Flyover (Expansion Shear)",
-            "sat_inlaks_hospital.png": "Inlaks Hospital (Flooded Substation)",
-            "sat_vesit_campus.png": "VESIT Campus (Collector Colony)",
-            "sat_surana_hospital.png": "Surana Sethia Hospital (Trauma ICU)",
-            "sat_zen_hospital.png": "Zen Multi Speciality Hospital",
-            "sat_chembur_naka.png": "Chembur Naka Transit Hub",
-            "sat_rcf_shelter.png": "RCF Sports Complex Mega-Shelter",
-            "sat_tilak_nagar.png": "Tilak Nagar Station Junction",
-            "sat_mankhurd_depot.png": "Mankhurd Supply Depot"
-        }.get(x, x),
-        help="High-resolution orbital satellite photography integrated into multimodal traversability"
-    )
-    st.session_state.selected_image_name = img_val
-
-with cmd_col4:
-    st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-    if st.button("Calculate Route", type="primary", use_container_width=True):
-        img_target = None
-        if st.session_state.selected_image_name != "None":
-            img_target = os.path.join(current_dir, "data", "damage_images", st.session_state.selected_image_name)
+    with cmd_col1:
+        query_val = st.text_input(
+            "Incident Dispatch Directive:",
+            value=st.session_state.directive_input,
+            placeholder="e.g. Find fastest safe ambulance route from VESIT to Zen Multi Speciality Hospital avoiding flooded streets..."
+        )
         
-        with st.spinner("Analyzing multimodal telemetry and calculating resilient corridor..."):
-            new_state = agent.run_pipeline(
-                query=st.session_state.directive_input,
-                image_path=img_target,
-                vehicle_type=st.session_state.vehicle_type,
-                avoid_hazards=st.session_state.avoid_hazards
-            )
-            st.session_state.current_state = new_state
-            st.rerun()
+    with cmd_col2:
+        vehicle_opts = ["ambulance", "high_clearance_truck", "rescue_boat", "civilian_car"]
+        v_idx = vehicle_opts.index(st.session_state.vehicle_type) if st.session_state.vehicle_type in vehicle_opts else 0
+        v_val = st.selectbox(
+            "Vehicle Profile:",
+            options=vehicle_opts,
+            index=v_idx,
+            format_func=lambda x: {
+                "ambulance": "Ambulance (<= 20cm flood)",
+                "high_clearance_truck": "Rescue Truck (<= 60cm flood)",
+                "rescue_boat": "Rescue Boat (Deep water)",
+                "civilian_car": "Civilian Car (<= 15cm flood)"
+            }.get(x, x)
+        )
 
-with st.expander("Advanced Constraints & Custom Satellite Image Upload", expanded=False):
-    adv_col1, adv_col2 = st.columns([1, 2])
-    with adv_col1:
-        strict_toggle = st.checkbox(
-            "Strict Hazard Avoidance",
-            value=st.session_state.avoid_hazards,
-            help="Disqualifies any road segment exceeding the vehicle flood/damage threshold"
+    with cmd_col3:
+        sat_imgs = [
+            "None",
+            "sat_disaster_shell_colony_flood.png",
+            "sat_disaster_amar_mahal_collapse.png",
+            "sat_inlaks_hospital.png",
+            "sat_vesit_campus.png",
+            "sat_surana_hospital.png",
+            "sat_zen_hospital.png",
+            "sat_chembur_naka.png",
+            "sat_rcf_shelter.png",
+            "sat_tilak_nagar.png",
+            "sat_mankhurd_depot.png"
+        ]
+        img_idx = sat_imgs.index(st.session_state.selected_image_name) if st.session_state.selected_image_name in sat_imgs else 0
+        img_val = st.selectbox(
+            "Satellite Surveillance Feed:",
+            options=sat_imgs,
+            index=img_idx,
+            format_func=lambda x: {
+                "None": "None (Sensor Mesh)",
+                "sat_disaster_shell_colony_flood.png": "Shell Colony Sector (75cm Flood Hazard)",
+                "sat_disaster_amar_mahal_collapse.png": "Amar Mahal Flyover (Expansion Shear Hazard)",
+                "sat_inlaks_hospital.png": "Inlaks Hospital (Flooded Substation)",
+                "sat_vesit_campus.png": "VESIT Campus (Collector Colony Safe Zone)",
+                "sat_surana_hospital.png": "Surana Sethia Hospital (Trauma ICU)",
+                "sat_zen_hospital.png": "Zen Multi Speciality Hospital",
+                "sat_chembur_naka.png": "Chembur Naka Transit Hub",
+                "sat_rcf_shelter.png": "RCF Sports Complex Mega-Shelter",
+                "sat_tilak_nagar.png": "Tilak Nagar Station Junction",
+                "sat_mankhurd_depot.png": "Mankhurd Supply Depot"
+            }.get(x, x),
+            help="High-resolution orbital satellite photography integrated into multimodal traversability"
         )
-        st.session_state.avoid_hazards = strict_toggle
-    with adv_col2:
-        custom_upload = st.file_uploader(
-            "Upload Custom Satellite / Aerial GeoTIFF or Photo",
-            type=["png", "jpg", "jpeg"],
-            help="Custom satellite imagery to index dynamically into multimodal graph traversability"
+
+    with cmd_col4:
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        calc_submitted = st.form_submit_button("Calculate Route", type="primary", use_container_width=True)
+
+if calc_submitted:
+    st.session_state.directive_input = query_val
+    st.session_state.vehicle_type = v_val
+    st.session_state.selected_image_name = img_val
+    
+    img_target = None
+    if st.session_state.selected_image_name != "None":
+        img_target = os.path.join(current_dir, "data", "damage_images", st.session_state.selected_image_name)
+    
+    with st.spinner("Analyzing multimodal telemetry and calculating resilient corridor..."):
+        new_state = agent.run_pipeline(
+            query=query_val,
+            image_path=img_target,
+            vehicle_type=v_val,
+            avoid_hazards=st.session_state.avoid_hazards
         )
-        if custom_upload:
-            upload_dir = os.path.join(current_dir, "data", "damage_images")
-            save_dest = os.path.join(upload_dir, "custom_user_recon.png")
-            with open(save_dest, "wb") as f_out:
-                f_out.write(custom_upload.read())
-            st.session_state.selected_image_name = "custom_user_recon.png"
-            st.success("Custom satellite reconnaissance image loaded.")
+        st.session_state.current_state = new_state
+        st.rerun()
+
+
 
 
 # ==============================================================================
 # MAIN TABS: USER-CENTRIC OPERATIONS (No Academic Module Division, No Emojis)
 # ==============================================================================
-tab_mission, tab_decision, tab_recon, tab_graph, tab_eval = st.tabs([
+tab_mission, tab_decision, tab_graph, tab_eval = st.tabs([
     "Tactical Mission & Map",
-    "Decision Intelligence",
-    "Hazard & Satellite Surveillance",
+    "Decision Intelligence & Explainability",
     "Knowledge Graph Topology",
     "System Quality & Verification"
 ])
@@ -996,51 +1026,92 @@ with tab_mission:
         components.html(map_html, height=550, scrolling=False)
 
     with recon_col:
-        # Tactical Satellite Surveillance Hub (Real Orbital Photography for Origin & Destination)
-        st.markdown('<div class="panel-heading">Tactical Satellite Surveillance Hub</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading">Tactical Satellite Reconnaissance Hub</div>', unsafe_allow_html=True)
         
-        orig_node_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
+        # All available nodes for inspection
+        all_nodes_list = list(graph_store.graph.nodes(data=True))
+        all_node_ids = [nid for nid, _ in all_nodes_list]
+        
+        # Default to active route destination or target
         dest_node_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
+        orig_node_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
         
-        orig_data = graph_store.graph.nodes.get(orig_node_id, {})
-        dest_data = graph_store.graph.nodes.get(dest_node_id, {})
-        
-        orig_img_name = get_node_satellite_image(orig_node_id)
-        dest_img_name = get_node_satellite_image(dest_node_id)
-        
-        orig_img_path = os.path.join(current_dir, "data", "damage_images", orig_img_name)
-        dest_img_path = os.path.join(current_dir, "data", "damage_images", dest_img_name)
+        if "selected_recon_node" not in st.session_state or st.session_state.selected_recon_node not in all_node_ids:
+            st.session_state.selected_recon_node = dest_node_id if dest_node_id in all_node_ids else all_node_ids[0]
 
-        # Origin Satellite Surveillance Card
-        st.markdown(f"""
-        <div class="glass-panel" style="padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid #0284C7;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-family: monospace; font-size: 10px; font-weight: 800; color: #38BDF8;">ORIGIN SATELLITE RECON</span>
-                <span class="status-pill pill-cyan" style="font-size: 9px; padding: 2px 6px;">ELEV {orig_data.get('elevation_m', 0)}M</span>
-            </div>
-            <div style="font-size: 13px; font-weight: 700; color: #F8FAFC;">{orig_data.get('name', orig_node_id)}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if os.path.exists(orig_img_path):
-            st.image(orig_img_path, caption=f"Orbital Recon: {orig_data.get('name', orig_node_id)} ({orig_data.get('lat', 0):.4f}N, {orig_data.get('lon', 0):.4f}E)", use_container_width=True)
+        def get_recon_label(nid):
+            nd = graph_store.graph.nodes.get(nid, {})
+            name = nd.get("name", nid)
+            ntype = nd.get("type", "").upper()
+            if nid == "N_INT_SHELL_COLONY":
+                return f"{name} [FLOOD HAZARD]"
+            elif nid == "N_BRIDGE_AMAR_MAHAL":
+                return f"{name} [STRUCTURAL HAZARD]"
+            elif nid == "N_CAMPUS_VESIT":
+                return f"{name} [ACADEMIC CAMPUS]"
+            elif nd.get("type") == "hospital":
+                return f"{name} [HOSPITAL]"
+            elif nd.get("type") == "shelter":
+                return f"{name} [SHELTER]"
+            return f"{name} ({ntype})"
 
-        # Destination Satellite Surveillance Card
-        st.markdown(f"""
-        <div class="glass-panel" style="padding: 10px 12px; margin-top: 10px; margin-bottom: 8px; border-left: 3px solid #10B981;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-family: monospace; font-size: 10px; font-weight: 800; color: #34D399;">DESTINATION SATELLITE RECON</span>
-                <span class="status-pill pill-green" style="font-size: 9px; padding: 2px 6px;">{dest_data.get('operational_status', 'ACTIVE').upper()}</span>
-            </div>
-            <div style="font-size: 13px; font-weight: 700; color: #F8FAFC;">{dest_data.get('name', dest_node_id)}</div>
-            <div style="font-size: 10.5px; color: #94A3B8; margin-top: 3px;">
-                Capacity: <b style="color: #34D399;">{dest_data.get('available_capacity', 0)}</b>/{dest_data.get('capacity', 0)} beds
-                {f" | ICU: <b style='color: #38BDF8;'>{dest_data.get('icu_beds')}</b>" if dest_data.get('icu_beds') else ""}
-                {f" | Helipad: <b style='color: #FBBF24;'>ACTIVE</b>" if dest_data.get('helipad') else ""}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if os.path.exists(dest_img_path):
-            st.image(dest_img_path, caption=f"Orbital Recon: {dest_data.get('name', dest_node_id)} ({dest_data.get('lat', 0):.4f}N, {dest_data.get('lon', 0):.4f}E)", use_container_width=True)
+        default_idx = all_node_ids.index(st.session_state.selected_recon_node) if st.session_state.selected_recon_node in all_node_ids else 0
+        
+        chosen_marker = st.selectbox(
+            "Inspect Map Marker Satellite Imagery:",
+            options=all_node_ids,
+            index=default_idx,
+            format_func=get_recon_label,
+            help="Select any Chembur marker to inspect authentic orbital satellite photography and telemetry"
+        )
+        st.session_state.selected_recon_node = chosen_marker
+        
+        sel_node_id = chosen_marker
+        sel_data = graph_store.graph.nodes.get(sel_node_id, {})
+        sel_img_name = get_node_satellite_image(sel_node_id)
+        sel_img_path = os.path.join(current_dir, "data", "damage_images", sel_img_name)
+        
+        # Telemetry styling & badges
+        is_flood = (sel_node_id == "N_INT_SHELL_COLONY")
+        is_struct = (sel_node_id == "N_BRIDGE_AMAR_MAHAL")
+        is_campus = (sel_node_id == "N_CAMPUS_VESIT")
+        is_hosp = (sel_data.get("type") == "hospital")
+        
+        if is_flood:
+            status_border = "#EF4444"
+            status_pill = '<span class="badge-critical">CRITICAL FLOOD HAZARD</span>'
+        elif is_struct:
+            status_border = "#EF4444"
+            status_pill = '<span class="badge-critical">CRITICAL STRUCTURAL HAZARD</span>'
+        elif is_campus:
+            status_border = "#A855F7"
+            status_pill = '<span class="status-pill pill-cyan" style="background: rgba(168,85,247,0.25); color: #C084FC; border-color: rgba(168,85,247,0.4);">CAMPUS SAFE ZONE</span>'
+        elif is_hosp:
+            status_border = "#10B981"
+            status_pill = f'<span class="status-pill pill-green">{sel_data.get("operational_status", "ACTIVE").upper()}</span>'
+        else:
+            status_border = "#0284C7"
+            status_pill = f'<span class="status-pill pill-cyan">{sel_data.get("operational_status", "ACTIVE").upper()}</span>'
+            
+        capacity_str = f"<span>Capacity: <b style='color: #34D399;'>{sel_data.get('available_capacity', 0)}</b>/{sel_data.get('capacity', 0)} beds</span>" if sel_data.get('capacity') else ""
+        icu_str = f"<span>ICU Beds: <b style='color: #38BDF8;'>{sel_data.get('icu_beds')}</b></span>" if sel_data.get('icu_beds') else ""
+        telem_html = (
+            f'<div class="glass-panel" style="padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid {status_border};">'
+            f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
+            f'<span style="font-family: monospace; font-size: 10px; font-weight: 800; color: #38BDF8;">ORBITAL SATELLITE TELEMETRY</span>'
+            f'{status_pill}</div>'
+            f'<div style="font-size: 13.5px; font-weight: 700; color: #F8FAFC;">{sel_data.get("name", sel_node_id)}</div>'
+            f'<div style="font-size: 10.5px; color: #94A3B8; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 14px;">'
+            f'<span>GPS: <b style="color: #F1F5F9;">{sel_data.get("lat", 0):.4f} N, {sel_data.get("lon", 0):.4f} E</b></span>'
+            f'<span>Elevation: <b style="color: #38BDF8;">{sel_data.get("elevation_m", 0)}m</b></span>'
+            f'{capacity_str}{icu_str}</div></div>'
+        )
+        st.markdown(telem_html, unsafe_allow_html=True)
+        
+        if os.path.exists(sel_img_path):
+            st.image(sel_img_path, caption=f"ArcGIS World Imagery: {sel_data.get('name', sel_node_id)} (Sub-meter optical recon)", use_container_width=True)
+        else:
+            st.info("Satellite imagery loading for selected location...")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
@@ -1170,140 +1241,161 @@ with tab_decision:
         target_facility_info=current_state.get("target_facility_info")
     )
 
-    # 1. Decision Provenance Banner
-    st.markdown(f"""
-    <div class="glass-panel" style="border-left: 3px solid #10B981; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <b style="color: #10B981; font-size: 13.5px; letter-spacing: 0.5px;">DECISION PROVENANCE & ATTRIBUTION ENGINE</b>
-            <span class="badge-clear">VERIFIED REASONING</span>
-        </div>
-        <div style="font-size: 13.5px; color: #F1F5F9; line-height: 1.5;">
-            {explanation.get("summary")}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # 1. LLM Cognitive Decision Attribution (Hero Component)
+    llm_attribution_text = explanation.get("llm_attribution") or explanation.get("summary", "No attribution available.")
+    llm_badge = explanation.get("llm_source", "GEMINI 3.1 FLASH LITE")
+    
+    st.markdown(
+        f'<div class="glass-panel" style="border-left: 3px solid #8B5CF6; margin-bottom: 16px; background: rgba(139, 92, 246, 0.05); padding: 16px 20px;">'
+        f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">'
+        f'<span style="font-family: monospace; font-size: 13px; font-weight: 800; color: #C4B5FD; letter-spacing: 0.8px;">LLM COGNITIVE DECISION ATTRIBUTION</span>'
+        f'<span class="status-pill pill-cyan" style="background: rgba(139, 92, 246, 0.25); color: #DDD6FE; border-color: rgba(139, 92, 246, 0.5); font-size: 11px; font-weight: 700; padding: 3px 10px;">POWERED BY {llm_badge}</span>'
+        f'</div>'
+        f'<div style="font-size: 14.5px; color: #F8FAFC; line-height: 1.75; font-weight: 450; white-space: pre-line;">'
+        f'{llm_attribution_text}'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
+    # 2. Executive Routing Telemetry Strip
+    pr = current_state.get("primary_route")
+    if pr:
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            st.markdown(
+                f'<div class="telemetry-card"><div class="metric-label" style="font-size: 11px;">Corridor Distance</div>'
+                f'<div class="metric-value" style="font-size: 22px;">{pr.get("total_distance_km", 0):.2f} <span style="font-size: 13px; color: #64748B;">km</span></div></div>',
+                unsafe_allow_html=True
+            )
+        with m2:
+            st.markdown(
+                f'<div class="telemetry-card"><div class="metric-label" style="font-size: 11px;">Estimated Transit</div>'
+                f'<div class="metric-value" style="font-size: 22px;">{pr.get("estimated_travel_time_min", 0):.1f} <span style="font-size: 13px; color: #64748B;">min</span></div></div>',
+                unsafe_allow_html=True
+            )
+        with m3:
+            elim_cnt = len(explanation.get("eliminated_edges", []))
+            st.markdown(
+                f'<div class="telemetry-card"><div class="metric-label" style="font-size: 11px;">Hazard Edges Disqualified</div>'
+                f'<div class="metric-value" style="font-size: 22px; color: #F87171;">{elim_cnt} <span style="font-size: 13px; color: #64748B;">zones</span></div></div>',
+                unsafe_allow_html=True
+            )
+        with m4:
+            t_info = current_state.get("target_facility_info", {})
+            beds = t_info.get("available_capacity", "--") if t_info else "--"
+            st.markdown(
+                f'<div class="telemetry-card"><div class="metric-label" style="font-size: 11px;">Target Intake Capacity</div>'
+                f'<div class="metric-value" style="font-size: 22px; color: #34D399;">{beds} <span style="font-size: 13px; color: #64748B;">beds</span></div></div>',
+                unsafe_allow_html=True
+            )
+
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
     dec_col1, dec_col2 = st.columns([1.25, 1.0])
 
     with dec_col1:
-        # A. Disqualified Hazards (Clean Structured Matrix Table)
-        st.markdown('<div class="panel-heading">Hazard Disqualification Matrix (Elimination Log)</div>', unsafe_allow_html=True)
+        # A. Disqualified Hazards (Clean Compact Matrix)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Hazard Disqualification Matrix</div>', unsafe_allow_html=True)
         eliminated = explanation.get("eliminated_edges", [])
         if eliminated:
-            table_rows = ""
+            table_rows = []
             for el in eliminated:
                 r_name = el.get('road_name', el.get('edge_id'))
-                table_rows += f"""
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
-                    <td style="padding: 10px 12px;">
-                        <b style="color: #F87171; font-size: 12px;">{r_name}</b><br/>
-                        <span style="color: #64748B; font-family: monospace; font-size: 9.5px;">{el.get('edge_id')}</span>
-                    </td>
-                    <td style="padding: 10px 12px; color: #E2E8F0; font-size: 11px;">
-                        {el.get('disqualification_rationale')}<br/>
-                        <span style="color: #FCD34D; font-size: 10px;">Report: {el.get('incident_id')}</span>
-                    </td>
-                    <td style="padding: 10px 12px; font-family: monospace; font-size: 11px; white-space: nowrap;">
-                        <span style="color: #38BDF8;">Water: {el.get('flood_depth')}</span><br/>
-                        <span style="color: #F87171;">Damage: {el.get('damage_severity')}</span>
-                    </td>
-                    <td style="padding: 10px 12px; text-align: right;">
-                        <span class="badge-critical">{el.get('reason')}</span>
-                    </td>
-                </tr>
-                """
-
-            st.markdown(f"""
-            <div class="glass-panel" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; text-align: left;">
-                    <thead>
-                        <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.08); color: #94A3B8; font-size: 10px; text-transform: uppercase;">
-                            <th style="padding: 9px 12px;">Corridor Segment</th>
-                            <th style="padding: 9px 12px;">Disaster Advisory</th>
-                            <th style="padding: 9px 12px;">Telemetry</th>
-                            <th style="padding: 9px 12px; text-align: right;">Verdict</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {table_rows}
-                    </tbody>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
+                row_html = (
+                    '<tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">'
+                    f'<td style="padding: 12px 14px;"><b style="color: #F87171; font-size: 13.5px;">{r_name}</b><br/><span style="color: #64748B; font-family: monospace; font-size: 10.5px;">{el.get("edge_id")}</span></td>'
+                    f'<td style="padding: 12px 14px; white-space: nowrap;"><b style="color: #38BDF8; font-size: 13.5px;">{el.get("flood_depth")}</b><br/><span style="color: #F87171; font-size: 12px;">{el.get("damage_severity")} Damage</span></td>'
+                    f'<td style="padding: 12px 14px; color: #E2E8F0; font-size: 13px; font-weight: 450;">{el.get("disqualification_rationale")}</td>'
+                    f'<td style="padding: 12px 14px; text-align: right;"><span class="badge-critical" style="font-size: 11px; padding: 4px 8px;">{el.get("reason")}</span></td>'
+                    '</tr>'
+                )
+                table_rows.append(row_html)
+            rows_joined = "".join(table_rows)
+            table_html = (
+                '<div class="glass-panel" style="padding: 0; overflow: hidden; margin-bottom: 14px;">'
+                '<table style="width: 100%; border-collapse: collapse; text-align: left;">'
+                '<thead><tr style="background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.1); color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">'
+                '<th style="padding: 10px 14px;">Corridor Segment</th>'
+                '<th style="padding: 10px 14px;">Telemetry</th>'
+                '<th style="padding: 10px 14px;">Disqualification Reason</th>'
+                '<th style="padding: 10px 14px; text-align: right;">Verdict</th>'
+                f'</tr></thead><tbody>{rows_joined}</tbody></table></div>'
+            )
+            st.markdown(table_html, unsafe_allow_html=True)
         else:
-            st.markdown("""
-            <div class="glass-panel" style="color: #94A3B8; font-size: 12.5px; margin-bottom: 16px;">
-                No hazard road segments disqualified along this active arterial query.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="glass-panel" style="color: #94A3B8; font-size: 13px; margin-bottom: 14px;">'
+                'All arterial road segments along selected corridor are within safe clearance limits.</div>',
+                unsafe_allow_html=True
+            )
 
         # B. Critical Infrastructure Bottlenecks
-        st.markdown('<div class="panel-heading">Infrastructure Bottleneck Monitoring</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Infrastructure Bottleneck Monitoring</div>', unsafe_allow_html=True)
         bottlenecks = explanation.get("bottlenecks", [])
         if bottlenecks:
             for b in bottlenecks:
-                st.markdown(f"""
-                <div class="glass-panel" style="border-left: 3px solid #F59E0B; padding: 10px 14px; margin-bottom: 8px;">
-                    <div style="color: #FDE68A; font-size: 11.5px; line-height: 1.4;">{b}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="glass-panel" style="border-left: 3px solid #F59E0B; padding: 10px 14px; margin-bottom: 8px;">'
+                    f'<div style="color: #FDE68A; font-size: 13px; line-height: 1.5; font-weight: 500;">{b}</div></div>',
+                    unsafe_allow_html=True
+                )
         else:
-            st.markdown("""
-            <div class="glass-panel" style="color: #94A3B8; font-size: 12.5px;">
-                No single-span bridges or low-elevation bottleneck vulnerabilities detected on this corridor.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="glass-panel" style="color: #94A3B8; font-size: 13px;">'
+                'No single-span bridges or bottleneck vulnerabilities detected on this corridor.</div>',
+                unsafe_allow_html=True
+            )
 
     with dec_col2:
         # C. Counterfactual Path Comparison ("Why Not Path B?")
-        st.markdown('<div class="panel-heading">Counterfactual Analysis (Why Not Path B?)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Counterfactual Analysis (Why Not Path B?)</div>', unsafe_allow_html=True)
         cf = explanation.get("counterfactual_analysis", {})
         if isinstance(cf, dict) and cf.get("details"):
             for d in cf["details"]:
-                st.markdown(f"""
-                <div class="glass-panel" style="border-left: 3px solid #8B5CF6; padding: 12px 14px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b style="color: #C4B5FD; font-size: 12.5px;">Candidate Corridor #{d.get('alternative_rank')}</b>
-                        <span class="badge-caution">REJECTED</span>
-                    </div>
-                    <div style="font-size: 10.5px; color: #94A3B8; margin-top: 4px; font-family: monospace; line-height: 1.35;">
-                        {d.get('path')}
-                    </div>
-                    <div style="font-size: 11.5px; color: #E2E8F0; margin-top: 6px; line-height: 1.4;">
-                        {d.get('rejection_rationale')}
-                    </div>
-                    <div style="display: flex; gap: 14px; font-size: 10.5px; color: #64748B; margin-top: 6px;">
-                        <span>Delay: <b style="color: #F87171;">+{d.get('eta_penalty_min')} min</b></span>
-                        <span>Detour: <b style="color: #FBBF24;">+{d.get('distance_penalty_km')} km</b></span>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="glass-panel" style="border-left: 3px solid #8B5CF6; padding: 12px 14px; margin-bottom: 10px;">'
+                    f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">'
+                    f'<b style="color: #C4B5FD; font-size: 13px;">Candidate Corridor #{d.get("alternative_rank")}</b>'
+                    f'<span class="badge-caution" style="font-size: 10.5px; padding: 2px 7px;">REJECTED</span></div>'
+                    f'<div style="font-size: 13px; color: #F1F5F9; line-height: 1.45; font-weight: 450;">{d.get("rejection_rationale")}</div>'
+                    f'<div style="display: flex; gap: 14px; font-size: 12px; margin-top: 8px;">'
+                    f'<span style="background: rgba(248,113,113,0.15); color: #F87171; padding: 2px 8px; border-radius: 4px; font-weight: 600;">+{d.get("eta_penalty_min")} min delay</span>'
+                    f'<span style="background: rgba(251,191,36,0.15); color: #FCD34D; padding: 2px 8px; border-radius: 4px; font-weight: 600;">+{d.get("distance_penalty_km")} km detour</span>'
+                    f'</div></div>',
+                    unsafe_allow_html=True
+                )
         else:
-            st.markdown("""
-            <div class="glass-panel" style="color: #94A3B8; font-size: 12.5px; margin-bottom: 12px;">
-                Selected corridor is the singularly viable path under active hazard constraints.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="glass-panel" style="color: #94A3B8; font-size: 13px; margin-bottom: 14px;">'
+                'Selected corridor is the singularly viable path under active hazard constraints.</div>',
+                unsafe_allow_html=True
+            )
 
         # D. Multimodal Satellite Evidence Grounding
-        st.markdown('<div class="panel-heading">Multimodal Satellite Grounding</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Multimodal Satellite Grounding</div>', unsafe_allow_html=True)
         citations = explanation.get("evidence_citations", [])
         if citations:
             for cit in citations:
-                st.markdown(f"""
-                <div class="glass-panel" style="border-left: 2px solid #06B6D4; padding: 10px 12px; margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b style="color: #38BDF8; font-family: monospace; font-size: 11px;">{cit.get('report_id')}</b>
-                        <span style="font-size: 10px; color: #94A3B8;">{cit.get('source')}</span>
-                    </div>
-                    <div style="font-size: 11px; color: #CBD5E1; margin-top: 4px; line-height: 1.35;">
-                        "{cit.get('evidence_summary')}"
-                    </div>
-                    <div style="font-size: 10px; color: #64748B; margin-top: 4px;">
-                        Satellite Telemetry: <code style="color: #38BDF8;">{cit.get('image_evidence')}</code>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                img_ev = cit.get("image_evidence")
+                img_name = os.path.basename(img_ev) if img_ev else "Sensor Mesh Grounding"
+                st.markdown(
+                    f'<div class="glass-panel" style="border-left: 2px solid #06B6D4; padding: 12px 14px; margin-bottom: 8px;">'
+                    f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
+                    f'<b style="color: #38BDF8; font-family: monospace; font-size: 12px;">{cit.get("report_id")}</b>'
+                    f'<span style="font-size: 11px; color: #94A3B8;">{cit.get("source")}</span></div>'
+                    f'<div style="font-size: 13px; color: #F1F5F9; line-height: 1.4; font-weight: 500;">{cit.get("incident_type")}</div>'
+                    f'<div style="font-size: 11.5px; color: #94A3B8; margin-top: 5px;">Satellite Telemetry: <code style="color: #38BDF8; font-size: 11px;">{img_name}</code></div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(
+                '<div class="glass-panel" style="color: #94A3B8; font-size: 13px;">'
+                'No external satellite incident reports triggered for this corridor.</div>',
+                unsafe_allow_html=True
+            )
+
 
     # E. Agent State Machine Trajectory (Compact 4-Column Stepper)
     st.markdown('<div class="panel-heading" style="margin-top: 14px;">Agent Reasoning Trace (State Machine Stepper)</div>', unsafe_allow_html=True)
@@ -1312,134 +1404,20 @@ with tab_decision:
         step_cols = st.columns(len(trace_steps))
         for idx, (s_col, step) in enumerate(zip(step_cols, trace_steps), 1):
             with s_col:
-                st.markdown(f"""
-                <div class="glass-panel" style="border-top: 3px solid #38BDF8; padding: 10px 12px; height: 100%;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span style="font-family: monospace; font-weight: 800; font-size: 10px; color: #38BDF8;">PHASE 0{idx}</span>
-                        <span style="font-size: 9.5px; color: #64748B;">{step.get('module')}</span>
-                    </div>
-                    <div style="font-size: 12px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px;">{step.get('step')}</div>
-                    <div style="color: #94A3B8; font-size: 11px; line-height: 1.35;">{step.get('details')}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="glass-panel" style="border-top: 3px solid #38BDF8; padding: 10px 12px; height: 100%;">'
+                    f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
+                    f'<span style="font-family: monospace; font-weight: 800; font-size: 10px; color: #38BDF8;">PHASE 0{idx}</span>'
+                    f'<span style="font-size: 9.5px; color: #64748B;">{step.get("module")}</span></div>'
+                    f'<div style="font-size: 12px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px;">{step.get("step")}</div>'
+                    f'<div style="color: #94A3B8; font-size: 11px; line-height: 1.35;">{step.get("details")}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
 
 
 # ==============================================================================
-# TAB 3: HAZARD & SATELLITE SURVEILLANCE
-# ==============================================================================
-with tab_recon:
-    st.markdown('<div class="panel-heading">Hazard Intelligence & Orbital Satellite Surveillance</div>', unsafe_allow_html=True)
-    
-    # Threat Counters Row
-    tc1, tc2, tc3, tc4 = st.columns(4)
-    with tc1:
-        st.markdown("""
-        <div class="metric-card" style="padding: 10px 14px;">
-            <div class="metric-caption">Critical Hazards</div>
-            <div class="metric-number" style="color: #EF4444; font-size: 20px;">2 <span class="metric-unit">Active</span></div>
-        </div>
-        """, unsafe_allow_html=True)
-    with tc2:
-        st.markdown("""
-        <div class="metric-card" style="padding: 10px 14px;">
-            <div class="metric-caption">Inundated Sectors</div>
-            <div class="metric-number" style="color: #38BDF8; font-size: 20px;">2 <span class="metric-unit">Lowlands</span></div>
-        </div>
-        """, unsafe_allow_html=True)
-    with tc3:
-        st.markdown("""
-        <div class="metric-card" style="padding: 10px 14px;">
-            <div class="metric-caption">Operational Hospitals</div>
-            <div class="metric-number" style="color: #10B981; font-size: 20px;">2 <span class="metric-unit">Receptive</span></div>
-        </div>
-        """, unsafe_allow_html=True)
-    with tc4:
-        st.markdown("""
-        <div class="metric-card" style="padding: 10px 14px;">
-            <div class="metric-caption">Monitored Bridges</div>
-            <div class="metric-number" style="color: #EC4899; font-size: 20px;">2 <span class="metric-unit">Spans</span></div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-    recon_col1, recon_col2 = st.columns([1.3, 1.0])
-
-    with recon_col1:
-        st.markdown("##### Verified Field Incident Reports")
-        for rep in disaster_reports:
-            sev = rep.get("severity", "MODERATE")
-            sev_class = "badge-critical" if sev == "CRITICAL" else ("badge-caution" if sev == "HIGH" else "badge-clear")
-            
-            st.markdown(f"""
-            <div class="glass-panel" style="border-left: 3px solid {'#EF4444' if sev == 'CRITICAL' else '#F59E0B'}; margin-bottom: 10px; padding: 12px 14px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <b style="font-family: monospace; color: #F1F5F9; font-size: 12.5px;">{rep.get('report_id')}</b>
-                        <span style="color: #64748B; font-size: 10.5px; margin-left: 8px;">{rep.get('timestamp')}</span>
-                    </div>
-                    <span class="{sev_class}">{sev}</span>
-                </div>
-                <div style="font-size: 13px; font-weight: 700; color: #F8FAFC; margin-top: 5px;">
-                    {rep.get('incident_type')}
-                </div>
-                <div style="font-size: 11.5px; color: #CBD5E1; margin-top: 3px; line-height: 1.4;">
-                    {rep.get('text')}
-                </div>
-                <div style="display: flex; gap: 14px; font-size: 10.5px; color: #94A3B8; margin-top: 6px;">
-                    <span>Source: <b style="color: #38BDF8;">{rep.get('source')}</b></span>
-                    <span>Water: <b style="color: #38BDF8;">{rep.get('flood_depth_cm', 0)} cm</b></span>
-                    <span>Damage: <b style="color: #F87171;">{int(rep.get('damage_severity', 0)*100)}%</b></span>
-                </div>
-                <div style="margin-top: 5px; font-size: 11px; color: #FCD34D;">
-                    <b>Action Required:</b> {rep.get('action_required')}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-    with recon_col2:
-        st.markdown("##### Interactive Orbital Satellite Surveillance")
-        
-        sat_options = [
-            ("sat_vesit_campus.png", "VESIT Campus (Vivekanand Education Society)"),
-            ("sat_zen_hospital.png", "Zen Multi Speciality Hospital"),
-            ("sat_surana_hospital.png", "Surana Sethia Hospital & Trauma Centre"),
-            ("sat_chembur_naka.png", "Chembur Naka Transit Hub"),
-            ("sat_amar_mahal.png", "Amar Mahal Flyover"),
-            ("sat_shell_colony.png", "Shell Colony Sector"),
-            ("sat_rcf_shelter.png", "RCF Sports Complex Community Shelter"),
-            ("sat_inlaks_hospital.png", "Inlaks General Hospital"),
-            ("sat_tilak_nagar.png", "Tilak Nagar Station Junction"),
-            ("sat_mankhurd_depot.png", "Mankhurd Logistics Depot")
-        ]
-        
-        chosen_sat = st.selectbox(
-            "Select Chembur Landmark for Satellite Surveillance:",
-            options=[x[0] for x in sat_options],
-            format_func=lambda x: dict(sat_options).get(x, x),
-            index=0
-        )
-        
-        sat_path = os.path.join(current_dir, "data", "damage_images", chosen_sat)
-        if os.path.exists(sat_path):
-            st.image(sat_path, caption=f"Orbital Photography: {dict(sat_options).get(chosen_sat, chosen_sat)}", use_container_width=True)
-            
-            st.markdown(f"""
-            <div class="glass-panel" style="padding: 10px 12px; margin-top: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-family: monospace; font-size: 10.5px; color: #38BDF8;">SENSOR: ArcGIS World Imagery</span>
-                    <span class="status-pill pill-green" style="font-size: 9px;">AUTHENTIC RECON</span>
-                </div>
-                <div style="font-size: 10.5px; color: #94A3B8; margin-top: 4px;">
-                    Location: <b style="color: #F1F5F9;">{dict(sat_options).get(chosen_sat, chosen_sat)}</b><br/>
-                    Coverage: Chembur Metropolitan Sector | Resolution: Sub-meter orbital optical
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-
-# ==============================================================================
-# TAB 4: KNOWLEDGE GRAPH TOPOLOGY
+# TAB 3: KNOWLEDGE GRAPH TOPOLOGY
 # ==============================================================================
 with tab_graph:
     st.markdown('<div class="panel-heading">Interactive Knowledge Subgraph Topology (Physics Simulation)</div>', unsafe_allow_html=True)

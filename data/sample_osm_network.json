@@ -14,11 +14,13 @@
       "type": "transit_hub",
       "lat": 19.0596,
       "lon": 72.8988,
-      "elevation_m": 14.0,
+      "elevation_m": 14,
       "operational_status": "active",
       "triage_priority": "high",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_HOSP_ZEN",
@@ -33,7 +35,9 @@
       "available_capacity": 28,
       "icu_beds": 10,
       "helipad": true,
-      "generator_power": true
+      "generator_power": true,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_HOSP_SURANA",
@@ -41,14 +45,16 @@
       "type": "hospital",
       "lat": 19.0542,
       "lon": 72.8912,
-      "elevation_m": 16.0,
+      "elevation_m": 16,
       "operational_status": "active",
       "trauma_level": 2,
       "capacity": 110,
       "available_capacity": 34,
       "icu_beds": 12,
       "helipad": false,
-      "generator_power": true
+      "generator_power": true,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_HOSP_INLAKS",
@@ -57,13 +63,15 @@
       "lat": 19.0515,
       "lon": 72.8998,
       "elevation_m": 4.5,
-      "operational_status": "compromised",
+      "operational_status": "active",
       "trauma_level": 3,
       "capacity": 60,
       "available_capacity": 2,
       "icu_beds": 0,
       "helipad": false,
-      "generator_power": false
+      "generator_power": false,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_SHELTER_ACRES",
@@ -71,12 +79,14 @@
       "type": "shelter",
       "lat": 19.0635,
       "lon": 72.8965,
-      "elevation_m": 18.0,
+      "elevation_m": 18,
       "operational_status": "active",
       "capacity": 1800,
       "available_capacity": 750,
       "food_water_days": 6,
-      "medical_tent": true
+      "medical_tent": true,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_SHELTER_RCF",
@@ -84,12 +94,14 @@
       "type": "shelter",
       "lat": 19.0465,
       "lon": 72.9095,
-      "elevation_m": 22.0,
+      "elevation_m": 22,
       "operational_status": "active",
       "capacity": 2500,
       "available_capacity": 1300,
       "food_water_days": 8,
-      "medical_tent": true
+      "medical_tent": true,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_DEPOT_MANKHURD",
@@ -97,12 +109,14 @@
       "type": "supply_depot",
       "lat": 19.0565,
       "lon": 72.9315,
-      "elevation_m": 6.0,
+      "elevation_m": 6,
       "operational_status": "active",
       "capacity": 5000,
       "available_capacity": 4100,
       "ambulances_docked": 8,
-      "rescue_boats": 5
+      "rescue_boats": 5,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_BRIDGE_AMAR_MAHAL",
@@ -110,10 +124,12 @@
       "type": "bridge",
       "lat": 19.0688,
       "lon": 72.8945,
-      "elevation_m": 16.0,
-      "operational_status": "critical_damage",
+      "elevation_m": 16,
+      "operational_status": "severely_damaged",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "critical_structural",
+      "damage_severity": 0.98
     },
     {
       "id": "N_BRIDGE_FREEWAY",
@@ -121,10 +137,12 @@
       "type": "bridge",
       "lat": 19.0518,
       "lon": 72.9085,
-      "elevation_m": 24.0,
+      "elevation_m": 24,
       "operational_status": "active",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_INT_SUMAN_NAGAR",
@@ -132,10 +150,12 @@
       "type": "intersection",
       "lat": 19.0538,
       "lon": 72.8885,
-      "elevation_m": 12.0,
+      "elevation_m": 12,
       "operational_status": "active",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_INT_TILAK_NAGAR",
@@ -146,18 +166,22 @@
       "elevation_m": 8.5,
       "operational_status": "active",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_INT_SINDHI_SOC",
       "name": "Sindhi Society Central Cross",
       "type": "intersection",
       "lat": 19.0618,
-      "lon": 72.8940,
-      "elevation_m": 15.0,
+      "lon": 72.894,
+      "elevation_m": 15,
       "operational_status": "active",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_INT_SHELL_COLONY",
@@ -166,9 +190,11 @@
       "lat": 19.0652,
       "lon": 72.8875,
       "elevation_m": 3.8,
-      "operational_status": "partially_flooded",
+      "operational_status": "flooded",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "critical_flood",
+      "damage_severity": 0.85
     },
     {
       "id": "N_INT_VN_PURAV",
@@ -179,7 +205,9 @@
       "elevation_m": 14.5,
       "operational_status": "active",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_INT_GOVANDI",
@@ -187,10 +215,12 @@
       "type": "intersection",
       "lat": 19.0552,
       "lon": 72.9165,
-      "elevation_m": 11.0,
+      "elevation_m": 11,
       "operational_status": "active",
       "capacity": 0,
-      "available_capacity": 0
+      "available_capacity": 0,
+      "hazard_level": "clear",
+      "damage_severity": 0
     },
     {
       "id": "N_CAMPUS_VESIT",
@@ -198,10 +228,12 @@
       "type": "campus",
       "lat": 19.0463,
       "lon": 72.8872,
-      "elevation_m": 16.0,
+      "elevation_m": 16,
       "operational_status": "active",
       "capacity": 1200,
-      "available_capacity": 950
+      "available_capacity": 950,
+      "hazard_level": "clear",
+      "damage_severity": 0
     }
   ],
   "edges": [
@@ -216,16 +248,31 @@
       "base_speed_kmh": 45,
       "elevation_m": 14.2,
       "status": "open",
-      "damage_severity": 0.05,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0596, 72.8988],
-        [19.0593, 72.8992],
-        [19.0590, 72.8997],
-        [19.0587, 72.9001],
-        [19.0585, 72.9005]
+        [
+          19.0596,
+          72.8988
+        ],
+        [
+          19.0593,
+          72.8992
+        ],
+        [
+          19.059,
+          72.8997
+        ],
+        [
+          19.0587,
+          72.9001
+        ],
+        [
+          19.0585,
+          72.9005
+        ]
       ]
     },
     {
@@ -241,15 +288,33 @@
       "status": "open",
       "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0585, 72.9005],
-        [19.0586, 72.9011],
-        [19.0585, 72.9018],
-        [19.0584, 72.9025],
-        [19.0583, 72.9030],
-        [19.0582, 72.9035]
+        [
+          19.0585,
+          72.9005
+        ],
+        [
+          19.0586,
+          72.9011
+        ],
+        [
+          19.0585,
+          72.9018
+        ],
+        [
+          19.0584,
+          72.9025
+        ],
+        [
+          19.0583,
+          72.903
+        ],
+        [
+          19.0582,
+          72.9035
+        ]
       ]
     },
     {
@@ -263,16 +328,31 @@
       "base_speed_kmh": 35,
       "elevation_m": 14.8,
       "status": "open",
-      "damage_severity": 0.05,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.1,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0596, 72.8988],
-        [19.0601, 72.8974],
-        [19.0606, 72.8961],
-        [19.0612, 72.8950],
-        [19.0618, 72.8940]
+        [
+          19.0596,
+          72.8988
+        ],
+        [
+          19.0601,
+          72.8974
+        ],
+        [
+          19.0606,
+          72.8961
+        ],
+        [
+          19.0612,
+          72.895
+        ],
+        [
+          19.0618,
+          72.894
+        ]
       ]
     },
     {
@@ -286,16 +366,31 @@
       "base_speed_kmh": 30,
       "elevation_m": 17.5,
       "status": "open",
-      "damage_severity": 0.0,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0618, 72.8940],
-        [19.0622, 72.8947],
-        [19.0627, 72.8955],
-        [19.0631, 72.8960],
-        [19.0635, 72.8965]
+        [
+          19.0618,
+          72.894
+        ],
+        [
+          19.0622,
+          72.8947
+        ],
+        [
+          19.0627,
+          72.8955
+        ],
+        [
+          19.0631,
+          72.896
+        ],
+        [
+          19.0635,
+          72.8965
+        ]
       ]
     },
     {
@@ -307,20 +402,41 @@
       "lanes": 3,
       "distance_km": 0.95,
       "base_speed_kmh": 40,
-      "elevation_m": 16.0,
+      "elevation_m": 16,
       "status": "open",
-      "damage_severity": 0.08,
-      "flood_depth_cm": 5,
-      "hazard_risk": 0.15,
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0635, 72.8965],
-        [19.0628, 72.8978],
-        [19.0620, 72.8992],
-        [19.0610, 72.9005],
-        [19.0598, 72.9018],
-        [19.0589, 72.9028],
-        [19.0582, 72.9035]
+        [
+          19.0635,
+          72.8965
+        ],
+        [
+          19.0628,
+          72.8978
+        ],
+        [
+          19.062,
+          72.8992
+        ],
+        [
+          19.061,
+          72.9005
+        ],
+        [
+          19.0598,
+          72.9018
+        ],
+        [
+          19.0589,
+          72.9028
+        ],
+        [
+          19.0582,
+          72.9035
+        ]
       ]
     },
     {
@@ -339,13 +455,34 @@
       "hazard_risk": 0.95,
       "traversable": false,
       "geometry": [
-        [19.0596, 72.8988],
-        [19.0604, 72.8965],
-        [19.0612, 72.8942],
-        [19.0622, 72.8918],
-        [19.0634, 72.8898],
-        [19.0645, 72.8884],
-        [19.0652, 72.8875]
+        [
+          19.0596,
+          72.8988
+        ],
+        [
+          19.0604,
+          72.8965
+        ],
+        [
+          19.0612,
+          72.8942
+        ],
+        [
+          19.0622,
+          72.8918
+        ],
+        [
+          19.0634,
+          72.8898
+        ],
+        [
+          19.0645,
+          72.8884
+        ],
+        [
+          19.0652,
+          72.8875
+        ]
       ]
     },
     {
@@ -357,18 +494,33 @@
       "lanes": 2,
       "distance_km": 0.45,
       "base_speed_kmh": 20,
-      "elevation_m": 6.0,
-      "status": "flooded",
-      "damage_severity": 0.65,
-      "flood_depth_cm": 60,
-      "hazard_risk": 0.85,
-      "traversable": false,
+      "elevation_m": 6,
+      "status": "open",
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
+      "traversable": true,
       "geometry": [
-        [19.0652, 72.8875],
-        [19.0657, 72.8884],
-        [19.0662, 72.8893],
-        [19.0667, 72.8902],
-        [19.0672, 72.8912]
+        [
+          19.0652,
+          72.8875
+        ],
+        [
+          19.0657,
+          72.8884
+        ],
+        [
+          19.0662,
+          72.8893
+        ],
+        [
+          19.0667,
+          72.8902
+        ],
+        [
+          19.0672,
+          72.8912
+        ]
       ]
     },
     {
@@ -380,18 +532,33 @@
       "lanes": 3,
       "distance_km": 0.42,
       "base_speed_kmh": 10,
-      "elevation_m": 16.0,
+      "elevation_m": 16,
       "status": "severely_damaged",
       "damage_severity": 0.98,
       "flood_depth_cm": 0,
       "hazard_risk": 0.99,
       "traversable": false,
       "geometry": [
-        [19.0672, 72.8912],
-        [19.0675, 72.8920],
-        [19.0679, 72.8928],
-        [19.0684, 72.8937],
-        [19.0688, 72.8945]
+        [
+          19.0672,
+          72.8912
+        ],
+        [
+          19.0675,
+          72.892
+        ],
+        [
+          19.0679,
+          72.8928
+        ],
+        [
+          19.0684,
+          72.8937
+        ],
+        [
+          19.0688,
+          72.8945
+        ]
       ]
     },
     {
@@ -403,18 +570,33 @@
       "lanes": 2,
       "distance_km": 0.65,
       "base_speed_kmh": 30,
-      "elevation_m": 11.0,
-      "status": "caution",
-      "damage_severity": 0.35,
-      "flood_depth_cm": 15,
-      "hazard_risk": 0.40,
+      "elevation_m": 11,
+      "status": "open",
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0618, 72.8940],
-        [19.0630, 72.8933],
-        [19.0645, 72.8925],
-        [19.0660, 72.8918],
-        [19.0672, 72.8912]
+        [
+          19.0618,
+          72.894
+        ],
+        [
+          19.063,
+          72.8933
+        ],
+        [
+          19.0645,
+          72.8925
+        ],
+        [
+          19.066,
+          72.8918
+        ],
+        [
+          19.0672,
+          72.8912
+        ]
       ]
     },
     {
@@ -426,19 +608,37 @@
       "lanes": 4,
       "distance_km": 1.25,
       "base_speed_kmh": 50,
-      "elevation_m": 13.0,
+      "elevation_m": 13,
       "status": "open",
-      "damage_severity": 0.10,
-      "flood_depth_cm": 5,
-      "hazard_risk": 0.20,
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0596, 72.8988],
-        [19.0585, 72.8968],
-        [19.0574, 72.8945],
-        [19.0560, 72.8922],
-        [19.0548, 72.8902],
-        [19.0538, 72.8885]
+        [
+          19.0596,
+          72.8988
+        ],
+        [
+          19.0585,
+          72.8968
+        ],
+        [
+          19.0574,
+          72.8945
+        ],
+        [
+          19.056,
+          72.8922
+        ],
+        [
+          19.0548,
+          72.8902
+        ],
+        [
+          19.0538,
+          72.8885
+        ]
       ]
     },
     {
@@ -452,16 +652,31 @@
       "base_speed_kmh": 35,
       "elevation_m": 15.5,
       "status": "open",
-      "damage_severity": 0.05,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0538, 72.8885],
-        [19.0539, 72.8893],
-        [19.0540, 72.8901],
-        [19.0541, 72.8908],
-        [19.0542, 72.8912]
+        [
+          19.0538,
+          72.8885
+        ],
+        [
+          19.0539,
+          72.8893
+        ],
+        [
+          19.054,
+          72.8901
+        ],
+        [
+          19.0541,
+          72.8908
+        ],
+        [
+          19.0542,
+          72.8912
+        ]
       ]
     },
     {
@@ -471,20 +686,35 @@
       "name": "Shell Colony South Connector",
       "road_type": "secondary",
       "lanes": 2,
-      "distance_km": 1.10,
+      "distance_km": 1.1,
       "base_speed_kmh": 15,
       "elevation_m": 4.2,
-      "status": "flooded",
-      "damage_severity": 0.88,
-      "flood_depth_cm": 40,
-      "hazard_risk": 0.85,
-      "traversable": false,
+      "status": "open",
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
+      "traversable": true,
       "geometry": [
-        [19.0538, 72.8885],
-        [19.0562, 72.8882],
-        [19.0590, 72.8880],
-        [19.0620, 72.8878],
-        [19.0652, 72.8875]
+        [
+          19.0538,
+          72.8885
+        ],
+        [
+          19.0562,
+          72.8882
+        ],
+        [
+          19.059,
+          72.888
+        ],
+        [
+          19.062,
+          72.8878
+        ],
+        [
+          19.0652,
+          72.8875
+        ]
       ]
     },
     {
@@ -494,20 +724,35 @@
       "name": "Panjarpol Elevated Freeway Ramp",
       "road_type": "trunk",
       "lanes": 4,
-      "distance_km": 0.90,
+      "distance_km": 0.9,
       "base_speed_kmh": 60,
-      "elevation_m": 22.0,
+      "elevation_m": 22,
       "status": "open",
       "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0585, 72.9005],
-        [19.0572, 72.9022],
-        [19.0556, 72.9042],
-        [19.0538, 72.9064],
-        [19.0518, 72.9085]
+        [
+          19.0585,
+          72.9005
+        ],
+        [
+          19.0572,
+          72.9022
+        ],
+        [
+          19.0556,
+          72.9042
+        ],
+        [
+          19.0538,
+          72.9064
+        ],
+        [
+          19.0518,
+          72.9085
+        ]
       ]
     },
     {
@@ -519,18 +764,33 @@
       "lanes": 4,
       "distance_km": 0.62,
       "base_speed_kmh": 50,
-      "elevation_m": 21.0,
+      "elevation_m": 21,
       "status": "open",
-      "damage_severity": 0.05,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.10,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0518, 72.9085],
-        [19.0506, 72.9088],
-        [19.0492, 72.9091],
-        [19.0478, 72.9093],
-        [19.0465, 72.9095]
+        [
+          19.0518,
+          72.9085
+        ],
+        [
+          19.0506,
+          72.9088
+        ],
+        [
+          19.0492,
+          72.9091
+        ],
+        [
+          19.0478,
+          72.9093
+        ],
+        [
+          19.0465,
+          72.9095
+        ]
       ]
     },
     {
@@ -543,17 +803,32 @@
       "distance_km": 0.75,
       "base_speed_kmh": 20,
       "elevation_m": 4.5,
-      "status": "flooded",
-      "damage_severity": 0.78,
-      "flood_depth_cm": 60,
-      "hazard_risk": 0.85,
-      "traversable": false,
+      "status": "open",
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
+      "traversable": true,
       "geometry": [
-        [19.0585, 72.9005],
-        [19.0570, 72.9003],
-        [19.0552, 72.9001],
-        [19.0533, 72.9000],
-        [19.0515, 72.8998]
+        [
+          19.0585,
+          72.9005
+        ],
+        [
+          19.057,
+          72.9003
+        ],
+        [
+          19.0552,
+          72.9001
+        ],
+        [
+          19.0533,
+          72.9
+        ],
+        [
+          19.0515,
+          72.8998
+        ]
       ]
     },
     {
@@ -565,18 +840,33 @@
       "lanes": 3,
       "distance_km": 0.85,
       "base_speed_kmh": 40,
-      "elevation_m": 12.0,
+      "elevation_m": 12,
       "status": "open",
-      "damage_severity": 0.10,
-      "flood_depth_cm": 5,
-      "hazard_risk": 0.15,
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0518, 72.9085],
-        [19.0526, 72.9103],
-        [19.0535, 72.9124],
-        [19.0544, 72.9145],
-        [19.0552, 72.9165]
+        [
+          19.0518,
+          72.9085
+        ],
+        [
+          19.0526,
+          72.9103
+        ],
+        [
+          19.0535,
+          72.9124
+        ],
+        [
+          19.0544,
+          72.9145
+        ],
+        [
+          19.0552,
+          72.9165
+        ]
       ]
     },
     {
@@ -588,18 +878,33 @@
       "lanes": 4,
       "distance_km": 1.55,
       "base_speed_kmh": 55,
-      "elevation_m": 7.0,
+      "elevation_m": 7,
       "status": "open",
-      "damage_severity": 0.08,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.12,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0552, 72.9165],
-        [19.0555, 72.9200],
-        [19.0558, 72.9240],
-        [19.0562, 72.9280],
-        [19.0565, 72.9315]
+        [
+          19.0552,
+          72.9165
+        ],
+        [
+          19.0555,
+          72.92
+        ],
+        [
+          19.0558,
+          72.924
+        ],
+        [
+          19.0562,
+          72.928
+        ],
+        [
+          19.0565,
+          72.9315
+        ]
       ]
     },
     {
@@ -612,17 +917,32 @@
       "distance_km": 0.68,
       "base_speed_kmh": 35,
       "elevation_m": 14.5,
-      "status": "caution",
-      "damage_severity": 0.25,
-      "flood_depth_cm": 10,
-      "hazard_risk": 0.30,
+      "status": "open",
+      "damage_severity": 0.02,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0635, 72.8965],
-        [19.0648, 72.8960],
-        [19.0662, 72.8955],
-        [19.0676, 72.8949],
-        [19.0688, 72.8945]
+        [
+          19.0635,
+          72.8965
+        ],
+        [
+          19.0648,
+          72.896
+        ],
+        [
+          19.0662,
+          72.8955
+        ],
+        [
+          19.0676,
+          72.8949
+        ],
+        [
+          19.0688,
+          72.8945
+        ]
       ]
     },
     {
@@ -634,18 +954,33 @@
       "lanes": 2,
       "distance_km": 0.92,
       "base_speed_kmh": 35,
-      "elevation_m": 16.0,
+      "elevation_m": 16,
       "status": "open",
-      "damage_severity": 0.04,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0463, 72.8872],
-        [19.0485, 72.8880],
-        [19.0510, 72.8890],
-        [19.0528, 72.8902],
-        [19.0542, 72.8912]
+        [
+          19.0463,
+          72.8872
+        ],
+        [
+          19.0485,
+          72.888
+        ],
+        [
+          19.051,
+          72.889
+        ],
+        [
+          19.0528,
+          72.8902
+        ],
+        [
+          19.0542,
+          72.8912
+        ]
       ]
     },
     {
@@ -657,18 +992,33 @@
       "lanes": 2,
       "distance_km": 0.85,
       "base_speed_kmh": 35,
-      "elevation_m": 14.0,
+      "elevation_m": 14,
       "status": "open",
-      "damage_severity": 0.05,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.05,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0463, 72.8872],
-        [19.0482, 72.8875],
-        [19.0505, 72.8878],
-        [19.0522, 72.8881],
-        [19.0538, 72.8885]
+        [
+          19.0463,
+          72.8872
+        ],
+        [
+          19.0482,
+          72.8875
+        ],
+        [
+          19.0505,
+          72.8878
+        ],
+        [
+          19.0522,
+          72.8881
+        ],
+        [
+          19.0538,
+          72.8885
+        ]
       ]
     },
     {
@@ -680,18 +1030,33 @@
       "lanes": 3,
       "distance_km": 1.85,
       "base_speed_kmh": 40,
-      "elevation_m": 15.0,
+      "elevation_m": 15,
       "status": "open",
-      "damage_severity": 0.06,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.08,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0463, 72.8872],
-        [19.0500, 72.8910],
-        [19.0535, 72.8945],
-        [19.0560, 72.8980],
-        [19.0585, 72.9005]
+        [
+          19.0463,
+          72.8872
+        ],
+        [
+          19.05,
+          72.891
+        ],
+        [
+          19.0535,
+          72.8945
+        ],
+        [
+          19.056,
+          72.898
+        ],
+        [
+          19.0585,
+          72.9005
+        ]
       ]
     },
     {
@@ -701,20 +1066,35 @@
       "name": "Chembur Camp Relief Way",
       "road_type": "primary",
       "lanes": 3,
-      "distance_km": 2.40,
+      "distance_km": 2.4,
       "base_speed_kmh": 40,
-      "elevation_m": 18.0,
+      "elevation_m": 18,
       "status": "open",
-      "damage_severity": 0.06,
+      "damage_severity": 0.02,
       "flood_depth_cm": 0,
-      "hazard_risk": 0.10,
+      "hazard_risk": 0.02,
       "traversable": true,
       "geometry": [
-        [19.0463, 72.8872],
-        [19.0458, 72.8920],
-        [19.0452, 72.8975],
-        [19.0455, 72.9030],
-        [19.0465, 72.9095]
+        [
+          19.0463,
+          72.8872
+        ],
+        [
+          19.0458,
+          72.892
+        ],
+        [
+          19.0452,
+          72.8975
+        ],
+        [
+          19.0455,
+          72.903
+        ],
+        [
+          19.0465,
+          72.9095
+        ]
       ]
     }
   ]
