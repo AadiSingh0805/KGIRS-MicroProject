@@ -1033,11 +1033,15 @@ with tab_mission:
             is_origin = bool(primary_route and nid == primary_route.get("origin"))
             is_target = bool(primary_route and nid == primary_route.get("target"))
             
-            # Central hazards (Shell Colony is strictly excluded from flood)
+            # Central hazards (Shell Colony and Amar Mahal are strictly excluded from hazards)
             is_flood_hazard = (nid == "N_INT_VN_PURAV" or ("vn_purav" in nid.lower() and status in ["partially_flooded", "flooded"]))
             if "shell" in nid.lower():
                 is_flood_hazard = False
-            is_structural_hazard = (nid == "N_INT_SUMAN_NAGAR" or (ntype == "bridge" and status in ["blocked", "damaged", "severely_damaged"]))
+                
+            is_structural_hazard = (nid == "N_INT_SUMAN_NAGAR")
+            if "amar_mahal" in nid.lower():
+                is_structural_hazard = False
+                is_flood_hazard = False
 
             # Select high-tech icon design and dimensions
             if is_origin:
@@ -1123,12 +1127,14 @@ with tab_mission:
                 </div>
                 """
             elif ntype == "bridge":
-                size = 24
+                size = 26
                 icon_html = """
-                <div style="width: 22px; height: 22px; border-radius: 5px; background: #500724; border: 1.5px solid #EC4899; box-shadow: 0 0 7px rgba(236, 72, 153, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="2.5">
-                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-                        <line x1="6" y1="12" x2="18" y2="12"></line>
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #1E1B4B; border: 1.5px solid #818CF8; box-shadow: 0 0 9px rgba(129, 140, 248, 0.65); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C7D2FE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10"></path>
+                        <line x1="2" y1="19" x2="22" y2="19"></line>
+                        <line x1="8" y1="7" x2="8" y2="19"></line>
+                        <line x1="16" y1="7" x2="16" y2="19"></line>
                     </svg>
                 </div>
                 """
@@ -1249,6 +1255,10 @@ with tab_mission:
             <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
                 <span style="display: inline-block; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; box-shadow: 0 0 6px #EF4444; border: 1.5px solid #FCA5A5;"></span>
                 <span>Structural Shear (Central Suman)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
+                <span style="display: inline-block; width: 9px; height: 9px; background: #1E1B4B; border-radius: 2px; border: 1.5px solid #818CF8; box-shadow: 0 0 4px #818CF8;"></span>
+                <span>Elevated Flyover (Amar Mahal - Clear)</span>
             </div>
             <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
                 <span style="display: inline-block; width: 9px; height: 9px; background: #064E3B; border-radius: 2px; border: 1.5px solid #10B981;"></span>
