@@ -31,9 +31,11 @@ LANDING_CSS = """
 .workflow-card p { color:#9caec4; font-size:12px; line-height:1.75; margin:0; }
 .sdg-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:10px 0 8px; }
 .sdg-item { display:flex; align-items:center; gap:11px; padding:12px 14px; background:#0c1421; border:1px solid #1f2e40; border-radius:10px; }
-.sdg-item img { width:34px; height:34px; border-radius:4px; }
-.sdg-item b { display:block; color:#c9d8e8; font-size:11px; margin-bottom:3px; }
-.sdg-item span { color:#8096af; font-size:10px; }
+.sdg-item img { width:54px; height:54px; flex-shrink:0; border-radius:5px; }
+.sdg-item b { display:block; color:#e4edf7; font-size:12px; line-height:1.4; margin-bottom:4px; }
+.sdg-label { color:#ffffff; font-size:15px; font-weight:750; letter-spacing:.6px; margin-bottom:4px; }
+.sdg-3 {border-left:3px solid #4c9f38;} .sdg-9 {border-left:3px solid #fd6925;} .sdg-11 {border-left:3px solid #fd9d24;} .sdg-13 {border-left:3px solid #3f7e44;}
+.sdg-item span { color:#a0b1c6; font-size:11px; }
 .stTabs [data-baseweb="tab-highlight"] { background:#4bb6dc!important; }
 .stTabs [aria-selected="true"] { background:#162d42!important; color:#92dafa!important; }
 @media(max-width:900px) { .intro-grid {grid-template-columns:1fr 1fr; gap:16px;} .st-key-about_hero {padding:22px;} .intro-title{font-size:34px!important;} .intro-copy{font-size:13px;} .workflow-card{padding:15px;} }
@@ -113,11 +115,11 @@ def render_about(graph_store, reports, vehicle_profiles, project_root):
 
 def _render_sdgs(project_root):
     st.markdown('<div class="section-kicker" style="margin-top:12px">CONNECTED TO THE SUSTAINABLE DEVELOPMENT GOALS</div>', unsafe_allow_html=True)
-    sdgs = [(3, "Good health", "Emergency access"), (9, "Resilient infrastructure", "Road-network awareness"),
-            (11, "Sustainable cities", "Urban disaster response"), (13, "Climate action", "Flood resilience")]
+    sdgs = [(3, "Good health & well-being", "Emergency access"), (9, "Industry, innovation & infrastructure", "Road-network awareness"),
+            (11, "Sustainable cities & communities", "Urban disaster response"), (13, "Climate action", "Flood resilience")]
     cards = []
     for number, title, subtitle in sdgs:
         path = Path(project_root) / "assets" / "sdg" / f"sdg_{number}.svg"
         icon = f'<img alt="SDG {number}" src="data:image/svg+xml;base64,{base64.b64encode(path.read_bytes()).decode()}"/>' if path.exists() else ''
-        cards.append(f'<div class="sdg-item">{icon}<div><b>{title}</b><span>{subtitle}</span></div></div>')
+        cards.append(f'<div class="sdg-item sdg-{number}">{icon}<div><div class="sdg-label">SDG {number}</div><b>{title}</b><span>{subtitle}</span></div></div>')
     st.markdown('<div class="sdg-row">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
