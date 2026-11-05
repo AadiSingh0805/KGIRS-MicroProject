@@ -428,17 +428,17 @@ def get_node_satellite_image(node_id: str) -> str:
         "N_HOSP_ZEN": "sat_zen_hospital.png",
         "N_HOSP_SURANA": "sat_surana_hospital.png",
         "N_CHEMBUR_NAKA": "sat_chembur_naka.png",
-        "N_BRIDGE_AMAR_MAHAL": "sat_disaster_amar_mahal_collapse.png",
+        "N_BRIDGE_AMAR_MAHAL": "sat_tilak_nagar.png",
         "N_SHELTER_RCF": "sat_rcf_shelter.png",
         "N_HOSP_INLAKS": "sat_inlaks_hospital.png",
-        "N_INT_SHELL_COLONY": "sat_disaster_shell_colony_flood.png",
+        "N_INT_SHELL_COLONY": "sat_chembur_naka.png",
         "N_INT_TILAK_NAGAR": "sat_tilak_nagar.png",
         "N_DEPOT_MANKHURD": "sat_mankhurd_depot.png",
         "N_SHELTER_ACRES": "sat_surana_hospital.png",
         "N_INT_SUMAN_NAGAR": "sat_surana_hospital.png",
-        "N_INT_VN_PURAV": "sat_chembur_naka.png",
+        "N_INT_VN_PURAV": "sat_disaster_shell_colony_flood.png",
         "N_INT_SINDHI_SOC": "sat_vesit_campus.png",
-        "N_BRIDGE_FREEWAY": "sat_rcf_shelter.png",
+        "N_BRIDGE_FREEWAY": "sat_disaster_amar_mahal_collapse.png",
         "N_INT_GOVANDI": "sat_mankhurd_depot.png"
     }
     return mapping.get(node_id, "sat_chembur_naka.png")
@@ -529,67 +529,56 @@ with top_col_right:
 
 st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-# UN Sustainable Development Goals (SDG) Alignment Strip
-st.markdown("""
-<div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+# Helper to load authentic official UN SVG vector files
+def load_sdg_b64(fname: str) -> str:
+    path = os.path.join(current_dir, "assets", "sdg", fname)
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
+    return ""
+
+sdg3_b64 = load_sdg_b64("sdg_3.svg")
+sdg9_b64 = load_sdg_b64("sdg_9.svg")
+sdg11_b64 = load_sdg_b64("sdg_11.svg")
+sdg13_b64 = load_sdg_b64("sdg_13.svg")
+
+# UN Sustainable Development Goals (SDG) Alignment Strip (Official High-Resolution Logos)
+st.markdown(f"""
+<div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
     <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">UN SUSTAINABLE DEVELOPMENT GOALS (SDGs):</span>
+        <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.9px;">UN SUSTAINABLE DEVELOPMENT GOALS (SDGs):</span>
     </div>
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <!-- SDG 3 -->
-        <div style="display: flex; align-items: center; gap: 8px; background: rgba(76, 159, 56, 0.14); border: 1px solid rgba(76, 159, 56, 0.4); border-radius: 6px; padding: 4px 10px;">
-            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
-                <rect width="32" height="32" rx="4" fill="#4C9F38"/>
-                <text x="5" y="11" fill="#FFFFFF" font-size="9" font-weight="900" font-family="system-ui, sans-serif">3</text>
-                <path d="M4 22 H10 L12 16 L15 26 L18 18 L20 23 L22 20 L24 22 H28" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(76, 159, 56, 0.16); border: 1px solid rgba(76, 159, 56, 0.45); border-radius: 8px; padding: 6px 12px;">
+            <img src="data:image/svg+xml;base64,{sdg3_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
             <div>
-                <div style="color: #86EFAC; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 3: Good Health</div>
-                <div style="color: #6EE7B7; font-size: 10px; opacity: 0.85;">Target 3.6 / 3.d (Emergency Triage)</div>
+                <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 3: Good Health</div>
+                <div style="color: #6EE7B7; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 3.6 & 3.d (Emergency Triage)</div>
             </div>
         </div>
         <!-- SDG 9 -->
-        <div style="display: flex; align-items: center; gap: 8px; background: rgba(253, 105, 37, 0.14); border: 1px solid rgba(253, 105, 37, 0.4); border-radius: 6px; padding: 4px 10px;">
-            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
-                <rect width="32" height="32" rx="4" fill="#FD6925"/>
-                <text x="5" y="11" fill="#FFFFFF" font-size="9" font-weight="900" font-family="system-ui, sans-serif">9</text>
-                <circle cx="16" cy="21" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.6"/>
-                <circle cx="16" cy="21" r="2.2" fill="#FFFFFF"/>
-                <path d="M16 14 V16 M16 26 V28 M9 21 H11 M21 21 H23 M11 16 L12.5 17.5 M19.5 24.5 L21 26 M11 26 L12.5 24.5 M19.5 17.5 L21 16" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 105, 37, 0.16); border: 1px solid rgba(253, 105, 37, 0.45); border-radius: 8px; padding: 6px 12px;">
+            <img src="data:image/svg+xml;base64,{sdg9_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
             <div>
-                <div style="color: #FDBA74; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 9: Resilient Infrastructure</div>
-                <div style="color: #FED7AA; font-size: 10px; opacity: 0.85;">Target 9.1 (Spatial Graph Defense)</div>
+                <div style="color: #FDBA74; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 9: Resilient Infrastructure</div>
+                <div style="color: #FED7AA; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 9.1 (Spatial Graph Defense)</div>
             </div>
         </div>
         <!-- SDG 11 -->
-        <div style="display: flex; align-items: center; gap: 8px; background: rgba(253, 157, 36, 0.14); border: 1px solid rgba(253, 157, 36, 0.4); border-radius: 6px; padding: 4px 10px;">
-            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
-                <rect width="32" height="32" rx="4" fill="#FD9D24"/>
-                <text x="5" y="11" fill="#000000" font-size="9" font-weight="900" font-family="system-ui, sans-serif">11</text>
-                <path d="M7 27 V19 H11 V15 H16 V18 H21 V21 H25 V27 Z" fill="#FFFFFF"/>
-                <rect x="9" y="21" width="1.2" height="1.8" fill="#FD9D24"/>
-                <rect x="13" y="17" width="1.2" height="1.8" fill="#FD9D24"/>
-                <rect x="18" y="20" width="1.2" height="1.8" fill="#FD9D24"/>
-                <rect x="23" y="23" width="1.2" height="1.8" fill="#FD9D24"/>
-            </svg>
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 157, 36, 0.16); border: 1px solid rgba(253, 157, 36, 0.45); border-radius: 8px; padding: 6px 12px;">
+            <img src="data:image/svg+xml;base64,{sdg11_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
             <div>
-                <div style="color: #FDE68A; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 11: Sustainable Cities</div>
-                <div style="color: #FEF08A; font-size: 10px; opacity: 0.85;">Target 11.5 (Urban Disaster Protection)</div>
+                <div style="color: #FDE68A; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 11: Sustainable Cities</div>
+                <div style="color: #FEF08A; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 11.5 (Urban Protection)</div>
             </div>
         </div>
         <!-- SDG 13 -->
-        <div style="display: flex; align-items: center; gap: 8px; background: rgba(63, 126, 68, 0.14); border: 1px solid rgba(63, 126, 68, 0.4); border-radius: 6px; padding: 4px 10px;">
-            <svg width="28" height="28" viewBox="0 0 32 32" style="border-radius: 4px; flex-shrink: 0;">
-                <rect width="32" height="32" rx="4" fill="#3F7E44"/>
-                <text x="5" y="11" fill="#FFFFFF" font-size="9" font-weight="900" font-family="system-ui, sans-serif">13</text>
-                <circle cx="16" cy="21" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
-                <ellipse cx="16" cy="21" rx="2.5" ry="5" fill="none" stroke="#FFFFFF" stroke-width="1"/>
-                <line x1="11" y1="21" x2="21" y2="21" stroke="#FFFFFF" stroke-width="1"/>
-            </svg>
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(63, 126, 68, 0.16); border: 1px solid rgba(63, 126, 68, 0.45); border-radius: 8px; padding: 6px 12px;">
+            <img src="data:image/svg+xml;base64,{sdg13_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
             <div>
-                <div style="color: #86EFAC; font-size: 11.5px; font-weight: 700; line-height: 1.2;">SDG 13: Climate Action</div>
-                <div style="color: #A7F3D0; font-size: 10px; opacity: 0.85;">Target 13.1 (Extreme Flood Adaptation)</div>
+                <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 13: Climate Action</div>
+                <div style="color: #A7F3D0; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 13.1 (Extreme Flood Defense)</div>
             </div>
         </div>
     </div>
@@ -605,7 +594,7 @@ st.markdown('<div class="panel-heading">Rapid Crisis Scenarios (Mumbai Chembur)<
 p_col1, p_col2, p_col3, p_col4, p_col5 = st.columns([1.0, 1.0, 1.1, 1.0, 0.7])
 
 with p_col1:
-    if st.button("Flood: Shell Colony Bypass", use_container_width=True, help="Chembur Naka to Zen Hospital avoiding 75cm flood at Shell Colony"):
+    if st.button("Flood: Central VN Purav Bypass", use_container_width=True, help="Chembur Naka to Zen Hospital avoiding 75cm flood on central VN Purav Marg"):
         st.session_state.active_scenario = "flood_bypass"
         st.session_state.directive_input = "Find fastest safe ambulance route from Chembur Naka to Zen Multi Speciality Hospital avoiding flooded streets"
         st.session_state.vehicle_type = "ambulance"
@@ -618,12 +607,14 @@ with p_col1:
             vehicle_type="ambulance",
             avoid_hazards=True
         )
+        st.session_state.recon_marker_selector = "N_INT_VN_PURAV"
+        st.session_state.selected_recon_node = "N_INT_VN_PURAV"
         st.rerun()
 
 with p_col2:
-    if st.button("Bridge: Amar Mahal Detour", use_container_width=True, help="Heavy convoy from Chembur to Mankhurd Depot bypassing fractured Amar Mahal flyover"):
+    if st.button("Bridge: Freeway Ramp Detour", use_container_width=True, help="Convoy from Chembur Naka to RCF Shelter avoiding 98% shear damage on Panjarpol elevated ramp"):
         st.session_state.active_scenario = "bridge_detour"
-        st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to Mankhurd Logistics Depot avoiding fractured Amar Mahal flyover"
+        st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to RCF Community Shelter avoiding damaged elevated bridges"
         st.session_state.vehicle_type = "high_clearance_truck"
         st.session_state.avoid_hazards = True
         st.session_state.selected_image_name = "sat_disaster_amar_mahal_collapse.png"
@@ -634,6 +625,8 @@ with p_col2:
             vehicle_type="high_clearance_truck",
             avoid_hazards=True
         )
+        st.session_state.recon_marker_selector = "N_BRIDGE_FREEWAY"
+        st.session_state.selected_recon_node = "N_BRIDGE_FREEWAY"
         st.rerun()
 
 with p_col3:
@@ -728,9 +721,9 @@ with st.form("dispatch_directive_form", clear_on_submit=False):
             index=img_idx,
             format_func=lambda x: {
                 "None": "None (Sensor Mesh)",
-                "sat_disaster_shell_colony_flood.png": "Shell Colony Sector (75cm Flood Hazard)",
-                "sat_disaster_amar_mahal_collapse.png": "Amar Mahal Flyover (Expansion Shear Hazard)",
-                "sat_inlaks_hospital.png": "Inlaks Hospital (Flooded Substation)",
+                "sat_disaster_shell_colony_flood.png": "VN Purav Marg Central Arterial (75cm Flood Hazard)",
+                "sat_disaster_amar_mahal_collapse.png": "Panjarpol Elevated Freeway Ramp (Expansion Shear Hazard)",
+                "sat_inlaks_hospital.png": "Inlaks Hospital (Postal Colony)",
                 "sat_vesit_campus.png": "VESIT Campus (Collector Colony Safe Zone)",
                 "sat_surana_hospital.png": "Surana Sethia Hospital (Trauma ICU)",
                 "sat_zen_hospital.png": "Zen Multi Speciality Hospital",
@@ -769,8 +762,8 @@ if calc_submitted:
             "sat_zen_hospital.png": "N_HOSP_ZEN",
             "sat_surana_hospital.png": "N_HOSP_SURANA",
             "sat_inlaks_hospital.png": "N_HOSP_INLAKS",
-            "sat_disaster_shell_colony_flood.png": "N_INT_SHELL_COLONY",
-            "sat_disaster_amar_mahal_collapse.png": "N_BRIDGE_AMAR_MAHAL",
+            "sat_disaster_shell_colony_flood.png": "N_INT_VN_PURAV",
+            "sat_disaster_amar_mahal_collapse.png": "N_BRIDGE_FREEWAY",
             "sat_vesit_campus.png": "N_CAMPUS_VESIT",
             "sat_rcf_shelter.png": "N_SHELTER_RCF",
             "sat_chembur_naka.png": "N_CHEMBUR_NAKA",
@@ -1009,7 +1002,7 @@ with tab_mission:
             elif ntype == "supply_depot":
                 icon_color = "darkblue"
                 icon_name = "cubes"
-            elif "shell" in nid.lower() or status in ["partially_flooded", "flooded"]:
+            elif "vn_purav" in nid.lower() or "shell" in nid.lower() or status in ["partially_flooded", "flooded"]:
                 icon_color = "lightblue"
                 icon_name = "tint"
             else:
@@ -1101,7 +1094,7 @@ with tab_mission:
             </div>
             <div style="display: flex; align-items: center; gap: 7px;">
                 <span style="display: inline-block; width: 8px; height: 8px; background: #06B6D4; border-radius: 50%;"></span>
-                <span>Inundation Zone (Shell Colony)</span>
+                <span>Inundation Zone (Central VN Purav Marg)</span>
             </div>
         </div>
         """
@@ -1129,9 +1122,9 @@ with tab_mission:
             nd = graph_store.graph.nodes.get(nid, {})
             name = nd.get("name", nid)
             ntype = nd.get("type", "").upper()
-            if nid == "N_INT_SHELL_COLONY":
-                return f"{name} [FLOOD HAZARD]"
-            elif nid == "N_BRIDGE_AMAR_MAHAL":
+            if nid == "N_INT_VN_PURAV":
+                return f"{name} [CENTRAL FLOOD HAZARD]"
+            elif nid == "N_BRIDGE_FREEWAY":
                 return f"{name} [STRUCTURAL HAZARD]"
             elif nid == "N_CAMPUS_VESIT":
                 return f"{name} [ACADEMIC CAMPUS]"
@@ -1159,8 +1152,8 @@ with tab_mission:
         sel_img_path = os.path.join(current_dir, "data", "damage_images", sel_img_name)
         
         # Telemetry styling & badges
-        is_flood = (sel_node_id == "N_INT_SHELL_COLONY")
-        is_struct = (sel_node_id == "N_BRIDGE_AMAR_MAHAL")
+        is_flood = (sel_node_id == "N_INT_VN_PURAV")
+        is_struct = (sel_node_id == "N_BRIDGE_FREEWAY")
         is_campus = (sel_node_id == "N_CAMPUS_VESIT")
         is_hosp = (sel_data.get("type") == "hospital")
         
