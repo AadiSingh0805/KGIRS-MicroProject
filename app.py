@@ -525,7 +525,34 @@ with top_col_right:
                 del st.session_state[k]
             st.rerun()
 
-st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+# UN Sustainable Development Goals (SDG) Alignment Strip
+st.markdown("""
+<div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-family: monospace; font-size: 10.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">UN SUSTAINABLE DEVELOPMENT GOALS MAPPING:</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px; background: rgba(76, 159, 56, 0.15); border: 1px solid rgba(76, 159, 56, 0.4); border-radius: 5px; padding: 3px 8px;">
+            <span style="background: #4C9F38; color: #FFFFFF; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 3</span>
+            <span style="color: #86EFAC; font-size: 11.5px; font-weight: 600;">Good Health & Well-Being (3.6 / 3.d)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; background: rgba(253, 105, 37, 0.15); border: 1px solid rgba(253, 105, 37, 0.4); border-radius: 5px; padding: 3px 8px;">
+            <span style="background: #FD6925; color: #FFFFFF; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 9</span>
+            <span style="color: #FDBA74; font-size: 11.5px; font-weight: 600;">Resilient Infrastructure & Innovation (9.1)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; background: rgba(253, 157, 36, 0.15); border: 1px solid rgba(253, 157, 36, 0.4); border-radius: 5px; padding: 3px 8px;">
+            <span style="background: #FD9D24; color: #000000; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 11</span>
+            <span style="color: #FDE68A; font-size: 11.5px; font-weight: 600;">Sustainable Cities & Communities (11.5)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; background: rgba(63, 126, 68, 0.15); border: 1px solid rgba(63, 126, 68, 0.4); border-radius: 5px; padding: 3px 8px;">
+            <span style="background: #3F7E44; color: #FFFFFF; font-weight: 900; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace;">SDG 13</span>
+            <span style="color: #86EFAC; font-size: 11.5px; font-weight: 600;">Climate Action & Flood Defense (13.1)</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ==============================================================================
@@ -694,6 +721,23 @@ if calc_submitted:
             avoid_hazards=st.session_state.avoid_hazards
         )
         st.session_state.current_state = new_state
+        
+        # Synchronize tactical reconnaissance hub with chosen telemetry or destination
+        image_to_node = {
+            "sat_zen_hospital.png": "N_HOSP_ZEN",
+            "sat_surana_hospital.png": "N_HOSP_SURANA",
+            "sat_inlaks_hospital.png": "N_HOSP_INLAKS",
+            "sat_disaster_shell_colony_flood.png": "N_INT_SHELL_COLONY",
+            "sat_disaster_amar_mahal_collapse.png": "N_BRIDGE_AMAR_MAHAL",
+            "sat_vesit_campus.png": "N_CAMPUS_VESIT",
+            "sat_rcf_shelter.png": "N_SHELTER_RCF",
+            "sat_chembur_naka.png": "N_CHEMBUR_NAKA",
+            "sat_tilak_nagar.png": "N_INT_TILAK_NAGAR",
+            "sat_mankhurd_depot.png": "N_DEPOT_MANKHURD"
+        }
+        target_recon = image_to_node.get(img_val) or new_state.get("extracted_destination", "N_HOSP_ZEN")
+        st.session_state.recon_marker_selector = target_recon
+        st.session_state.selected_recon_node = target_recon
         st.rerun()
 
 
@@ -1036,8 +1080,8 @@ with tab_mission:
         dest_node_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
         orig_node_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
         
-        if "selected_recon_node" not in st.session_state or st.session_state.selected_recon_node not in all_node_ids:
-            st.session_state.selected_recon_node = dest_node_id if dest_node_id in all_node_ids else all_node_ids[0]
+        if "recon_marker_selector" not in st.session_state or st.session_state.recon_marker_selector not in all_node_ids:
+            st.session_state.recon_marker_selector = dest_node_id if dest_node_id in all_node_ids else all_node_ids[0]
 
         def get_recon_label(nid):
             nd = graph_store.graph.nodes.get(nid, {})
@@ -1055,13 +1099,14 @@ with tab_mission:
                 return f"{name} [SHELTER]"
             return f"{name} ({ntype})"
 
-        default_idx = all_node_ids.index(st.session_state.selected_recon_node) if st.session_state.selected_recon_node in all_node_ids else 0
+        default_idx = all_node_ids.index(st.session_state.recon_marker_selector) if st.session_state.recon_marker_selector in all_node_ids else 0
         
         chosen_marker = st.selectbox(
             "Inspect Map Marker Satellite Imagery:",
             options=all_node_ids,
             index=default_idx,
             format_func=get_recon_label,
+            key="recon_marker_selector",
             help="Select any Chembur marker to inspect authentic orbital satellite photography and telemetry"
         )
         st.session_state.selected_recon_node = chosen_marker
@@ -1245,15 +1290,37 @@ with tab_decision:
     llm_attribution_text = explanation.get("llm_attribution") or explanation.get("summary", "No attribution available.")
     llm_badge = explanation.get("llm_source", "GEMINI 3.1 FLASH LITE")
     
+    # Clean and split bullet points to prevent raw markdown asterisks or detached bullet dots
+    raw_lines = [l.strip() for l in llm_attribution_text.split("\n") if l.strip()]
+    cleaned_bullets = []
+    for l in raw_lines:
+        # Strip leading asterisks, dashes, unicode bullets, numbers
+        cleaned = re.sub(r'^[*\-•\d.]+\s*', '', l).strip()
+        # Clean any bold markdown markers inside
+        cleaned = re.sub(r'\*\*(.*?)\*\*', r'<b style="color: #F8FAFC;">\1</b>', cleaned)
+        if cleaned:
+            cleaned_bullets.append(cleaned)
+    
+    if not cleaned_bullets:
+        cleaned_bullets = [llm_attribution_text]
+        
+    bullet_html_list = []
+    for b in cleaned_bullets:
+        bullet_html_list.append(
+            f'<div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px;">'
+            f'<span style="color: #A78BFA; font-size: 16px; line-height: 1.4; user-select: none;">&#8226;</span>'
+            f'<div style="font-size: 14px; color: #E2E8F0; line-height: 1.6; font-weight: 450;">{b}</div>'
+            f'</div>'
+        )
+    rendered_bullets = "".join(bullet_html_list)
+
     st.markdown(
-        f'<div class="glass-panel" style="border-left: 3px solid #8B5CF6; margin-bottom: 16px; background: rgba(139, 92, 246, 0.05); padding: 16px 20px;">'
-        f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">'
+        f'<div class="glass-panel" style="border-left: 3px solid #8B5CF6; margin-bottom: 16px; background: rgba(139, 92, 246, 0.05); padding: 18px 22px;">'
+        f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">'
         f'<span style="font-family: monospace; font-size: 13px; font-weight: 800; color: #C4B5FD; letter-spacing: 0.8px;">LLM COGNITIVE DECISION ATTRIBUTION</span>'
         f'<span class="status-pill pill-cyan" style="background: rgba(139, 92, 246, 0.25); color: #DDD6FE; border-color: rgba(139, 92, 246, 0.5); font-size: 11px; font-weight: 700; padding: 3px 10px;">POWERED BY {llm_badge}</span>'
         f'</div>'
-        f'<div style="font-size: 14.5px; color: #F8FAFC; line-height: 1.75; font-weight: 450; white-space: pre-line;">'
-        f'{llm_attribution_text}'
-        f'</div>'
+        f'<div>{rendered_bullets}</div>'
         f'</div>',
         unsafe_allow_html=True
     )
@@ -1397,23 +1464,7 @@ with tab_decision:
             )
 
 
-    # E. Agent State Machine Trajectory (Compact 4-Column Stepper)
-    st.markdown('<div class="panel-heading" style="margin-top: 14px;">Agent Reasoning Trace (State Machine Stepper)</div>', unsafe_allow_html=True)
-    trace_steps = current_state.get("reasoning_trace", [])
-    if trace_steps:
-        step_cols = st.columns(len(trace_steps))
-        for idx, (s_col, step) in enumerate(zip(step_cols, trace_steps), 1):
-            with s_col:
-                st.markdown(
-                    f'<div class="glass-panel" style="border-top: 3px solid #38BDF8; padding: 10px 12px; height: 100%;">'
-                    f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
-                    f'<span style="font-family: monospace; font-weight: 800; font-size: 10px; color: #38BDF8;">PHASE 0{idx}</span>'
-                    f'<span style="font-size: 9.5px; color: #64748B;">{step.get("module")}</span></div>'
-                    f'<div style="font-size: 12px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px;">{step.get("step")}</div>'
-                    f'<div style="color: #94A3B8; font-size: 11px; line-height: 1.35;">{step.get("details")}</div>'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
+
 
 
 # ==============================================================================
