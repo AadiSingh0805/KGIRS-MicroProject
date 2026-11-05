@@ -1,6 +1,6 @@
 # Multimodal Geospatial Crisis Response & Infrastructure GraphRAG Dependencies
 networkx>=3.0
-streamlit>=1.28.0
+streamlit>=1.50.0
 streamlit-folium>=0.20.0
 folium>=0.15.0
 pyvis>=0.3.2

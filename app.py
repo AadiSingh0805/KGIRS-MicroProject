@@ -50,6 +50,7 @@ from src.evaluation import run_benchmark_suite, CRISIS_BENCHMARK_DATASET
 from src.incident_repository import IncidentRepository
 from src.incident_ui import render_incident_manager
 from src.vehicle_profiles import VEHICLE_PROFILES
+from src.presentation import render_about
 
 # ==============================================================================
 # STREAMLIT CONFIGURATION - CLEAN FULL-CANVAS LAYOUT (NO SIDEBAR, NO EMOJIS)
@@ -588,7 +589,7 @@ with top_col_right:
 # Navigation separates planning, data editing, and project context.
 tab_about, tab_mission, tab_incidents, tab_decision, tab_graph, tab_eval = st.tabs([
     "About", "Route planner", "Incidents", "Evidence", "Network", "Evaluation"
-])
+], default="Route planner" if st.query_params.get("view") == "planner" else "About")
 
 with tab_incidents:
     st.subheader("Incident registry")
@@ -604,68 +605,7 @@ with tab_incidents:
     ), expanded=True)
 
 with tab_about:
-    st.subheader("About Aegis CrisisNav")
-    st.markdown("A GraphRAG demonstration of emergency routing in Chembur, Mumbai. Incident reports are retrieved from Qdrant and combined with a road graph to calculate vehicle-specific routes.")
-    st.markdown("**Demo flow:** plan a route → add or resolve an incident → see the route change → inspect the supporting evidence.")
-    st.info("The road network, incident reports, hospital capacity, and evacuation scenarios are sample data. Map tiles provide geographic context; they do not supply live road or hospital conditions.")
-    st.markdown("**How to read the results.** Route estimates include configured hazard penalties. Evidence counts show retrieved reports, not a probability of safety. Image search uses visual features and filenames; it does not measure flood depth or diagnose damage.")
-    st.markdown("**Evaluation.** Retrieval metrics are calculated when you run a benchmark. Grounding and judge metrics include custom heuristics and should be interpreted as demonstration measures.")
-    st.markdown("**Sustainable development goals**")
-    # Helper to load authentic official UN SVG vector files
-    def load_sdg_b64(fname: str) -> str:
-        path = os.path.join(current_dir, "assets", "sdg", fname)
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                return base64.b64encode(f.read()).decode("utf-8")
-        return ""
-
-    sdg3_b64 = load_sdg_b64("sdg_3.svg")
-    sdg9_b64 = load_sdg_b64("sdg_9.svg")
-    sdg11_b64 = load_sdg_b64("sdg_11.svg")
-    sdg13_b64 = load_sdg_b64("sdg_13.svg")
-
-    # UN Sustainable Development Goals (SDG) Alignment Strip (Official High-Resolution Logos)
-    st.markdown(f"""
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.9px;">UN SUSTAINABLE DEVELOPMENT GOALS (SDGs):</span>
-        </div>
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <!-- SDG 3 -->
-            <div style="display: flex; align-items: center; gap: 10px; background: rgba(76, 159, 56, 0.16); border: 1px solid rgba(76, 159, 56, 0.45); border-radius: 8px; padding: 6px 12px;">
-                <img src="data:image/svg+xml;base64,{sdg3_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-                <div>
-                    <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 3: Good Health</div>
-                    <div style="color: #6EE7B7; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 3.6 & 3.d (Emergency Triage)</div>
-                </div>
-            </div>
-            <!-- SDG 9 -->
-            <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 105, 37, 0.16); border: 1px solid rgba(253, 105, 37, 0.45); border-radius: 8px; padding: 6px 12px;">
-                <img src="data:image/svg+xml;base64,{sdg9_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-                <div>
-                    <div style="color: #FDBA74; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 9: Resilient Infrastructure</div>
-                    <div style="color: #FED7AA; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 9.1 (Spatial Graph Defense)</div>
-                </div>
-            </div>
-            <!-- SDG 11 -->
-            <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 157, 36, 0.16); border: 1px solid rgba(253, 157, 36, 0.45); border-radius: 8px; padding: 6px 12px;">
-                <img src="data:image/svg+xml;base64,{sdg11_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-                <div>
-                    <div style="color: #FDE68A; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 11: Sustainable Cities</div>
-                    <div style="color: #FEF08A; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 11.5 (Urban Protection)</div>
-                </div>
-            </div>
-            <!-- SDG 13 -->
-            <div style="display: flex; align-items: center; gap: 10px; background: rgba(63, 126, 68, 0.16); border: 1px solid rgba(63, 126, 68, 0.45); border-radius: 8px; padding: 6px 12px;">
-                <img src="data:image/svg+xml;base64,{sdg13_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-                <div>
-                    <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 13: Climate Action</div>
-                    <div style="color: #A7F3D0; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 13.1 (Extreme Flood Defense)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    render_about(graph_store, disaster_reports, VEHICLE_PROFILES, current_dir)
 
 with tab_mission:
     st.markdown('<h2 class="planner-title">Plan an emergency route</h2>', unsafe_allow_html=True)
