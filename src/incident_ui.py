@@ -3,11 +3,11 @@ import uuid
 import streamlit as st
 
 
-def render_incident_manager(repository):
+def render_incident_manager(repository, expanded=False):
     if "incident_notice" in st.session_state:
         st.success(st.session_state.pop("incident_notice"))
-    with st.expander("Incident management — add, update, or resolve reports"):
-        st.caption("Save a report to update Qdrant and recalculate the current route. Resolved reports remain in the registry but stop imposing restrictions. Operator edits are saved locally.")
+    with st.expander("Add, update, or resolve a report", expanded=expanded):
+        st.caption("Saved reports recalculate the route. Resolved reports remain in history and stop imposing restrictions. Changes are kept locally.")
         reports, revision = repository.load()
         st.dataframe([{
             "ID": row["report_id"], "Incident": row["incident_type"],

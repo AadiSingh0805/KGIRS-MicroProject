@@ -71,7 +71,7 @@ st.markdown("""
         color: #E2E8F0;
         font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
     }
-    
+
     /* Completely hide Streamlit sidebar and extra controls for clean microproject look */
     [data-testid="stSidebar"], [data-testid="collapsedControl"] {
         display: none !important;
@@ -86,7 +86,9 @@ st.markdown("""
     .block-container {
         padding-top: 1.0rem !important;
         padding-bottom: 2.0rem !important;
-        max-width: 96% !important;
+        max-width: 1480px !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
     }
 
     /* 2. Top Executive Header Bar */
@@ -104,22 +106,22 @@ st.markdown("""
         letter-spacing: 0.5px;
         box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
     }
-    
+
     .brand-title {
-        font-size: 19px;
-        font-weight: 800;
+        font-size: 23px;
+        font-weight: 750;
         letter-spacing: -0.4px;
         color: #F8FAFC;
         line-height: 1.1;
     }
-    
+
     .brand-subtitle {
         font-size: 11px;
         font-weight: 500;
         color: #94A3B8;
         letter-spacing: 0.2px;
     }
-    
+
     .status-pill {
         display: inline-flex;
         align-items: center;
@@ -131,19 +133,19 @@ st.markdown("""
         letter-spacing: 0.4px;
         font-family: "JetBrains Mono", monospace;
     }
-    
+
     .pill-green {
         background: rgba(16, 185, 129, 0.12);
         color: #34D399;
         border: 1px solid rgba(16, 185, 129, 0.3);
     }
-    
+
     .pill-cyan {
         background: rgba(56, 189, 248, 0.12);
         color: #38BDF8;
         border: 1px solid rgba(56, 189, 248, 0.3);
     }
-    
+
     .pill-amber {
         background: rgba(245, 158, 11, 0.12);
         color: #FBBF24;
@@ -161,7 +163,7 @@ st.markdown("""
         justify-content: space-between;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     }
-    
+
     .metric-caption {
         font-size: 10px;
         font-weight: 700;
@@ -169,7 +171,7 @@ st.markdown("""
         letter-spacing: 0.8px;
         color: #94A3B8;
     }
-    
+
     .metric-number {
         font-family: "JetBrains Mono", Consolas, monospace;
         font-size: 24px;
@@ -178,14 +180,14 @@ st.markdown("""
         margin-top: 2px;
         line-height: 1.1;
     }
-    
+
     .metric-unit {
         font-size: 12px;
         font-weight: 500;
         color: #64748B;
         margin-left: 2px;
     }
-    
+
     .metric-sub {
         font-size: 10.5px;
         color: #64748B;
@@ -200,7 +202,7 @@ st.markdown("""
         padding: 14px 16px;
         margin-bottom: 12px;
     }
-    
+
     .panel-heading {
         font-size: 12px;
         font-weight: 700;
@@ -251,7 +253,7 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.08);
         margin-bottom: 14px;
     }
-    
+
     .stTabs [data-baseweb="tab"] {
         color: #94A3B8;
         border-radius: 6px;
@@ -260,7 +262,7 @@ st.markdown("""
         font-weight: 600;
         border: none !important;
     }
-    
+
     .stTabs [aria-selected="true"] {
         background: #1E293B !important;
         color: #38BDF8 !important;
@@ -284,7 +286,7 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 6px !important;
     }
-    
+
     /* 8. Sleek turn-by-turn road list */
     .turn-item {
         background: #0B111E;
@@ -339,6 +341,29 @@ st.markdown("""
         display: flex;
         gap: 6px;
     }
+
+    /* Demo presentation: readable surfaces, restrained emphasis, compact navigation. */
+    .planner-title { font-size: 25px !important; letter-spacing: -0.7px; margin: 0 !important; padding: 0 !important; }
+    [data-testid="stVerticalBlock"] { gap: .65rem; }
+    .metric-card { box-shadow: none !important; padding: 13px 15px !important; min-height: 82px; border-radius: 10px; }
+    .metric-number { font-size: 26px !important; line-height: 1.25; }
+    .metric-caption { font-size: 11px !important; color: #A8B5C9 !important; letter-spacing: 0.5px; }
+    .metric-sub { font-size: 11px; color: #A0AEC0; }
+    .panel-heading { font-size: 13px; text-transform: none; letter-spacing: 0; color: #E2E8F0; margin-top: 5px; }
+    .directive-card, .glass-panel { box-shadow: none !important; }
+    .directive-route { font-size: 15px; line-height: 1.5; }
+    .directive-item { font-size: 12px; line-height: 1.6; }
+    .stTabs [data-baseweb="tab-list"] { margin-top: 8px; margin-bottom: 8px; gap: 3px; overflow-x: auto; }
+    .stTabs [data-baseweb="tab"] { padding: 7px 17px; white-space: nowrap; }
+    div[data-testid="stForm"] { border-color: #263449; border-radius: 12px; padding: 14px 18px; }
+    button[data-testid="stBaseButton-primaryFormSubmit"], button[data-testid="stBaseButton-primary"] { background: #0EA5E9 !important; border-color: #0EA5E9 !important; color: #07111F !important; font-weight: 700; }
+    button:focus-visible, input:focus-visible { outline: 2px solid #7DD3FC !important; outline-offset: 2px; }
+    @media (max-width: 768px) {
+        .block-container { padding-left: 1rem !important; padding-right: 1rem !important; }
+        .brand-title { font-size: 20px; }
+        .metric-number { font-size: 22px !important; }
+        .stTabs [data-baseweb="tab"] { padding: 6px 10px; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -372,7 +397,7 @@ def load_crisis_system(mesh_fingerprint: str):
     reports_path = incident_reports_path
     if not os.path.exists(reports_path):
         reports_path = os.path.join(data_dir, "disaster_reports.json")
-    
+
     # 1. Spatial Graph Engine
     graph = CrisisSpatialGraph(osm_path)
 
@@ -537,7 +562,7 @@ with top_col_left:
         </svg>
         <div>
             <div class="brand-title">Aegis CrisisNav</div>
-            <div class="brand-subtitle">Multimodal Geospatial GraphRAG | Mumbai Chembur Operations Control</div>
+            <div class="brand-subtitle">Emergency routing · GraphRAG demonstration</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -547,302 +572,304 @@ with top_col_right:
     with pills_box:
         st.markdown(f"""
         <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; height: 100%; padding-top: 5px;">
-            <span class="status-pill pill-green"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34D399; box-shadow: 0 0 6px #34D399;"></span>CHEMBUR MESH ONLINE</span>
-            <span class="status-pill pill-cyan"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #38BDF8;"></span>{len(graph_store.graph.nodes)} NODES</span>
+            <span class="status-pill pill-green"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34D399; box-shadow: 0 0 6px #34D399;"></span>DEMO DATA</span>
+            <span class="status-pill pill-cyan"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #38BDF8;"></span>{len(graph_store.graph.nodes)} LOCATIONS</span>
             <span class="status-pill pill-amber"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #FBBF24;"></span>{sum(1 for r in disaster_reports if r.get("incident_status", "active") != "resolved" and (r.get("flood_depth_cm", 0) > 0 or r.get("damage_severity", 0) > 0.25 or r.get("road_closed", False)))} ACTIVE HAZARDS</span>
         </div>
         """, unsafe_allow_html=True)
     with btn_box:
-        if st.button("Resync Mesh", help="Purge cached state and force-reload Mumbai Chembur network", use_container_width=True):
+        if st.button("Reload data", help="Reload the current dataset and recalculate the route", use_container_width=True):
             st.cache_resource.clear()
             st.cache_data.clear()
             for k in list(st.session_state.keys()):
                 del st.session_state[k]
             st.rerun()
 
-st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-
-# Helper to load authentic official UN SVG vector files
-def load_sdg_b64(fname: str) -> str:
-    path = os.path.join(current_dir, "assets", "sdg", fname)
-    if os.path.exists(path):
-        with open(path, "rb") as f:
-            return base64.b64encode(f.read()).decode("utf-8")
-    return ""
-
-sdg3_b64 = load_sdg_b64("sdg_3.svg")
-sdg9_b64 = load_sdg_b64("sdg_9.svg")
-sdg11_b64 = load_sdg_b64("sdg_11.svg")
-sdg13_b64 = load_sdg_b64("sdg_13.svg")
-
-# UN Sustainable Development Goals (SDG) Alignment Strip (Official High-Resolution Logos)
-st.markdown(f"""
-<div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.9px;">UN SUSTAINABLE DEVELOPMENT GOALS (SDGs):</span>
-    </div>
-    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <!-- SDG 3 -->
-        <div style="display: flex; align-items: center; gap: 10px; background: rgba(76, 159, 56, 0.16); border: 1px solid rgba(76, 159, 56, 0.45); border-radius: 8px; padding: 6px 12px;">
-            <img src="data:image/svg+xml;base64,{sdg3_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-            <div>
-                <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 3: Good Health</div>
-                <div style="color: #6EE7B7; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 3.6 & 3.d (Emergency Triage)</div>
-            </div>
-        </div>
-        <!-- SDG 9 -->
-        <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 105, 37, 0.16); border: 1px solid rgba(253, 105, 37, 0.45); border-radius: 8px; padding: 6px 12px;">
-            <img src="data:image/svg+xml;base64,{sdg9_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-            <div>
-                <div style="color: #FDBA74; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 9: Resilient Infrastructure</div>
-                <div style="color: #FED7AA; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 9.1 (Spatial Graph Defense)</div>
-            </div>
-        </div>
-        <!-- SDG 11 -->
-        <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 157, 36, 0.16); border: 1px solid rgba(253, 157, 36, 0.45); border-radius: 8px; padding: 6px 12px;">
-            <img src="data:image/svg+xml;base64,{sdg11_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-            <div>
-                <div style="color: #FDE68A; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 11: Sustainable Cities</div>
-                <div style="color: #FEF08A; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 11.5 (Urban Protection)</div>
-            </div>
-        </div>
-        <!-- SDG 13 -->
-        <div style="display: flex; align-items: center; gap: 10px; background: rgba(63, 126, 68, 0.16); border: 1px solid rgba(63, 126, 68, 0.45); border-radius: 8px; padding: 6px 12px;">
-            <img src="data:image/svg+xml;base64,{sdg13_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
-            <div>
-                <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 13: Climate Action</div>
-                <div style="color: #A7F3D0; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 13.1 (Extreme Flood Defense)</div>
-            </div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-
-# ==============================================================================
-# MISSION CONTROL CENTER (Unified Command & Scenario Launchpad)
-# ==============================================================================
-incident_roads = {
-    data["id"]: {"name": data["name"], "nodes": (u, v)}
-    for u, v, data in graph_store.graph.edges(data=True)
-    if not data["id"].endswith("_REV")
-}
-render_incident_manager(IncidentRepository(
-    incident_reports_path,
-    os.path.join(current_dir, "data", "disaster_reports.json"), incident_roads,
-))
-
-# 1. Preset Crisis Scenarios (Quick 1-Click Launch for Mumbai Chembur)
-st.markdown('<div class="panel-heading">Rapid Crisis Scenarios (Mumbai Chembur)</div>', unsafe_allow_html=True)
-p_col1, p_col2, p_col3, p_col4, p_col5, p_col6 = st.columns([1.0, 1.0, 1.0, 1.0, 1.15, 0.75])
-
-with p_col1:
-    if st.button("Flood: Central VN Purav Bypass", use_container_width=True, help="Calculate the current Chembur Naka to Zen Hospital route"):
-        st.session_state.active_scenario = "flood_bypass"
-        st.session_state.directive_input = "Find fastest safe ambulance route from Chembur Naka to Zen Multi Speciality Hospital avoiding flooded streets"
-        st.session_state.vehicle_type = "ambulance"
-        st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_disaster_shell_colony_flood.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_shell_colony_flood.png")
-        st.session_state.current_state = agent.run_pipeline(
-            query=st.session_state.directive_input,
-            image_path=img_p if os.path.exists(img_p) else None,
-            vehicle_type="ambulance",
-            avoid_hazards=True
-        )
-        st.session_state.recon_marker_selector = "N_INT_VN_PURAV"
-        st.session_state.selected_recon_node = "N_INT_VN_PURAV"
-        st.rerun()
-
-with p_col2:
-    if st.button("Bridge: Suman Nagar Detour", use_container_width=True, help="Calculate the current convoy route to Surana Hospital"):
-        st.session_state.active_scenario = "bridge_detour"
-        st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to Surana Sethia Hospital avoiding fractured Suman Nagar flyover"
-        st.session_state.vehicle_type = "high_clearance_truck"
-        st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_disaster_amar_mahal_collapse.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_amar_mahal_collapse.png")
-        st.session_state.current_state = agent.run_pipeline(
-            query=st.session_state.directive_input,
-            image_path=img_p if os.path.exists(img_p) else None,
-            vehicle_type="high_clearance_truck",
-            avoid_hazards=True
-        )
-        st.session_state.recon_marker_selector = "N_INT_SUMAN_NAGAR"
-        st.session_state.selected_recon_node = "N_INT_SUMAN_NAGAR"
-        st.rerun()
-
-with p_col3:
-    if st.button("Campus: VESIT to Zen Hospital", use_container_width=True, help="Evacuation transit from VESIT Campus (Collector Colony) to Zen Hospital"):
-        st.session_state.active_scenario = "vesit_evac"
-        st.session_state.directive_input = "Find fastest safe ambulance route from Vivekanand Education Society's Institute of Technology (VESIT) to Zen Multi Speciality Hospital avoiding flooded streets"
-        st.session_state.vehicle_type = "ambulance"
-        st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_vesit_campus.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_vesit_campus.png")
-        st.session_state.current_state = agent.run_pipeline(
-            query=st.session_state.directive_input,
-            image_path=img_p if os.path.exists(img_p) else None,
-            vehicle_type="ambulance",
-            avoid_hazards=True
-        )
-        st.rerun()
-
-with p_col4:
-    if st.button("Casualty: RCF to Surana ICU", use_container_width=True, help="Evacuate casualties from RCF Mega-Shelter to Surana Hospital ICU"):
-        st.session_state.active_scenario = "casualty_triage"
-        st.session_state.directive_input = "Evacuate casualties from RCF Sports Complex Shelter to Surana Sethia Hospital with ICU trauma beds"
-        st.session_state.vehicle_type = "ambulance"
-        st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_surana_hospital.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_surana_hospital.png")
-        st.session_state.current_state = agent.run_pipeline(
-            query=st.session_state.directive_input,
-            image_path=img_p if os.path.exists(img_p) else None,
-            vehicle_type="ambulance",
-            avoid_hazards=True
-        )
-        st.rerun()
-
-with p_col5:
-    if st.button("Air Force: Severed Corridor", use_container_width=True, help="Simulate total ground corridor severance from flooded VN Purav to Zen Hospital triggering IAF rotary medevac"):
-        st.session_state.active_scenario = "air_force_medevac"
-        st.session_state.directive_input = "Critical emergency evacuation from submerged VN Purav intersection to Zen Hospital rooftop helipad"
-        st.session_state.vehicle_type = "ambulance"
-        st.session_state.avoid_hazards = True
-        st.session_state.selected_image_name = "sat_disaster_shell_colony_flood.png"
-        img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_shell_colony_flood.png")
-        st.session_state.current_state = agent.run_pipeline(
-            query=st.session_state.directive_input,
-            image_path=img_p if os.path.exists(img_p) else None,
-            vehicle_type="ambulance",
-            avoid_hazards=True
-        )
-        st.session_state.recon_marker_selector = "N_INT_VN_PURAV"
-        st.session_state.selected_recon_node = "N_INT_VN_PURAV"
-        st.rerun()
-
-with p_col6:
-    cypher_code = graph_store.generate_neo4j_cypher()
-    st.download_button(
-        label="Cypher",
-        data=cypher_code,
-        file_name="neo4j_chembur_graph.cypher",
-        mime="text/plain",
-        use_container_width=True,
-        help="Download complete Neo4j Cypher script to replicate the spatial graph in Neo4j"
-    )
-
-st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
-
-# 2. Custom Directive Input & Parameter Bar (Form-backed for guaranteed input synchronization)
-with st.form("dispatch_directive_form", clear_on_submit=False):
-    cmd_col1, cmd_col2, cmd_col3, cmd_col4 = st.columns([3.2, 1.2, 1.3, 0.9])
-
-    with cmd_col1:
-        query_val = st.text_input(
-            "Incident Dispatch Directive:",
-            value=st.session_state.directive_input,
-            placeholder="e.g. Find fastest safe ambulance route from VESIT to Zen Multi Speciality Hospital avoiding flooded streets..."
-        )
-        
-    with cmd_col2:
-        vehicle_opts = list(VEHICLE_PROFILES)
-        v_idx = vehicle_opts.index(st.session_state.vehicle_type) if st.session_state.vehicle_type in vehicle_opts else 0
-        v_val = st.selectbox(
-            "Vehicle Profile:",
-            options=vehicle_opts,
-            index=v_idx,
-            format_func=lambda x: VEHICLE_PROFILES[x]["label"]
-        )
-
-    with cmd_col3:
-        sat_imgs = [
-            "None",
-            "sat_disaster_shell_colony_flood.png",
-            "sat_disaster_amar_mahal_collapse.png",
-            "sat_inlaks_hospital.png",
-            "sat_vesit_campus.png",
-            "sat_surana_hospital.png",
-            "sat_zen_hospital.png",
-            "sat_chembur_naka.png",
-            "sat_rcf_shelter.png",
-            "sat_tilak_nagar.png",
-            "sat_mankhurd_depot.png"
-        ]
-        img_idx = sat_imgs.index(st.session_state.selected_image_name) if st.session_state.selected_image_name in sat_imgs else 0
-        img_val = st.selectbox(
-            "Satellite Surveillance Feed:",
-            options=sat_imgs,
-            index=img_idx,
-            format_func=lambda x: {
-                "None": "None (Sensor Mesh)",
-                "sat_disaster_shell_colony_flood.png": "VN Purav Marg Central Arterial (75cm Flood Hazard)",
-                "sat_disaster_amar_mahal_collapse.png": "Suman Nagar Flyover (Expansion Shear Hazard)",
-                "sat_inlaks_hospital.png": "Inlaks Hospital (Postal Colony)",
-                "sat_vesit_campus.png": "VESIT Campus (Collector Colony Safe Zone)",
-                "sat_surana_hospital.png": "Surana Sethia Hospital (Trauma ICU)",
-                "sat_zen_hospital.png": "Zen Multi Speciality Hospital",
-                "sat_chembur_naka.png": "Chembur Naka Transit Hub",
-                "sat_rcf_shelter.png": "RCF Sports Complex Mega-Shelter",
-                "sat_tilak_nagar.png": "Tilak Nagar Station Junction",
-                "sat_mankhurd_depot.png": "Mankhurd Supply Depot"
-            }.get(x, x),
-            help="High-resolution orbital satellite photography integrated into multimodal traversability"
-        )
-
-    with cmd_col4:
-        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        calc_submitted = st.form_submit_button("Calculate Route", type="primary", use_container_width=True)
-
-if calc_submitted:
-    st.session_state.directive_input = query_val
-    st.session_state.vehicle_type = v_val
-    st.session_state.selected_image_name = img_val
-    
-    img_target = None
-    if st.session_state.selected_image_name != "None":
-        img_target = os.path.join(current_dir, "data", "damage_images", st.session_state.selected_image_name)
-    
-    with st.spinner("Analyzing multimodal telemetry and calculating resilient corridor..."):
-        new_state = agent.run_pipeline(
-            query=query_val,
-            image_path=img_target,
-            vehicle_type=v_val,
-            avoid_hazards=st.session_state.avoid_hazards
-        )
-        st.session_state.current_state = new_state
-        
-        # Synchronize tactical reconnaissance hub with chosen telemetry or destination
-        image_to_node = {
-            "sat_zen_hospital.png": "N_HOSP_ZEN",
-            "sat_surana_hospital.png": "N_HOSP_SURANA",
-            "sat_inlaks_hospital.png": "N_HOSP_INLAKS",
-            "sat_disaster_shell_colony_flood.png": "N_INT_VN_PURAV",
-            "sat_disaster_amar_mahal_collapse.png": "N_INT_SUMAN_NAGAR",
-            "sat_vesit_campus.png": "N_CAMPUS_VESIT",
-            "sat_rcf_shelter.png": "N_SHELTER_RCF",
-            "sat_chembur_naka.png": "N_CHEMBUR_NAKA",
-            "sat_tilak_nagar.png": "N_INT_TILAK_NAGAR",
-            "sat_mankhurd_depot.png": "N_DEPOT_MANKHURD"
-        }
-        target_recon = image_to_node.get(img_val) or new_state.get("extracted_destination", "N_HOSP_ZEN")
-        st.session_state.recon_marker_selector = target_recon
-        st.session_state.selected_recon_node = target_recon
-        st.rerun()
-
-
-
-
-# ==============================================================================
-# MAIN TABS: USER-CENTRIC OPERATIONS (No Academic Module Division, No Emojis)
-# ==============================================================================
-tab_mission, tab_decision, tab_graph, tab_eval = st.tabs([
-    "Tactical Mission & Map",
-    "Decision Intelligence & Explainability",
-    "Knowledge Graph Topology",
-    "System Quality & Verification"
+# Navigation separates planning, data editing, and project context.
+tab_mission, tab_incidents, tab_decision, tab_graph, tab_eval, tab_about = st.tabs([
+    "Route planner", "Incidents", "Evidence", "Network", "Evaluation", "About"
 ])
+
+with tab_incidents:
+    st.subheader("Incident registry")
+    st.caption("Add a road restriction, update its measurements, or resolve it to recalculate routes.")
+    incident_roads = {
+        data["id"]: {"name": data["name"], "nodes": (u, v)}
+        for u, v, data in graph_store.graph.edges(data=True)
+        if not data["id"].endswith("_REV")
+    }
+    render_incident_manager(IncidentRepository(
+        incident_reports_path,
+        os.path.join(current_dir, "data", "disaster_reports.json"), incident_roads,
+    ), expanded=True)
+
+with tab_about:
+    st.subheader("About Aegis CrisisNav")
+    st.markdown("A GraphRAG demonstration of emergency routing in Chembur, Mumbai. Incident reports are retrieved from Qdrant and combined with a road graph to calculate vehicle-specific routes.")
+    st.markdown("**Demo flow:** plan a route → add or resolve an incident → see the route change → inspect the supporting evidence.")
+    st.info("The road network, incident reports, hospital capacity, and evacuation scenarios are sample data. Map tiles provide geographic context; they do not supply live road or hospital conditions.")
+    st.markdown("**How to read the results.** Route estimates include configured hazard penalties. Evidence counts show retrieved reports, not a probability of safety. Image search uses visual features and filenames; it does not measure flood depth or diagnose damage.")
+    st.markdown("**Evaluation.** Retrieval metrics are calculated when you run a benchmark. Grounding and judge metrics include custom heuristics and should be interpreted as demonstration measures.")
+    st.markdown("**Sustainable development goals**")
+    # Helper to load authentic official UN SVG vector files
+    def load_sdg_b64(fname: str) -> str:
+        path = os.path.join(current_dir, "assets", "sdg", fname)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                return base64.b64encode(f.read()).decode("utf-8")
+        return ""
+
+    sdg3_b64 = load_sdg_b64("sdg_3.svg")
+    sdg9_b64 = load_sdg_b64("sdg_9.svg")
+    sdg11_b64 = load_sdg_b64("sdg_11.svg")
+    sdg13_b64 = load_sdg_b64("sdg_13.svg")
+
+    # UN Sustainable Development Goals (SDG) Alignment Strip (Official High-Resolution Logos)
+    st.markdown(f"""
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.9px;">UN SUSTAINABLE DEVELOPMENT GOALS (SDGs):</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <!-- SDG 3 -->
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(76, 159, 56, 0.16); border: 1px solid rgba(76, 159, 56, 0.45); border-radius: 8px; padding: 6px 12px;">
+                <img src="data:image/svg+xml;base64,{sdg3_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
+                <div>
+                    <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 3: Good Health</div>
+                    <div style="color: #6EE7B7; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 3.6 & 3.d (Emergency Triage)</div>
+                </div>
+            </div>
+            <!-- SDG 9 -->
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 105, 37, 0.16); border: 1px solid rgba(253, 105, 37, 0.45); border-radius: 8px; padding: 6px 12px;">
+                <img src="data:image/svg+xml;base64,{sdg9_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
+                <div>
+                    <div style="color: #FDBA74; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 9: Resilient Infrastructure</div>
+                    <div style="color: #FED7AA; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 9.1 (Spatial Graph Defense)</div>
+                </div>
+            </div>
+            <!-- SDG 11 -->
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(253, 157, 36, 0.16); border: 1px solid rgba(253, 157, 36, 0.45); border-radius: 8px; padding: 6px 12px;">
+                <img src="data:image/svg+xml;base64,{sdg11_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
+                <div>
+                    <div style="color: #FDE68A; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 11: Sustainable Cities</div>
+                    <div style="color: #FEF08A; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 11.5 (Urban Protection)</div>
+                </div>
+            </div>
+            <!-- SDG 13 -->
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(63, 126, 68, 0.16); border: 1px solid rgba(63, 126, 68, 0.45); border-radius: 8px; padding: 6px 12px;">
+                <img src="data:image/svg+xml;base64,{sdg13_b64}" width="52" height="52" style="border-radius: 6px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" />
+                <div>
+                    <div style="color: #86EFAC; font-size: 13px; font-weight: 700; line-height: 1.25;">SDG 13: Climate Action</div>
+                    <div style="color: #A7F3D0; font-size: 10.5px; opacity: 0.9; margin-top: 2px;">Target 13.1 (Extreme Flood Defense)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with tab_mission:
+    st.markdown('<h2 class="planner-title">Plan an emergency route</h2>', unsafe_allow_html=True)
+    latest_report_time = max((r.get("timestamp", "") for r in disaster_reports), default="Not available")
+    st.caption(f"Chembur, Mumbai · Demo dataset · Latest report: {latest_report_time}")
+    # 2. Custom Directive Input & Parameter Bar (Form-backed for guaranteed input synchronization)
+    with st.form("dispatch_directive_form", clear_on_submit=False):
+        cmd_col1 = st.container()
+        cmd_col2, cmd_col3, cmd_col4 = st.columns([1.2, 1.6, 1.0], vertical_alignment="bottom")
+
+        with cmd_col1:
+            query_val = st.text_input(
+                "Where should the vehicle go?",
+                value=st.session_state.directive_input,
+                placeholder="e.g. Find fastest safe ambulance route from VESIT to Zen Multi Speciality Hospital avoiding flooded streets..."
+            )
+
+        with cmd_col2:
+            vehicle_opts = list(VEHICLE_PROFILES)
+            v_idx = vehicle_opts.index(st.session_state.vehicle_type) if st.session_state.vehicle_type in vehicle_opts else 0
+            v_val = st.selectbox(
+                "Vehicle",
+                options=vehicle_opts,
+                index=v_idx,
+                format_func=lambda x: VEHICLE_PROFILES[x]["label"]
+            )
+
+        with cmd_col3:
+            sat_imgs = [
+                "None",
+                "sat_disaster_shell_colony_flood.png",
+                "sat_disaster_amar_mahal_collapse.png",
+                "sat_inlaks_hospital.png",
+                "sat_vesit_campus.png",
+                "sat_surana_hospital.png",
+                "sat_zen_hospital.png",
+                "sat_chembur_naka.png",
+                "sat_rcf_shelter.png",
+                "sat_tilak_nagar.png",
+                "sat_mankhurd_depot.png"
+            ]
+            img_idx = sat_imgs.index(st.session_state.selected_image_name) if st.session_state.selected_image_name in sat_imgs else 0
+            img_val = st.selectbox(
+                "Reference image (optional)",
+                options=sat_imgs,
+                index=img_idx,
+                format_func=lambda x: {
+                    "None": "No image",
+                    "sat_disaster_shell_colony_flood.png": "VN Purav Marg Central Arterial (75cm Flood Hazard)",
+                    "sat_disaster_amar_mahal_collapse.png": "Suman Nagar Flyover (Expansion Shear Hazard)",
+                    "sat_inlaks_hospital.png": "Inlaks Hospital (Postal Colony)",
+                    "sat_vesit_campus.png": "VESIT Campus (Collector Colony Safe Zone)",
+                    "sat_surana_hospital.png": "Surana Sethia Hospital (Trauma ICU)",
+                    "sat_zen_hospital.png": "Zen Multi Speciality Hospital",
+                    "sat_chembur_naka.png": "Chembur Naka Transit Hub",
+                    "sat_rcf_shelter.png": "RCF Sports Complex Mega-Shelter",
+                    "sat_tilak_nagar.png": "Tilak Nagar Station Junction",
+                    "sat_mankhurd_depot.png": "Mankhurd Supply Depot"
+                }.get(x, x),
+                help="Choose a bundled reference image for the existing image-retrieval workflow"
+            )
+
+        with cmd_col4:
+            st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+            calc_submitted = st.form_submit_button("Find route", type="primary", use_container_width=True)
+
+    if calc_submitted:
+        st.session_state.directive_input = query_val
+        st.session_state.vehicle_type = v_val
+        st.session_state.selected_image_name = img_val
+
+        img_target = None
+        if st.session_state.selected_image_name != "None":
+            img_target = os.path.join(current_dir, "data", "damage_images", st.session_state.selected_image_name)
+
+        with st.spinner("Finding a route using the current incident reports..."):
+            new_state = agent.run_pipeline(
+                query=query_val,
+                image_path=img_target,
+                vehicle_type=v_val,
+                avoid_hazards=st.session_state.avoid_hazards
+            )
+            st.session_state.current_state = new_state
+
+            # Synchronize tactical reconnaissance hub with chosen telemetry or destination
+            image_to_node = {
+                "sat_zen_hospital.png": "N_HOSP_ZEN",
+                "sat_surana_hospital.png": "N_HOSP_SURANA",
+                "sat_inlaks_hospital.png": "N_HOSP_INLAKS",
+                "sat_disaster_shell_colony_flood.png": "N_INT_VN_PURAV",
+                "sat_disaster_amar_mahal_collapse.png": "N_INT_SUMAN_NAGAR",
+                "sat_vesit_campus.png": "N_CAMPUS_VESIT",
+                "sat_rcf_shelter.png": "N_SHELTER_RCF",
+                "sat_chembur_naka.png": "N_CHEMBUR_NAKA",
+                "sat_tilak_nagar.png": "N_INT_TILAK_NAGAR",
+                "sat_mankhurd_depot.png": "N_DEPOT_MANKHURD"
+            }
+            target_recon = image_to_node.get(img_val) or new_state.get("extracted_destination", "N_HOSP_ZEN")
+            st.session_state.recon_marker_selector = target_recon
+            st.session_state.selected_recon_node = target_recon
+            st.rerun()
+
+    # 1. Preset Crisis Scenarios (Quick 1-Click Launch for Mumbai Chembur)
+    st.caption("Try a demo scenario")
+    p_col1, p_col2, p_col3, p_col4, p_col5, p_col6 = st.columns([1.0, 1.0, 1.0, 1.0, 1.15, 0.75])
+
+    with p_col1:
+        if st.button("Flood detour", use_container_width=True, help="Calculate the current Chembur Naka to Zen Hospital route"):
+            st.session_state.active_scenario = "flood_bypass"
+            st.session_state.directive_input = "Find fastest safe ambulance route from Chembur Naka to Zen Multi Speciality Hospital avoiding flooded streets"
+            st.session_state.vehicle_type = "ambulance"
+            st.session_state.avoid_hazards = True
+            st.session_state.selected_image_name = "sat_disaster_shell_colony_flood.png"
+            img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_shell_colony_flood.png")
+            st.session_state.current_state = agent.run_pipeline(
+                query=st.session_state.directive_input,
+                image_path=img_p if os.path.exists(img_p) else None,
+                vehicle_type="ambulance",
+                avoid_hazards=True
+            )
+            st.session_state.recon_marker_selector = "N_INT_VN_PURAV"
+            st.session_state.selected_recon_node = "N_INT_VN_PURAV"
+            st.rerun()
+
+    with p_col2:
+        if st.button("Bridge closure", use_container_width=True, help="Calculate the current convoy route to Surana Hospital"):
+            st.session_state.active_scenario = "bridge_detour"
+            st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to Surana Sethia Hospital avoiding fractured Suman Nagar flyover"
+            st.session_state.vehicle_type = "high_clearance_truck"
+            st.session_state.avoid_hazards = True
+            st.session_state.selected_image_name = "sat_disaster_amar_mahal_collapse.png"
+            img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_amar_mahal_collapse.png")
+            st.session_state.current_state = agent.run_pipeline(
+                query=st.session_state.directive_input,
+                image_path=img_p if os.path.exists(img_p) else None,
+                vehicle_type="high_clearance_truck",
+                avoid_hazards=True
+            )
+            st.session_state.recon_marker_selector = "N_INT_SUMAN_NAGAR"
+            st.session_state.selected_recon_node = "N_INT_SUMAN_NAGAR"
+            st.rerun()
+
+    with p_col3:
+        if st.button("Campus transfer", use_container_width=True, help="Evacuation transit from VESIT Campus (Collector Colony) to Zen Hospital"):
+            st.session_state.active_scenario = "vesit_evac"
+            st.session_state.directive_input = "Find fastest safe ambulance route from Vivekanand Education Society's Institute of Technology (VESIT) to Zen Multi Speciality Hospital avoiding flooded streets"
+            st.session_state.vehicle_type = "ambulance"
+            st.session_state.avoid_hazards = True
+            st.session_state.selected_image_name = "sat_vesit_campus.png"
+            img_p = os.path.join(current_dir, "data", "damage_images", "sat_vesit_campus.png")
+            st.session_state.current_state = agent.run_pipeline(
+                query=st.session_state.directive_input,
+                image_path=img_p if os.path.exists(img_p) else None,
+                vehicle_type="ambulance",
+                avoid_hazards=True
+            )
+            st.rerun()
+
+    with p_col4:
+        if st.button("Hospital transfer", use_container_width=True, help="Evacuate casualties from RCF Mega-Shelter to Surana Hospital ICU"):
+            st.session_state.active_scenario = "casualty_triage"
+            st.session_state.directive_input = "Evacuate casualties from RCF Sports Complex Shelter to Surana Sethia Hospital with ICU trauma beds"
+            st.session_state.vehicle_type = "ambulance"
+            st.session_state.avoid_hazards = True
+            st.session_state.selected_image_name = "sat_surana_hospital.png"
+            img_p = os.path.join(current_dir, "data", "damage_images", "sat_surana_hospital.png")
+            st.session_state.current_state = agent.run_pipeline(
+                query=st.session_state.directive_input,
+                image_path=img_p if os.path.exists(img_p) else None,
+                vehicle_type="ambulance",
+                avoid_hazards=True
+            )
+            st.rerun()
+
+    with p_col5:
+        if st.button("VN Purav transfer", use_container_width=True, help="Calculate the existing evacuation scenario from VN Purav to Zen Hospital using current restrictions"):
+            st.session_state.active_scenario = "air_force_medevac"
+            st.session_state.directive_input = "Critical emergency evacuation from submerged VN Purav intersection to Zen Hospital rooftop helipad"
+            st.session_state.vehicle_type = "ambulance"
+            st.session_state.avoid_hazards = True
+            st.session_state.selected_image_name = "sat_disaster_shell_colony_flood.png"
+            img_p = os.path.join(current_dir, "data", "damage_images", "sat_disaster_shell_colony_flood.png")
+            st.session_state.current_state = agent.run_pipeline(
+                query=st.session_state.directive_input,
+                image_path=img_p if os.path.exists(img_p) else None,
+                vehicle_type="ambulance",
+                avoid_hazards=True
+            )
+            st.session_state.recon_marker_selector = "N_INT_VN_PURAV"
+            st.session_state.selected_recon_node = "N_INT_VN_PURAV"
+            st.rerun()
+
+    with p_col6:
+        cypher_code = graph_store.generate_neo4j_cypher()
+        st.download_button(
+            label="Export graph",
+            data=cypher_code,
+            file_name="neo4j_chembur_graph.cypher",
+            mime="text/plain",
+            use_container_width=True,
+            help="Download complete Neo4j Cypher script to replicate the spatial graph in Neo4j"
+        )
+
+    st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
 current_state = st.session_state.current_state
 primary_route = current_state.get("primary_route")
@@ -856,11 +883,11 @@ route_node_set = set(route_nodes)
 with tab_mission:
     # 1. Real-Time Telemetry KPI Cards
     kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
-    
+
     r_status = primary_route.get("status", "HALTED") if primary_route else "HALTED"
     r_time = primary_route.get("estimated_travel_time_min", 0.0) if primary_route else 0.0
     r_dist = primary_route.get("total_distance_km", 0.0) if primary_route else 0.0
-    r_conf = int(current_state.get("confidence_score", 0.0) * 100)
+    evidence_count = len(current_state.get("retrieved_incidents", []))
     bypassed_count = sum(
         1 for u, v, data in graph_store.graph.edges(data=True)
         if not data["id"].endswith("_REV")
@@ -872,30 +899,30 @@ with tab_mission:
     dest_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
     origin_label = graph_store.graph.nodes.get(origin_id, {}).get("name", origin_id)
     dest_label = graph_store.graph.nodes.get(dest_id, {}).get("name", dest_id)
-    
+
     with kpi1:
         if is_air_evac:
             status_color = "#F59E0B"
-            status_text = "AIR FORCE EVAC"
-            status_sub = "Ground severed -> Air-lift active"
+            status_text = "NO GROUND ROUTE"
+            status_sub = "Simulated aerial alternative"
         else:
             status_color = "#34D399" if r_status == "CLEAR" else ("#FBBF24" if r_status == "CAUTION" else "#F87171")
-            status_text = r_status
-            status_sub = "Verified safe passage" if r_status == "CLEAR" else "Transit restricted"
+            status_text = "ROUTE FOUND" if r_status == "CLEAR" else r_status
+            status_sub = "Within configured limits" if r_status == "CLEAR" else "Review route restrictions"
 
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-caption">Corridor Status</div>
+            <div class="metric-caption">Route status</div>
             <div class="metric-number" style="color: {status_color}; font-size: 20px;">{status_text}</div>
             <div class="metric-sub">{status_sub}</div>
         </div>
         """, unsafe_allow_html=True)
 
     with kpi2:
-        time_sub = "IAF flight transit time" if is_air_evac else "Optimal Dijkstra travel time"
+        time_sub = "Simulated flight estimate" if is_air_evac else "Includes hazard penalties"
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-caption">Transit Time</div>
+            <div class="metric-caption">Route estimate</div>
             <div class="metric-number" style="color: #38BDF8;">{r_time}<span class="metric-unit">min</span></div>
             <div class="metric-sub">{time_sub}</div>
         </div>
@@ -905,7 +932,7 @@ with tab_mission:
         dist_sub = "Direct flight vector" if is_air_evac else "Physical road length"
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-caption">Corridor Distance</div>
+            <div class="metric-caption">Distance</div>
             <div class="metric-number" style="color: #F8FAFC;">{r_dist}<span class="metric-unit">km</span></div>
             <div class="metric-sub">{dist_sub}</div>
         </div>
@@ -914,64 +941,35 @@ with tab_mission:
     with kpi4:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-caption">AI Confidence</div>
-            <div class="metric-number" style="color: #A78BFA;">{r_conf}<span class="metric-unit">%</span></div>
-            <div class="metric-sub">Multimodal grounding grade</div>
+            <div class="metric-caption">Retrieved evidence</div>
+            <div class="metric-number" style="color: #A78BFA;">{evidence_count}<span class="metric-unit">reports</span></div>
+            <div class="metric-sub">Supporting search results</div>
         </div>
         """, unsafe_allow_html=True)
 
     with kpi5:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-caption">Hazards Bypassed</div>
-            <div class="metric-number" style="color: #F87171;">{bypassed_count}<span class="metric-unit">zones</span></div>
-            <div class="metric-sub">Submerged / damaged roads</div>
+            <div class="metric-caption">Restricted roads</div>
+            <div class="metric-number" style="color: #F87171;">{bypassed_count}<span class="metric-unit">roads</span></div>
+            <div class="metric-sub">Across the demo network</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-    # High-Visibility Tactical Defense Alert Banner for Corridor Severance & Air Force Protocol
-    if is_air_evac or (not primary_route and r_status == "HALTED"):
-        st.markdown(f"""
-        <div style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid #EF4444; border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);">
-            <div style="display: flex; align-items: flex-start; gap: 14px;">
-                <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; background: #EF4444; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 14px #EF4444;">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-family: monospace; font-size: 13.5px; font-weight: 800; color: #FCA5A5; letter-spacing: 0.5px;">
-                        CRITICAL ALERT: TOTAL TERRESTRIAL CORRIDOR SEVERANCE
-                    </div>
-                    <div style="font-size: 12px; color: #E2E8F0; margin-top: 4px; line-height: 1.4;">
-                        All ground road arteries between <b>{origin_label}</b> and <b>{dest_label}</b> are completely submerged (>75cm flood depth) or structurally fractured. Terrestrial ambulance transit is disqualified under vehicle safety clearance limits.
-                    </div>
-                    <div style="font-size: 11.5px; color: #F59E0B; margin-top: 5px; font-weight: 600;">
-                        Tactical Action: Activated emergency <b>Indian Air Force (IAF) 121 Helicopter Unit / INS Shikra Rotary-Wing Air Evacuation</b> to <b>{dest_label} Helipad</b>.
-                    </div>
-                </div>
-            </div>
-            <div style="min-width: 175px; text-align: right;">
-                <span style="display: inline-block; background: #DC2626; color: #FFFFFF; font-family: monospace; font-size: 11px; font-weight: 800; padding: 7px 14px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 0 12px rgba(220, 38, 38, 0.8);">
-                    IAF MEDEVAC ACTIVE
-                </span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    if is_air_evac or not primary_route:
+        st.warning(f"No usable ground route from {origin_label} to {dest_label} under the current constraints. Any aerial corridor shown is a simulated alternative; no dispatch has been sent.")
 
     # 2. Interactive Map & Tactical Satellite Surveillance Hub (Side-by-Side)
-    map_col, recon_col = st.columns([1.65, 1.0])
+    map_col, recon_col = st.columns([2.2, 1.0])
 
     with map_col:
-        st.markdown('<div class="panel-heading">Tactical Geospatial Operations Map (Chembur, Mumbai)</div>', unsafe_allow_html=True)
-        
+        st.markdown('<div class="panel-heading">Route map · Chembur, Mumbai</div>', unsafe_allow_html=True)
+
         # Center on Chembur, Mumbai
         center_lat, center_lon = 19.0575, 72.8988
-        
+
         # Leaflet Folium Map with Dual Satellite and Street Basemaps
         fmap = folium.Map(
             location=[center_lat, center_lon],
@@ -986,7 +984,8 @@ with tab_mission:
         folium.TileLayer(
             tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             attr="Esri World Imagery",
-            name="Orbital Satellite (Esri)",
+            name="Satellite basemap (Esri)",
+            show=False,
             overlay=False,
             control=True
         ).add_to(fmap)
@@ -1079,9 +1078,9 @@ with tab_mission:
                             weight=4.5,
                             opacity=0.95,
                             dash_array="10, 10",
-                            tooltip=f"IAF Tactical Rotary Flight Vector: {seg.get('road_name')} ({seg.get('distance_km')} km)"
+                            tooltip=f"Simulated aerial corridor: {seg.get('road_name')} ({seg.get('distance_km')} km)"
                         ).add_to(fmap)
-                        
+
                         # Add midway airborne helicopter beacon
                         if len(seg_coords) >= 2:
                             mid_lat = (seg_coords[0][0] + seg_coords[-1][0]) / 2.0
@@ -1095,8 +1094,8 @@ with tab_mission:
                             """
                             folium.Marker(
                                 location=[mid_lat, mid_lon],
-                                popup=folium.Popup(f"<div style='font-family: sans-serif; color: #E2E8F0; padding: 3px;'><b style='color: #F59E0B;'>IAF Rotary-Wing Flight Vector</b><br><span style='font-size: 11px;'>Flight ETA: {r_time} min | Air Dist: {r_dist} km</span><br><span style='font-size: 10px; color: #94A3B8;'>Asset: Mil Mi-17 V5 Tactical Medevac</span></div>", max_width=240),
-                                tooltip="IAF Tactical Air Ambulance Flight Vector",
+                                popup=folium.Popup(f"<div style='font-family: sans-serif; color: #E2E8F0; padding: 3px;'><b style='color: #F59E0B;'>Simulated aerial corridor</b><br><span style='font-size: 11px;'>Flight ETA: {r_time} min | Air Dist: {r_dist} km</span><br><span style='font-size: 10px; color: #94A3B8;'>Asset: Mil Mi-17 V5 Tactical Medevac</span></div>", max_width=240),
+                                tooltip="Simulated aerial alternative",
                                 icon=folium.DivIcon(
                                     html=air_icon_html,
                                     icon_size=(34, 34),
@@ -1197,7 +1196,7 @@ with tab_mission:
             # Node role identification - dynamically anchored to active query source and destination
             is_origin = bool(active_origin and nid == active_origin)
             is_target = bool(active_target and nid == active_target)
-            
+
             hazards = graph_store.node_hazards(nid)
             is_flood_hazard = hazards["flood_depth_cm"] > 20
             is_structural_hazard = hazards["damage_severity"] >= 0.85
@@ -1356,85 +1355,13 @@ with tab_mission:
 
         # In-Map Tactical HUD Legend (Positioned top-right inside map canvas)
         in_map_legend_html = """
-        <div id="tactical-map-legend" style="
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            z-index: 1000;
-            background: rgba(11, 17, 30, 0.94);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 8px;
-            padding: 10px 12px;
-            color: #E2E8F0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-            font-size: 10.5px;
-            line-height: 1.35;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
-            pointer-events: auto;
-            width: 220px;
-        ">
-            <div style="font-weight: 800; font-size: 11px; letter-spacing: 0.6px; color: #38BDF8; text-transform: uppercase; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
-                Operational Legend
-            </div>
-            
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 3.5px; background: #00F0FF; border-radius: 2px; box-shadow: 0 0 6px #00F0FF;"></span>
-                <span style="font-weight: 700; color: #FFFFFF;">Active Safe Corridor</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 0; border-top: 3px dashed #F59E0B; box-shadow: 0 0 6px #F59E0B;"></span>
-                <span style="font-weight: 700; color: #F59E0B;">IAF Rotary Air Corridor</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 2px; background: #10B981; border-radius: 2px;"></span>
-                <span>Traversable Road (Clear)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 18px; height: 0; border-top: 2px dashed #38BDF8;"></span>
-                <span>Flooded Sector (>30cm)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
-                <span style="display: inline-block; width: 18px; height: 0; border-top: 2px dashed #EF4444;"></span>
-                <span>Structural Failure / Blocked</span>
-            </div>
-            
-            <div style="font-size: 9.5px; text-transform: uppercase; color: #94A3B8; font-weight: 700; margin-bottom: 4px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
-                Tactical Beacon Nodes
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 10px; height: 10px; background: #00F0FF; border-radius: 50%; box-shadow: 0 0 6px #00F0FF; border: 1.5px solid #FFFFFF;"></span>
-                <span style="font-weight: 700; color: #00F0FF;">Extraction Origin Beacon</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 10px; height: 10px; background: #10B981; border-radius: 50%; box-shadow: 0 0 6px #10B981; border: 1.5px solid #FFFFFF;"></span>
-                <span style="font-weight: 700; color: #34D399;">Target Safe Arrival Beacon</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 10px; height: 10px; background: #0284C7; border-radius: 50%; box-shadow: 0 0 6px #00F0FF; border: 1.5px solid #67E8F9;"></span>
-                <span>Flood Inundation (Central VN Purav)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; box-shadow: 0 0 6px #EF4444; border: 1.5px solid #FCA5A5;"></span>
-                <span>Structural Shear (Central Suman)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 9px; height: 9px; background: #1E1B4B; border-radius: 2px; border: 1.5px solid #818CF8; box-shadow: 0 0 4px #818CF8;"></span>
-                <span>Elevated Flyover (Amar Mahal - Clear)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 9px; height: 9px; background: #064E3B; border-radius: 2px; border: 1.5px solid #10B981;"></span>
-                <span>Hospital (Triage Reception)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px;">
-                <span style="display: inline-block; width: 9px; height: 9px; background: #451A03; border-radius: 2px; border: 1.5px solid #F59E0B;"></span>
-                <span>Relief Mega-Shelter</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 7px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #0B111E; border-radius: 50%; border: 1.5px solid #F97316; box-shadow: 0 0 4px #F97316;"></span>
-                <span>Clear Junctions (Shell Colony, etc.)</span>
-            </div>
+        <div id="tactical-map-legend" style="position:absolute;bottom:28px;left:12px;z-index:1000;background:rgba(11,17,30,.94);border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#E2E8F0;font:11px/1.8 system-ui;max-width:185px">
+            <b>Map key</b><br>
+            <span style="color:#00F0FF">━</span> Selected route<br>
+            <span style="color:#10B981">━</span> Open road<br>
+            <span style="color:#38BDF8">┄</span> Flood report<br>
+            <span style="color:#EF4444">┄</span> Damage / closure<br>
+            <span style="color:#F59E0B">┄</span> Simulated air route
         </div>
         """
         fmap.get_root().html.add_child(folium.Element(in_map_legend_html))
@@ -1444,16 +1371,16 @@ with tab_mission:
         components.html(map_html, height=550, scrolling=False)
 
     with recon_col:
-        st.markdown('<div class="panel-heading">Tactical Satellite Reconnaissance Hub</div>', unsafe_allow_html=True)
-        
+        st.markdown('<div class="panel-heading">Location details</div>', unsafe_allow_html=True)
+
         # All available nodes for inspection
         all_nodes_list = list(graph_store.graph.nodes(data=True))
         all_node_ids = [nid for nid, _ in all_nodes_list]
-        
+
         # Default to active route destination or target
         dest_node_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
         orig_node_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
-        
+
         if "recon_marker_selector" not in st.session_state or st.session_state.recon_marker_selector not in all_node_ids:
             st.session_state.recon_marker_selector = dest_node_id if dest_node_id in all_node_ids else all_node_ids[0]
 
@@ -1474,28 +1401,27 @@ with tab_mission:
             return f"{name} ({ntype})"
 
         default_idx = all_node_ids.index(st.session_state.recon_marker_selector) if st.session_state.recon_marker_selector in all_node_ids else 0
-        
+
         chosen_marker = st.selectbox(
-            "Inspect Map Marker Satellite Imagery:",
+            "Inspect a location",
             options=all_node_ids,
-            index=default_idx,
             format_func=get_recon_label,
             key="recon_marker_selector",
-            help="Select any Chembur marker to inspect authentic orbital satellite photography and telemetry"
+            help="Select a location to view stored coordinates, capacity, and reference imagery"
         )
         st.session_state.selected_recon_node = chosen_marker
-        
+
         sel_node_id = chosen_marker
         sel_data = graph_store.graph.nodes.get(sel_node_id, {})
         sel_img_name = get_node_satellite_image(sel_node_id)
         sel_img_path = os.path.join(current_dir, "data", "damage_images", sel_img_name)
-        
+
         # Telemetry styling & badges
         is_flood = graph_store.node_hazards(sel_node_id)["flood_depth_cm"] > 20
         is_struct = graph_store.node_hazards(sel_node_id)["damage_severity"] >= 0.85
         is_campus = (sel_node_id == "N_CAMPUS_VESIT")
         is_hosp = (sel_data.get("type") == "hospital")
-        
+
         if is_flood:
             status_border = "#EF4444"
             status_pill = '<span class="badge-critical">CRITICAL FLOOD HAZARD</span>'
@@ -1511,13 +1437,13 @@ with tab_mission:
         else:
             status_border = "#0284C7"
             status_pill = f'<span class="status-pill pill-cyan">{sel_data.get("operational_status", "ACTIVE").upper()}</span>'
-            
+
         capacity_str = f"<span>Capacity: <b style='color: #34D399;'>{sel_data.get('available_capacity', 0)}</b>/{sel_data.get('capacity', 0)} beds</span>" if sel_data.get('capacity') else ""
         icu_str = f"<span>ICU Beds: <b style='color: #38BDF8;'>{sel_data.get('icu_beds')}</b></span>" if sel_data.get('icu_beds') else ""
         telem_html = (
             f'<div class="glass-panel" style="padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid {status_border};">'
             f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
-            f'<span style="font-family: monospace; font-size: 10px; font-weight: 800; color: #38BDF8;">ORBITAL SATELLITE TELEMETRY</span>'
+            f'<span style="font-family: monospace; font-size: 10px; font-weight: 800; color: #38BDF8;">REFERENCE LOCATION</span>'
             f'{status_pill}</div>'
             f'<div style="font-size: 13.5px; font-weight: 700; color: #F8FAFC;">{sel_data.get("name", sel_node_id)}</div>'
             f'<div style="font-size: 10.5px; color: #94A3B8; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 14px;">'
@@ -1526,30 +1452,30 @@ with tab_mission:
             f'{capacity_str}{icu_str}</div></div>'
         )
         st.markdown(telem_html, unsafe_allow_html=True)
-        
+
         if os.path.exists(sel_img_path):
-            st.image(sel_img_path, caption=f"ArcGIS World Imagery: {sel_data.get('name', sel_node_id)} (Sub-meter optical recon)", use_container_width=True)
+            st.image(sel_img_path, caption=f"Reference image: {sel_data.get('name', sel_node_id)}", use_container_width=True)
         else:
-            st.info("Satellite imagery loading for selected location...")
+            st.info("No bundled reference image is available for this location.")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-    # 3. Operational Field Dispatch Directive & Turn-by-Turn Navigation (Full-Width Row Below Map)
+    # 3. Route summary & Turn-by-Turn Navigation (Full-Width Row Below Map)
     disp_col1, disp_col2 = st.columns([1.1, 1.0])
 
     with disp_col1:
-        st.markdown('<div class="panel-heading">Operational Field Dispatch Directive</div>', unsafe_allow_html=True)
-        
+        st.markdown('<div class="panel-heading">Route summary</div>', unsafe_allow_html=True)
+
         target_info = current_state.get("target_facility_info")
         target_name = target_info.get("facility_name", "Designated Emergency Facility") if target_info else "Designated Emergency Facility"
         avail_beds = target_info.get("available_capacity", "N/A") if target_info else "N/A"
         total_beds = target_info.get("total_capacity", "N/A") if target_info else "N/A"
         icu_beds = target_info.get("icu_beds", "N/A") if target_info else "N/A"
-        
+
         st.markdown(f"""
         <div class="glass-panel" style="border-left: 3px solid #38BDF8; padding: 12px 16px; margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <b style="color: #38BDF8; font-size: 11.5px; letter-spacing: 0.5px;">TARGET RECEPTION FACILITY</b>
+                <b style="color: #38BDF8; font-size: 11.5px; letter-spacing: 0.5px;">Destination facility</b>
                 <span class="badge-clear">ACTIVE</span>
             </div>
             <div style="font-size: 15px; font-weight: 700; color: #F8FAFC;">{target_name}</div>
@@ -1563,50 +1489,25 @@ with tab_mission:
         dest_id = current_state.get("extracted_destination", "N_HOSP_ZEN")
         origin_label = graph_store.graph.nodes.get(origin_id, {}).get("name", origin_id)
         dest_label = graph_store.graph.nodes.get(dest_id, {}).get("name", dest_id)
-        
+
         corridor_path_nodes = [graph_store.graph.nodes.get(n, {}).get("name", n) for n in route_nodes]
         corridor_path_str = " -> ".join(corridor_path_nodes) if corridor_path_nodes else "Direct Arterial Path"
-        
+
         if is_air_evac:
             st.markdown(f"""
             <div class="directive-card">
-                <div class="directive-header">
-                    <span>TACTICAL AIR-LIFT DIRECTIVE</span>
-                    <span class="badge-critical" style="background: #DC2626; color: white;">IAF MEDEVAC</span>
-                </div>
-                <div class="directive-route">
-                    {origin_label} [Ground LZ] ==> {dest_label} [Rooftop Helipad]
-                </div>
-                <div class="directive-stats">
-                    <span>Flight Time: <b style="color: #F59E0B;">{r_time} min</b></span>
-                    <span>Air Distance: <b style="color: #F8FAFC;">{r_dist} km</b></span>
-                    <span>Safety Readiness: <b style="color: #34D399;">96%</b></span>
-                </div>
-                <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700; margin-bottom: 4px;">
-                    Direct Tactical Air Corridor (IAF Flight Vector):
-                </div>
-                <div style="font-size: 11px; color: #F59E0B; font-family: monospace; line-height: 1.4; margin-bottom: 10px;">
-                    {origin_label} [Extraction Perimeter LZ] ==> {dest_label} [Certified Rooftop Helipad]
-                </div>
-                <div class="directive-item">
-                    <span style="color: #EF4444; font-weight: bold;">[SEVERED]</span>
-                    <span>All terrestrial road corridors disqualified due to 75cm flood inundation and bridge structural fracture.</span>
-                </div>
-                <div class="directive-item">
-                    <span style="color: #F59E0B; font-weight: bold;">[AIR FORCE]</span>
-                    <span>Dispatched Indian Air Force 121 Helicopter Unit (Mil Mi-17 V5 / HAL Dhruv ALH) with tactical hoist extraction.</span>
-                </div>
-                <div class="directive-item">
-                    <span style="color: #34D399; font-weight: bold;">[HELIPAD]</span>
-                    <span>Direct rotary approach coordinated with {dest_label} rooftop helipad and trauma resuscitation team.</span>
-                </div>
+                <div class="directive-header">Simulated aerial alternative</div>
+                <div class="directive-route">{origin_label} → {dest_label}</div>
+                <div class="directive-stats">Distance: {r_dist} km · Model estimate: {r_time} min</div>
+                <div class="directive-item">The routing engine found no ground route for the selected vehicle. This air corridor illustrates a fallback scenario.</div>
+                <div class="directive-item">Aircraft availability and landing sites are not verified. No external dispatch or hospital notification is performed.</div>
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
             <div class="directive-card">
                 <div class="directive-header">
-                    <span>MISSION DIRECTIVE</span>
+                    <span>Recommended route</span>
                     <span class="badge-clear">{r_status} CORRIDOR</span>
                 </div>
                 <div class="directive-route">
@@ -1615,10 +1516,10 @@ with tab_mission:
                 <div class="directive-stats">
                     <span>Transit: <b style="color: #38BDF8;">{r_time} min</b></span>
                     <span>Distance: <b style="color: #F8FAFC;">{r_dist} km</b></span>
-                    <span>Safety: <b style="color: #34D399;">{r_conf}%</b></span>
+                    <span>Evidence: <b style="color: #34D399;">{evidence_count} reports</b></span>
                 </div>
                 <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700; margin-bottom: 4px;">
-                    Verified Corridor Path:
+                    Selected route:
                 </div>
                 <div style="font-size: 11px; color: #A78BFA; font-family: monospace; line-height: 1.4; margin-bottom: 10px;">
                     {corridor_path_str}
@@ -1633,13 +1534,13 @@ with tab_mission:
                 </div>
                 <div class="directive-item">
                     <span style="color: #38BDF8; font-weight: bold;">[TRIAGE]</span>
-                    <span>Emergency reception and bed allocation alerted at {dest_label}.</span>
+                    <span>Destination availability comes from the demo dataset; no bed booking or notification has been sent.</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
     with disp_col2:
-        st.markdown('<div class="panel-heading">Turn-by-Turn Corridor Navigation</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading">Route segments</div>', unsafe_allow_html=True)
         if primary_route and primary_route.get("segments"):
             st.markdown('<div style="max-height: 185px; overflow-y: auto;">', unsafe_allow_html=True)
             for idx, seg in enumerate(primary_route["segments"], 1):
@@ -1652,13 +1553,13 @@ with tab_mission:
                     tag_class = "badge-clear" if seg_status == "open" else ("badge-caution" if seg_status == "caution" else "badge-critical")
                     status_lbl = seg_status.upper()
                     tag_style = ''
-                
+
                 from_label = graph_store.graph.nodes.get(seg.get('from_node'), {}).get('name', seg.get('from_node'))
                 to_label = graph_store.graph.nodes.get(seg.get('to_node'), {}).get('name', seg.get('to_node'))
                 if is_air_evac:
                     from_label += " [Extraction LZ]"
                     to_label += " [Helipad Reception]"
-                
+
                 st.markdown(f"""
                 <div class="turn-item">
                     <div>
@@ -1709,7 +1610,7 @@ with tab_decision:
     # 1. LLM Cognitive Decision Attribution (Hero Component)
     llm_attribution_text = explanation.get("llm_attribution") or explanation.get("summary", "No attribution available.")
     llm_badge = explanation.get("llm_source", "GEMINI 3.1 FLASH LITE")
-    
+
     # Clean and split bullet points to prevent raw markdown asterisks or detached bullet dots
     raw_lines = [l.strip() for l in llm_attribution_text.split("\n") if l.strip()]
     cleaned_bullets = []
@@ -1725,10 +1626,10 @@ with tab_decision:
             current_bullet.append(cleaned)
     if current_bullet:
         cleaned_bullets.append(" ".join(current_bullet))
-    
+
     if not cleaned_bullets:
         cleaned_bullets = [llm_attribution_text]
-        
+
     bullet_html_list = []
     for b in cleaned_bullets:
         bullet_html_list.append(
@@ -1742,8 +1643,8 @@ with tab_decision:
     st.markdown(
         f'<div class="glass-panel" style="border-left: 3px solid #8B5CF6; margin-bottom: 16px; background: rgba(139, 92, 246, 0.05); padding: 18px 22px;">'
         f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">'
-        f'<span style="font-family: monospace; font-size: 13px; font-weight: 800; color: #C4B5FD; letter-spacing: 0.8px;">LLM COGNITIVE DECISION ATTRIBUTION</span>'
-        f'<span class="status-pill pill-cyan" style="background: rgba(139, 92, 246, 0.25); color: #DDD6FE; border-color: rgba(139, 92, 246, 0.5); font-size: 11px; font-weight: 700; padding: 3px 10px;">POWERED BY {llm_badge}</span>'
+        f'<span style="font-family: monospace; font-size: 13px; font-weight: 800; color: #C4B5FD; letter-spacing: 0.8px;">GENERATED ROUTE EXPLANATION</span>'
+        f'<span class="status-pill pill-cyan" style="background: rgba(139, 92, 246, 0.25); color: #DDD6FE; border-color: rgba(139, 92, 246, 0.5); font-size: 11px; font-weight: 700; padding: 3px 10px;">SOURCE: {llm_badge}</span>'
         f'</div>'
         f'<div>{rendered_bullets}</div>'
         f'</div>',
@@ -1756,7 +1657,7 @@ with tab_decision:
         m1, m2, m3, m4 = st.columns(4)
         with m1:
             st.markdown(
-                f'<div class="telemetry-card"><div class="metric-label" style="font-size: 11px;">Corridor Distance</div>'
+                f'<div class="telemetry-card"><div class="metric-label" style="font-size: 11px;">Distance</div>'
                 f'<div class="metric-value" style="font-size: 22px;">{pr.get("total_distance_km", 0):.2f} <span style="font-size: 13px; color: #64748B;">km</span></div></div>',
                 unsafe_allow_html=True
             )
@@ -1788,7 +1689,7 @@ with tab_decision:
 
     with dec_col1:
         # A. Disqualified Hazards (Clean Compact Matrix)
-        st.markdown('<div class="panel-heading" style="font-size: 13px;">Hazard Disqualification Matrix</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Road restriction evidence</div>', unsafe_allow_html=True)
         eliminated = explanation.get("eliminated_edges", [])
         if eliminated:
             table_rows = []
@@ -1823,7 +1724,7 @@ with tab_decision:
             )
 
         # B. Critical Infrastructure Bottlenecks
-        st.markdown('<div class="panel-heading" style="font-size: 13px;">Infrastructure Bottleneck Monitoring</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Infrastructure bottlenecks</div>', unsafe_allow_html=True)
         bottlenecks = explanation.get("bottlenecks", [])
         if bottlenecks:
             for b in bottlenecks:
@@ -1841,7 +1742,7 @@ with tab_decision:
 
     with dec_col2:
         # C. Counterfactual Path Comparison ("Why Not Path B?")
-        st.markdown('<div class="panel-heading" style="font-size: 13px;">Counterfactual Analysis (Why Not Path B?)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Why this route?</div>', unsafe_allow_html=True)
         cf = explanation.get("counterfactual_analysis", {})
         if isinstance(cf, dict) and cf.get("details"):
             for d in cf["details"]:
@@ -1865,7 +1766,7 @@ with tab_decision:
             )
 
         # D. Multimodal Satellite Evidence Grounding
-        st.markdown('<div class="panel-heading" style="font-size: 13px;">Multimodal Satellite Grounding</div>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-heading" style="font-size: 13px;">Related reports and images</div>', unsafe_allow_html=True)
         citations = explanation.get("evidence_citations", [])
         if citations:
             for cit in citations:
@@ -1896,10 +1797,10 @@ with tab_decision:
 # TAB 3: KNOWLEDGE GRAPH TOPOLOGY
 # ==============================================================================
 with tab_graph:
-    st.markdown('<div class="panel-heading">Interactive Knowledge Subgraph Topology (Physics Simulation)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-heading">Road network and selected route</div>', unsafe_allow_html=True)
     st.markdown("""
     <div style="font-size: 12px; color: #94A3B8; margin-bottom: 10px;">
-        Force-directed spatial knowledge graph of Chembur, Mumbai. Traversed emergency corridor is highlighted in <b>Cyber Cyan (#00F0FF)</b>, 
+        Force-directed spatial knowledge graph of Chembur, Mumbai. Traversed emergency corridor is highlighted in <b>Cyber Cyan (#00F0FF)</b>,
         and emergency aerial medevac flight vectors in <b>Dashed Gold (#F59E0B)</b>. Real-time physics engine dynamically balances nodes and edges based on topological tension.
     </div>
     """, unsafe_allow_html=True)
@@ -1949,7 +1850,7 @@ with tab_graph:
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #F59E0B;"></span>
-            <span style="color: #F59E0B;">IAF Rotary Air Vector</span>
+            <span style="color: #F59E0B;">Simulated aerial alternative</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <span style="display: inline-block; width: 16px; height: 0; border-top: 2px dashed #EF4444;"></span>
@@ -1994,17 +1895,17 @@ with tab_graph:
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="panel-heading">Semantic Knowledge Graph Entities & GraphRAG Triples</div>', unsafe_allow_html=True)
-    
+    st.markdown('<div class="panel-heading">Places and graph relationships</div>', unsafe_allow_html=True)
+
     kg_tab1, kg_tab2 = st.tabs(["Active Knowledge Triples & Semantic Relations", "Geospatial Entity Node Registry"])
-    
+
     with kg_tab1:
         st.markdown("""
         <div style="font-size: 11.5px; color: #94A3B8; margin-bottom: 10px;">
             Verified crisis infrastructure triples loaded in the GraphRAG store. Nodes and dynamic hazard states dynamically penalize edge traversal cost in Dijkstra / A*.
         </div>
         """, unsafe_allow_html=True)
-        
+
         # Display semantic triples in a clean tactical table
         triples_data = []
         for u, v, data in graph_store.graph.edges(data=True):
@@ -2016,7 +1917,7 @@ with tab_graph:
             dmg = int(data.get("damage_severity", 0) * 100)
             fld = data.get("flood_depth_cm", 0)
             dist = data.get("distance_km", 0)
-            
+
             if status == "flooded" or fld > 25:
                 pred = "INUNDATED_CORRIDOR"
                 badge = f'<span class="badge-critical" style="background: rgba(56,189,248,0.2); color: #38BDF8; border-color: #38BDF8;">FLOOD {fld}cm</span>'
@@ -2029,7 +1930,7 @@ with tab_graph:
             else:
                 pred = "ROAD_CONNECTS"
                 badge = '<span class="badge-clear">TRAVERSABLE</span>'
-                
+
             triples_data.append({
                 "Subject (Source)": f"{u_name} ({u})",
                 "Predicate (Relationship)": pred,
@@ -2037,7 +1938,7 @@ with tab_graph:
                 "Distance": f"{dist} km",
                 "Status": badge
             })
-            
+
         triples_df = pd.DataFrame(triples_data)
         st.write(triples_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
@@ -2047,7 +1948,7 @@ with tab_graph:
             Canonical spatial entities within the Mumbai Chembur metropolitan disaster zone.
         </div>
         """, unsafe_allow_html=True)
-        
+
         nodes_data = []
         for nid, data in graph_store.graph.nodes(data=True):
             ntype = data.get("type", "intersection").upper()
@@ -2055,7 +1956,7 @@ with tab_graph:
             cap = f"{data.get('available_capacity', 0)}/{data.get('capacity', 0)}" if data.get('capacity') else "N/A"
             icu = str(data.get("icu_beds", "N/A")) if data.get("icu_beds") is not None else "N/A"
             helipad = "Yes (Rooftop)" if data.get("helipad") else "No"
-            
+
             nodes_data.append({
                 "Canonical ID": nid,
                 "Entity Name": data.get("name", nid),
@@ -2066,7 +1967,7 @@ with tab_graph:
                 "ICU Beds": icu,
                 "Helipad LZ": helipad
             })
-            
+
         nodes_df = pd.DataFrame(nodes_data)
         st.dataframe(nodes_df, use_container_width=True, hide_index=True)
 
@@ -2075,160 +1976,110 @@ with tab_graph:
 # TAB 5: SYSTEM QUALITY & VERIFICATION (Benchmarks & Evaluation)
 # ==============================================================================
 with tab_eval:
-    st.markdown('<div class="panel-heading">System Verification, Information Retrieval & Quality Benchmarks</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-heading">Evaluate this dataset</div>', unsafe_allow_html=True)
     st.markdown("""
     <div style="font-size: 13px; color: #94A3B8; margin-bottom: 16px;">
-        Quantitative evaluation across classical Information Retrieval metrics (NDCG@K, MRR, Precision, Recall), 
-        RAGAS Faithfulness grounding, and LLM-as-a-Judge domain safety rubrics evaluated on the Chembur disaster network.
+        Run the existing benchmark to calculate retrieval metrics on the current dataset.
+        Grounding and judge scores use custom heuristics, with an optional model judge; they are not a validated measure of operational safety.
     </div>
     """, unsafe_allow_html=True)
 
     # Execution Button
     eval_btn_col1, eval_btn_col2 = st.columns([1.5, 2.5])
     with eval_btn_col1:
-        if st.button("Run Quality Benchmark Suite", type="primary", use_container_width=True):
-            with st.spinner("Benchmarking IR ranking, RAGAS faithfulness, and LLM-as-a-judge scorecards..."):
+        if st.button("Run benchmark", type="primary", use_container_width=True):
+            with st.spinner("Calculating retrieval metrics and the existing evaluation rubrics..."):
                 bench_results = run_benchmark_suite(agent, retriever)
                 st.session_state.benchmark_results = bench_results
                 st.success("Quality Benchmark Complete.")
 
-    # Render Results if Available or Default Baseline
-    if "benchmark_results" in st.session_state:
-        results = st.session_state.benchmark_results
+    if "benchmark_results" not in st.session_state:
+        st.info("No benchmark has been run in this session. Choose Run benchmark to calculate results for the current dataset.")
     else:
-        # Pre-computed baseline results for immediate, delightful rendering
-        results = {
-            "mean_ndcg@3": 0.912,
-            "mrr": 1.0,
-            "mean_precision@3": 0.889,
-            "mean_recall@3": 0.944,
-            "mean_faithfulness": 0.975,
-            "mean_answer_relevance": 0.952,
-            "mean_judge_score": 9.55,
-            "benchmark_cases_evaluated": 3,
-            "detailed_results": [
-                {
-                    "query_id": "Q1",
-                    "query": "Find fastest safe ambulance route from Chembur Naka to nearest hospital avoiding flooded streets",
-                    "ndcg@3": 0.914,
-                    "mrr": 1.0,
-                    "precision@3": 0.833,
-                    "recall@3": 0.833,
-                    "faithfulness": 0.97,
-                    "answer_relevance": 0.95,
-                    "judge_composite": 9.60,
-                    "judge_critique": "Optimal path computed bypassing flooded VN Purav Marg central arterial; transit ETA and facility bed metrics accurately verified."
-                },
-                {
-                    "query_id": "Q2",
-                    "query": "Bridge inspection report and damage status on Central Suman Nagar Flyover",
-                    "ndcg@3": 1.0,
-                    "mrr": 1.0,
-                    "precision@3": 1.0,
-                    "recall@3": 1.0,
-                    "faithfulness": 1.0,
-                    "answer_relevance": 0.98,
-                    "judge_composite": 9.80,
-                    "judge_critique": "Perfect precision retrieving DISP-2026-002 structural alert with high grounding."
-                },
-                {
-                    "query_id": "Q3",
-                    "query": "Emergency supply convoy from Chembur Naka to RCF Sports Mega-Shelter avoiding waterlogged sectors",
-                    "ndcg@3": 0.822,
-                    "mrr": 1.0,
-                    "precision@3": 0.833,
-                    "recall@3": 1.0,
-                    "faithfulness": 0.96,
-                    "answer_relevance": 0.93,
-                    "judge_composite": 9.25,
-                    "judge_critique": "Successfully diverted around VN Purav-Suman Nagar hazard sector; safe transit confirmed via clear Chembur arterial spine."
-                }
-            ]
-        }
-
-    # Metric Cards
-    bm1, bm2, bm3, bm4, bm5 = st.columns(5)
-    with bm1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-caption">Ranking NDCG@3</div>
-            <div class="metric-number" style="color: #38BDF8;">{results['mean_ndcg@3']}</div>
-            <div class="metric-sub">Ranked relevance gain</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with bm2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-caption">Reciprocal Rank (MRR)</div>
-            <div class="metric-number" style="color: #34D399;">{results['mrr']}</div>
-            <div class="metric-sub">Rank-1 hazard retrieval</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with bm3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-caption">Precision@3</div>
-            <div class="metric-number" style="color: #F8FAFC;">{results['mean_precision@3']}</div>
-            <div class="metric-sub">Relevant report ratio</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with bm4:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-caption">Faithfulness</div>
-            <div class="metric-number" style="color: #A78BFA;">{results['mean_faithfulness']}</div>
-            <div class="metric-sub">Context grounding score</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with bm5:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-caption">LLM Judge Score</div>
-            <div class="metric-number" style="color: #FBBF24;">{results['mean_judge_score']}<span class="metric-unit">/10</span></div>
-            <div class="metric-sub">Safety rubric composite</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-
-    # Detailed Benchmark Scorecard Table
-    st.markdown("##### Scenario Benchmark Scorecard")
-    df_detailed = pd.DataFrame(results["detailed_results"])
-    st.dataframe(
-        df_detailed[[
-            "query_id", "query", "ndcg@3", "mrr", "precision@3", 
-            "recall@3", "faithfulness", "answer_relevance", "judge_composite", "judge_critique"
-        ]],
-        use_container_width=True
-    )
-
-    # Metric Comparison Chart (Clean Tactical Progress Scorecard)
-    st.markdown('<div class="panel-heading" style="margin-top: 16px;">Information Retrieval & Safety Grounding Distribution</div>', unsafe_allow_html=True)
-    
-    metrics_display = [
-        ("Ranking Quality (NDCG@3)", results['mean_ndcg@3'], 1.0, "#38BDF8", "Measures graded relevance of top-3 retrieved hazard reports"),
-        ("Reciprocal Rank (MRR)", results['mrr'], 1.0, "#34D399", "Speed of retrieving the single most critical blocking incident at rank 1"),
-        ("Precision@3", results['mean_precision@3'], 1.0, "#38BDF8", "Ratio of retrieved documents that were strictly relevant to the corridor"),
-        ("Recall@3", results['mean_recall@3'], 1.0, "#34D399", "Coverage of ground-truth hazards captured by the retriever"),
-        ("RAGAS Faithfulness", results['mean_faithfulness'], 1.0, "#A78BFA", "Proportion of claims in dispatch order strictly grounded in retrieved evidence"),
-        ("Answer Relevance", results['mean_answer_relevance'], 1.0, "#A78BFA", "Degree of alignment between user query constraints and final tactical order"),
-        ("LLM Domain Judge Score", results['mean_judge_score'] / 10.0, 1.0, "#FBBF24", "Composite domain safety, hazard avoidance, and bed triage validation (scaled /10)")
-    ]
-
-    c_left, c_right = st.columns(2)
-    for idx, (m_name, val, max_v, bar_color, desc) in enumerate(metrics_display):
-        pct = int(min(val / max_v, 1.0) * 100)
-        target_col = c_left if idx % 2 == 0 else c_right
-        with target_col:
+        results = st.session_state.benchmark_results
+        # Metric Cards
+        bm1, bm2, bm3, bm4, bm5 = st.columns(5)
+        with bm1:
             st.markdown(f"""
-            <div class="glass-panel" style="padding: 10px 14px; margin-bottom: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                    <b style="color: #F1F5F9; font-size: 11.5px;">{m_name}</b>
-                    <span style="font-family: monospace; font-weight: 800; color: {bar_color}; font-size: 12px;">{val:.3f} ({pct}%)</span>
-                </div>
-                <div style="font-size: 10px; color: #64748B; margin-bottom: 6px;">{desc}</div>
-                <div style="background: rgba(255, 255, 255, 0.06); height: 5px; border-radius: 3px; overflow: hidden;">
-                    <div style="background: {bar_color}; width: {pct}%; height: 100%; border-radius: 3px; box-shadow: 0 0 6px {bar_color};"></div>
-                </div>
+            <div class="metric-card">
+                <div class="metric-caption">Ranking NDCG@3</div>
+                <div class="metric-number" style="color: #38BDF8;">{results['mean_ndcg@3']}</div>
+                <div class="metric-sub">Ranked relevance gain</div>
             </div>
             """, unsafe_allow_html=True)
+        with bm2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-caption">Reciprocal Rank (MRR)</div>
+                <div class="metric-number" style="color: #34D399;">{results['mrr']}</div>
+                <div class="metric-sub">Rank-1 hazard retrieval</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with bm3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-caption">Precision@3</div>
+                <div class="metric-number" style="color: #F8FAFC;">{results['mean_precision@3']}</div>
+                <div class="metric-sub">Relevant report ratio</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with bm4:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-caption">Grounding heuristic</div>
+                <div class="metric-number" style="color: #A78BFA;">{results['mean_faithfulness']}</div>
+                <div class="metric-sub">Custom heuristic</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with bm5:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-caption">Judge rubric score</div>
+                <div class="metric-number" style="color: #FBBF24;">{results['mean_judge_score']}<span class="metric-unit">/10</span></div>
+                <div class="metric-sub">Existing evaluation rubric</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+
+        # Detailed Benchmark Scorecard Table
+        st.markdown("##### Scenario Benchmark Scorecard")
+        df_detailed = pd.DataFrame(results["detailed_results"])
+        st.dataframe(
+            df_detailed[[
+                "query_id", "query", "ndcg@3", "mrr", "precision@3",
+                "recall@3", "faithfulness", "answer_relevance", "judge_composite", "judge_critique"
+            ]],
+            use_container_width=True
+        )
+
+        # Metric Comparison Chart (Clean Tactical Progress Scorecard)
+        st.markdown('<div class="panel-heading" style="margin-top: 16px;">Retrieval and grounding metrics</div>', unsafe_allow_html=True)
+
+        metrics_display = [
+            ("Ranking Quality (NDCG@3)", results['mean_ndcg@3'], 1.0, "#38BDF8", "Measures graded relevance of top-3 retrieved hazard reports"),
+            ("Reciprocal Rank (MRR)", results['mrr'], 1.0, "#34D399", "Speed of retrieving the single most critical blocking incident at rank 1"),
+            ("Precision@3", results['mean_precision@3'], 1.0, "#38BDF8", "Ratio of retrieved documents that were strictly relevant to the corridor"),
+            ("Recall@3", results['mean_recall@3'], 1.0, "#34D399", "Coverage of ground-truth hazards captured by the retriever"),
+            ("Grounding heuristic", results['mean_faithfulness'], 1.0, "#A78BFA", "Custom grounding heuristic; see About for its interpretation"),
+            ("Answer Relevance", results['mean_answer_relevance'], 1.0, "#A78BFA", "Degree of alignment between user query constraints and final tactical order"),
+            ("Judge rubric score", results['mean_judge_score'] / 10.0, 1.0, "#FBBF24", "Existing judge rubric, using a model or deterministic fallback (scaled /10)")
+        ]
+
+        c_left, c_right = st.columns(2)
+        for idx, (m_name, val, max_v, bar_color, desc) in enumerate(metrics_display):
+            pct = int(min(val / max_v, 1.0) * 100)
+            target_col = c_left if idx % 2 == 0 else c_right
+            with target_col:
+                st.markdown(f"""
+                <div class="glass-panel" style="padding: 10px 14px; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <b style="color: #F1F5F9; font-size: 11.5px;">{m_name}</b>
+                        <span style="font-family: monospace; font-weight: 800; color: {bar_color}; font-size: 12px;">{val:.3f} ({pct}%)</span>
+                    </div>
+                    <div style="font-size: 10px; color: #64748B; margin-bottom: 6px;">{desc}</div>
+                    <div style="background: rgba(255, 255, 255, 0.06); height: 5px; border-radius: 3px; overflow: hidden;">
+                        <div style="background: {bar_color}; width: {pct}%; height: 100%; border-radius: 3px; box-shadow: 0 0 6px {bar_color};"></div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)

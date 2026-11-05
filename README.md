@@ -240,3 +240,13 @@ with open("neo4j_crisis.cypher", "w") as f:
     f.write(cypher_script)
 ```
 Paste into Neo4j Browser or run via `cypher-shell` to instantiate the spatial graph in a Neo4j instance.
+
+## Demo interface
+
+The dashboard opens on **Route planner**, with the request, vehicle selection,
+reference-image option, scenario shortcuts, and map together. **Incidents** holds
+the report editor; **Evidence** and **Network** explain the result. **Evaluation**
+shows results only after **Run benchmark** is selected. **About** explains the
+sample dataset, implementation limits, and SDG alignment. Evidence counts replace
+unvalidated confidence percentages, and aerial fallbacks are labelled simulations.
+This presentation update does not change routing, retrieval, storage, or scoring.
