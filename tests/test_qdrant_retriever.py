@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class QdrantRetrieverTests(unittest.TestCase):
     def setUp(self):
-        self.env = patch.dict("os.environ", {"GEMINI_API_KEY": ""})
+        self.env = patch.dict("os.environ", {"GEMINI_API_KEY": "", "EMBEDDING_PROVIDER": "hash", "EMBEDDING_DIM": "128"})
         self.env.start()
         self.client = QdrantClient(":memory:")
         self.r = MultimodalRetriever(128, qdrant_client=self.client, collection_prefix="test")
@@ -99,7 +99,10 @@ class QdrantRetrieverTests(unittest.TestCase):
     def test_dimension_isolation_and_incompatible_collection(self):
         other = MultimodalRetriever(256, qdrant_client=self.client, collection_prefix="test")
         self.assertNotEqual(other.store.collections, self.r.store.collections)
-        self.client.create_collection("bad_reports_128", vectors_config=models.VectorParams(size=64, distance=models.Distance.COSINE))
+        bad = MultimodalRetriever(128, qdrant_client=self.client, collection_prefix="bad")
+        name = bad.store.collections["reports"]
+        self.client.delete_collection(name)
+        self.client.create_collection(name, vectors_config=models.VectorParams(size=64, distance=models.Distance.COSINE))
         with self.assertRaisesRegex(ValueError, "128-dimensional"):
             MultimodalRetriever(128, qdrant_client=self.client, collection_prefix="bad")
 

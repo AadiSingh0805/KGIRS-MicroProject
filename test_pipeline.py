@@ -23,7 +23,7 @@ def main():
     print("\n=== TEST 2: MULTIMODAL RETRIEVER ===")
     reports_path = os.path.join("data", "disaster_reports.json")
     client = QdrantClient(":memory:")
-    retriever = MultimodalRetriever(embedding_dim=128, qdrant_client=client)
+    retriever = MultimodalRetriever(embedding_dim=128, qdrant_client=client, embedding_provider="hash")
     with open(reports_path, "r", encoding="utf-8") as f:
         reps = json.load(f)
     retriever.index_reports(reps)

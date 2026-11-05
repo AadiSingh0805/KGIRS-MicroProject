@@ -26,7 +26,7 @@ class IncidentManagementTests(unittest.TestCase):
                       if not data["id"].endswith("_REV")}
         self.repository = IncidentRepository(self.path, ROOT / "data/disaster_reports.json", self.roads)
         self.client = QdrantClient(":memory:")
-        self.env = patch.dict("os.environ", {"GEMINI_API_KEY": ""})
+        self.env = patch.dict("os.environ", {"GEMINI_API_KEY": "", "EMBEDDING_PROVIDER": "hash", "EMBEDDING_DIM": "128"})
         self.env.start()
         self.retriever = MultimodalRetriever(128, qdrant_client=self.client)
 
@@ -146,7 +146,7 @@ class IncidentManagementTests(unittest.TestCase):
             self.assertEqual(app.session_state["current_state"]["primary_route"]["path"], original)
             from src.qdrant_store import configured_client
             client = configured_client()
-            self.assertEqual(client.count("crisisnav_reports_128").count, 7)
+            self.assertEqual(client.count(MultimodalRetriever(128, qdrant_client=client).store.collections["reports"]).count, 7)
             client.close()
 
     def test_editor_create_and_resolve_flow(self):

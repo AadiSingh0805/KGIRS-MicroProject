@@ -5,17 +5,12 @@ Uses Gemini or deterministic text embeddings, visual features, and persistent Qd
 """
 
 import os
-import hashlib
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 import numpy as np
 from PIL import Image
 from .qdrant_store import QdrantVectorStore
 
-try:
-    import google.generativeai as genai
-    _GENAI_AVAILABLE = True
-except ImportError:
-    _GENAI_AVAILABLE = False
+from .embeddings import TextEmbedder
 
 
 class MultimodalRetriever:
@@ -23,72 +18,23 @@ class MultimodalRetriever:
     Multimodal vector index and retriever for crisis dispatch reports and damage images.
     Stores embeddings and metadata in Qdrant for text, visual, and multimodal queries.
     """
-    def __init__(self, embedding_dim: int = 256, api_key: Optional[str] = None,
-                 qdrant_client=None, collection_prefix: Optional[str] = None):
-        if embedding_dim <= 0:
-            raise ValueError("embedding_dim must be positive")
-        self.store = QdrantVectorStore(embedding_dim, qdrant_client, collection_prefix)
-        self.embedding_dim = embedding_dim
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self._setup_api()
+    def __init__(self, embedding_dim: Optional[int] = None, api_key: Optional[str] = None,
+                 qdrant_client=None, collection_prefix: Optional[str] = None,
+                 embedding_provider: Optional[str] = None):
+        self.embedder = TextEmbedder(embedding_dim, embedding_provider, api_key)
+        self.embedding_dim = self.embedder.dimension
+        self.api_key = self.embedder.api_key
+        self.embedding_profiles = {
+            "reports": dict(self.embedder.profile),
+            "images": {"features": "rgb-gradient-filename-v1", "text": dict(self.embedder.profile)},
+        }
+        self.store = QdrantVectorStore(
+            self.embedding_dim, qdrant_client, collection_prefix, self.embedding_profiles
+        )
 
-    def _setup_api(self):
-        if self.api_key and _GENAI_AVAILABLE:
-            try:
-                genai.configure(api_key=self.api_key)
-            except Exception:
-                pass
-
-    def compute_text_embedding(self, text: str) -> np.ndarray:
-        """
-        Computes text embedding. Uses Gemini models/text-embedding-004 if available,
-        falling back to deterministic semantic hashing and vocabulary term vector.
-        """
-        if self.api_key and _GENAI_AVAILABLE:
-            for m_name in ["models/gemini-embedding-001", "models/text-embedding-004"]:
-                try:
-                    response = genai.embed_content(
-                        model=m_name,
-                        content=text,
-                        task_type="retrieval_document"
-                    )
-                    raw_emb = response.get("embedding", {})
-                    if isinstance(raw_emb, dict) and "values" in raw_emb:
-                        emb = np.array(raw_emb["values"], dtype=np.float32)
-                    elif isinstance(raw_emb, list):
-                        emb = np.array(raw_emb, dtype=np.float32)
-                    else:
-                        emb = np.array(response.get("embedding", []), dtype=np.float32)
-                        
-                    if len(emb) != self.embedding_dim:
-                        if len(emb) > self.embedding_dim:
-                            emb = emb[:self.embedding_dim]
-                        else:
-                            emb = np.pad(emb, (0, self.embedding_dim - len(emb)))
-                    norm = np.linalg.norm(emb)
-                    return emb / (norm + 1e-8)
-                except Exception:
-                    continue
-
-        # Robust High-Dimension Semantic Fallback Vector
-        vec = np.zeros(self.embedding_dim, dtype=np.float32)
-        tokens = text.lower().replace(",", " ").replace(".", " ").replace(":", " ").split()
-        for idx, token in enumerate(tokens):
-            # Seeded deterministic projection
-            h = int(hashlib.md5(token.encode()).hexdigest(), 16)
-            pos = h % self.embedding_dim
-            sign = 1.0 if ((h >> 8) % 2 == 0) else -1.0
-            weight = 1.0 + (1.0 / (idx + 1))
-            
-            # Boost emergency keywords
-            if any(k in token for k in ["flood", "water", "crack", "bridge", "collapse", "hospital", "landslide", "blocked"]):
-                weight *= 3.0
-            vec[pos] += sign * weight
-
-        norm = np.linalg.norm(vec)
-        if norm > 0:
-            vec /= norm
-        return vec
+    def compute_text_embedding(self, text: str, task_type: str = "RETRIEVAL_DOCUMENT") -> np.ndarray:
+        """Use the configured provider and exact dimension for every request."""
+        return self.embedder.embed(text, task_type)
 
     def compute_image_embedding(self, image_path: str) -> np.ndarray:
         """
@@ -96,50 +42,46 @@ class MultimodalRetriever:
         thermal/structural indicators) calibrated for crisis damage imagery.
         """
         vec = np.zeros(self.embedding_dim, dtype=np.float32)
-        if not os.path.exists(image_path):
-            return vec
+        if not os.path.isfile(image_path):
+            raise FileNotFoundError(f"Image file does not exist: {image_path}")
 
-        try:
-            with Image.open(image_path) as img:
-                img_rgb = img.convert("RGB")
-                img_resized = img_rgb.resize((64, 64))
-                arr = np.array(img_resized, dtype=np.float32) / 255.0
+        with Image.open(image_path) as img:
+            img_rgb = img.convert("RGB")
+            img_resized = img_rgb.resize((64, 64))
+            arr = np.array(img_resized, dtype=np.float32) / 255.0
 
-                # 1. Color channel moments (Red = hazard/fire, Blue = water, Brown = landslide)
-                r_mean, g_mean, b_mean = arr[:, :, 0].mean(), arr[:, :, 1].mean(), arr[:, :, 2].mean()
-                r_std, g_std, b_std = arr[:, :, 0].std(), arr[:, :, 1].std(), arr[:, :, 2].std()
+            # 1. Color channel moments (Red = hazard/fire, Blue = water, Brown = landslide)
+            r_mean, g_mean, b_mean = arr[:, :, 0].mean(), arr[:, :, 1].mean(), arr[:, :, 2].mean()
+            r_std, g_std, b_std = arr[:, :, 0].std(), arr[:, :, 1].std(), arr[:, :, 2].std()
 
-                # 2. Gradient / Edge magnitude (structural cracks and debris)
-                dx = np.diff(arr, axis=1)
-                dy = np.diff(arr, axis=0)
-                edge_energy = float(np.mean(np.abs(dx)) + np.mean(np.abs(dy)))
+            # 2. Gradient / Edge magnitude (structural cracks and debris)
+            dx = np.diff(arr, axis=1)
+            dy = np.diff(arr, axis=0)
+            edge_energy = float(np.mean(np.abs(dx)) + np.mean(np.abs(dy)))
 
-                # 3. Spatial quadrant distribution
-                quadrants = [
-                    arr[:32, :32], arr[:32, 32:],
-                    arr[32:, :32], arr[32:, 32:]
-                ]
-                quad_features = []
-                for q in quadrants:
-                    quad_features.extend([q[:, :, 0].mean(), q[:, :, 1].mean(), q[:, :, 2].mean()])
+            # 3. Spatial quadrant distribution
+            quadrants = [
+                arr[:32, :32], arr[:32, 32:],
+                arr[32:, :32], arr[32:, 32:]
+            ]
+            quad_features = []
+            for q in quadrants:
+                quad_features.extend([q[:, :, 0].mean(), q[:, :, 1].mean(), q[:, :, 2].mean()])
 
-                # Compose feature slots
-                feature_list = [r_mean, g_mean, b_mean, r_std, g_std, b_std, edge_energy] + quad_features
-                for i, val in enumerate(feature_list):
-                    idx = (i * 13) % self.embedding_dim
-                    vec[idx] += val
+            # Compose feature slots
+            feature_list = [r_mean, g_mean, b_mean, r_std, g_std, b_std, edge_energy] + quad_features
+            for i, val in enumerate(feature_list):
+                idx = (i * 13) % self.embedding_dim
+                vec[idx] += val
 
-                # High-level domain hazard projection
-                filename = os.path.basename(image_path).lower()
-                name_emb = self.compute_text_embedding(filename)
-                vec = 0.6 * vec + 0.4 * name_emb
+            # High-level domain hazard projection
+            filename = os.path.basename(image_path).lower()
+            name_emb = self.compute_text_embedding(filename)
+            vec = 0.6 * vec + 0.4 * name_emb
 
-                norm = np.linalg.norm(vec)
-                if norm > 0:
-                    vec /= norm
-        except Exception as e:
-            print(f"Warning: Failed to extract image embedding for {image_path}: {e}")
-
+            norm = np.linalg.norm(vec)
+            if norm > 0:
+                vec /= norm
         return vec
 
     def index_reports(self, reports: List[Dict[str, Any]]) -> None:
@@ -184,7 +126,7 @@ class MultimodalRetriever:
         """Search Qdrant, including reports persisted by previous app runs."""
         if top_k <= 0:
             return []
-        matches = self.store.search("reports", self.compute_text_embedding(query), top_k)
+        matches = self.store.search("reports", self.compute_text_embedding(query, "RETRIEVAL_QUERY"), top_k)
         return [{"score": round(hit.score, 4), "report": hit.payload["report"]}
                 for hit in matches]
 
@@ -195,7 +137,7 @@ class MultimodalRetriever:
         if query_image_path and os.path.exists(query_image_path):
             embedding = self.compute_image_embedding(query_image_path)
         elif query_text:
-            embedding = self.compute_text_embedding(query_text)
+            embedding = self.compute_text_embedding(query_text, "RETRIEVAL_QUERY")
         else:
             return []
         matches = self.store.search("images", embedding, top_k)

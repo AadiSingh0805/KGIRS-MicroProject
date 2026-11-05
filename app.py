@@ -49,6 +49,7 @@ from src.explainability import ReasoningChainVisualizer
 from src.evaluation import run_benchmark_suite, CRISIS_BENCHMARK_DATASET
 from src.incident_repository import IncidentRepository
 from src.incident_ui import render_incident_manager
+from src.vehicle_profiles import VEHICLE_PROFILES
 
 # ==============================================================================
 # STREAMLIT CONFIGURATION - CLEAN FULL-CANVAS LAYOUT (NO SIDEBAR, NO EMOJIS)
@@ -360,6 +361,8 @@ def get_data_fingerprint() -> str:
     if os.path.exists(incident_reports_path):
         with open(incident_reports_path, "rb") as f:
             h.update(f.read())
+    for name in ("EMBEDDING_PROVIDER", "EMBEDDING_DIM"):
+        h.update(os.getenv(name, "").encode())
     return h.hexdigest()[:16]
 
 @st.cache_resource(show_spinner=False)
@@ -375,7 +378,7 @@ def load_crisis_system(mesh_fingerprint: str):
 
     # 2. Multimodal Telemetry Retriever & Agent
     api_key = os.getenv("GEMINI_API_KEY")
-    retriever = MultimodalRetriever(embedding_dim=128, api_key=api_key)
+    retriever = MultimodalRetriever(api_key=api_key)
     if os.path.exists(reports_path):
         with open(reports_path, "r", encoding="utf-8") as f:
             reports_data = json.load(f)
@@ -744,18 +747,13 @@ with st.form("dispatch_directive_form", clear_on_submit=False):
         )
         
     with cmd_col2:
-        vehicle_opts = ["ambulance", "high_clearance_truck", "rescue_boat", "civilian_car"]
+        vehicle_opts = list(VEHICLE_PROFILES)
         v_idx = vehicle_opts.index(st.session_state.vehicle_type) if st.session_state.vehicle_type in vehicle_opts else 0
         v_val = st.selectbox(
             "Vehicle Profile:",
             options=vehicle_opts,
             index=v_idx,
-            format_func=lambda x: {
-                "ambulance": "Ambulance (<= 20cm flood)",
-                "high_clearance_truck": "Rescue Truck (<= 60cm flood)",
-                "rescue_boat": "Rescue Boat (Deep water)",
-                "civilian_car": "Civilian Car (<= 15cm flood)"
-            }.get(x, x)
+            format_func=lambda x: VEHICLE_PROFILES[x]["label"]
         )
 
     with cmd_col3:

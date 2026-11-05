@@ -1,6 +1,9 @@
 """Persistent Qdrant storage shared across retrievers and Streamlit reloads."""
 import os
 import uuid
+import hashlib
+import json
+import numpy as np
 from functools import lru_cache, wraps
 from threading import RLock
 from pathlib import Path
@@ -49,12 +52,18 @@ class QdrantVectorStore:
     """Separate cosine collections for reports and image feature vectors."""
 
     @_synchronized
-    def __init__(self, embedding_dim: int, client=None, collection_prefix=None):
+    def __init__(self, embedding_dim: int, client=None, collection_prefix=None, embedding_profiles=None):
         self.client = client if client is not None else configured_client()
         prefix = collection_prefix or os.getenv("QDRANT_COLLECTION_PREFIX", "crisisnav")
-        self.collections = {
-            kind: f"{prefix}_{kind}_{embedding_dim}" for kind in ("reports", "images")
-        }
+        if not embedding_profiles or set(embedding_profiles) != {"reports", "images"}:
+            raise ValueError("Versioned embedding profiles are required for both modalities")
+        self.embedding_dim = embedding_dim
+        self.embedding_profiles = embedding_profiles
+        self.collections = {}
+        for kind, profile in embedding_profiles.items():
+            signature = hashlib.sha256(json.dumps(profile, sort_keys=True).encode()).hexdigest()[:16]
+            self.collections[kind] = f"{prefix}_{kind}_{embedding_dim}_{signature}"
+
         for name in self.collections.values():
             if not self.client.collection_exists(name):
                 self.client.create_collection(
@@ -76,9 +85,15 @@ class QdrantVectorStore:
         Only this application's dedicated collection is synchronized. Validation
         and embedding generation finish before this method writes anything.
         """
+        # Validate the complete batch before the first write, so a bad vector
+        # cannot partially replace a healthy snapshot.
+        for record in records:
+            self._validate_vector(record["embedding"])
         points = [models.PointStruct(
             id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"crisisnav:{kind}:{r['id']}")),
-            vector=r["embedding"].tolist(), payload=r["payload"],
+            vector=r["embedding"].tolist(), payload={
+                **r["payload"], "embedding_profile": self.embedding_profiles[kind]
+            },
         ) for r in records]
         name = self.collections[kind]
         for offset in range(0, len(points), 64):
@@ -90,13 +105,28 @@ class QdrantVectorStore:
     def search(self, kind: str, vector, top_k: int):
         if top_k <= 0:
             return []
-        return self.client.query_points(
+        self._validate_vector(vector)
+        if not np.any(vector):
+            return []
+        points = self.client.query_points(
             collection_name=self.collections[kind], query=vector.tolist(),
             query_filter=models.Filter(must_not=[models.FieldCondition(
                 key="report.incident_status", match=models.MatchValue(value="resolved")
             )]) if kind == "reports" else None,
             limit=top_k, with_payload=True, with_vectors=False,
         ).points
+        for point in points:
+            self._validate_profile(kind, point.payload)
+        return points
+
+    def _validate_vector(self, vector):
+        vector = np.asarray(vector)
+        if vector.shape != (self.embedding_dim,) or not np.isfinite(vector).all():
+            raise ValueError(f"Expected a finite {self.embedding_dim}-dimensional embedding")
+
+    def _validate_profile(self, kind, payload):
+        if not payload or payload.get("embedding_profile") != self.embedding_profiles[kind]:
+            raise ValueError("Stored embedding profile is incompatible. Reindex this collection before searching.")
 
     @_synchronized
     def reports_snapshot(self):
@@ -107,6 +137,8 @@ class QdrantVectorStore:
                 collection_name=self.collections["reports"], limit=128,
                 offset=offset, with_payload=True, with_vectors=False,
             )
-            reports.extend(point.payload["report"] for point in points)
+            for point in points:
+                self._validate_profile("reports", point.payload)
+                reports.append(point.payload["report"])
             if offset is None:
                 return reports

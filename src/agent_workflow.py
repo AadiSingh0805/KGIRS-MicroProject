@@ -13,6 +13,7 @@ import urllib.request
 from typing import Dict, Any, List, Optional, TypedDict, Tuple
 from .graph_store import CrisisSpatialGraph
 from .multimodal_retriever import MultimodalRetriever
+from .vehicle_profiles import normalize_vehicle_type
 
 try:
     import google.generativeai as genai
@@ -322,14 +323,16 @@ class CrisisResponseAgent:
         destination = extracted_dest or ("N_HOSP_ZEN" if not facility_type else None)
 
         # Dynamic vehicle type extraction from text
-        if any(w in q_lower for w in ["boat", "zodiac", "raft"]):
+        if re.search(r"\b(boat|zodiac|raft)\b", q_lower):
             state["vehicle_type"] = "rescue_boat"
-        elif any(w in q_lower for w in ["truck", "heavy vehicle", "unimog"]):
+        elif re.search(r"\b(truck|heavy vehicle|unimog)\b", q_lower):
             state["vehicle_type"] = "high_clearance_truck"
-        elif any(w in q_lower for w in ["car", "sedan", "civilian"]):
+        elif re.search(r"\b(car|sedan|civilian)\b", q_lower):
             state["vehicle_type"] = "civilian_car"
-        elif "ambulance" in q_lower:
+        elif re.search(r"\bambulance\b", q_lower):
             state["vehicle_type"] = "ambulance"
+
+        state["vehicle_type"] = normalize_vehicle_type(state.get("vehicle_type", "ambulance"))
 
         # By default in crisis navigation, all emergency dispatch avoids impassable hazards
         if any(w in q_lower for w in ["ignore hazard", "unconstrained", "force direct", "allow flood"]):

@@ -10,6 +10,7 @@ import math
 import os
 from typing import Dict, List, Optional, Tuple, Any
 import networkx as nx
+from .vehicle_profiles import VEHICLE_PROFILES, normalize_vehicle_type
 
 class CrisisSpatialGraph:
     """
@@ -144,6 +145,7 @@ class CrisisSpatialGraph:
         Calculates effective traversal cost (minutes + risk penalty).
         Returns infinity (math.inf) if impassable for the given vehicle type.
         """
+        vehicle_type = normalize_vehicle_type(vehicle_type)
         # Absolute blockers
         if not edge_data.get("traversable", True) and avoid_hazards:
             return float("inf")
@@ -155,12 +157,7 @@ class CrisisSpatialGraph:
         base_time = edge_data.get("base_time_min", 2.0)
 
         # Vehicle threshold constraints
-        max_flood_tolerance = {
-            "ambulance": 20.0,         # 20cm max safe water clearance
-            "high_clearance_truck": 60.0,
-            "rescue_boat": 999.0,
-            "civilian_car": 15.0
-        }.get(vehicle_type, 20.0)
+        max_flood_tolerance = VEHICLE_PROFILES[vehicle_type]["max_flood_cm"]
 
         if avoid_hazards:
             if flood > max_flood_tolerance:
