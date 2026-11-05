@@ -117,6 +117,51 @@ Create or edit `.env` in the root workspace:
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
+### Qdrant vector storage
+
+Report embeddings, image feature vectors, and their metadata are stored in
+Qdrant. Retrieval uses Qdrant cosine search rather than in-memory Python lists.
+The existing Gemini/hash text embeddings and visual feature extraction remain unchanged.
+
+Copy `.env.example` to `.env` and configure it as needed. By default, no server
+or credentials are required: embedded Qdrant persists data under
+`data/qdrant_storage/` (ignored by Git). `QDRANT_PATH` can override that location;
+relative paths resolve from the repository root. `.env` is loaded for both the
+app and command-line use, with existing environment variables taking precedence.
+
+For a Qdrant server or Qdrant Cloud, set `QDRANT_URL` and, when required,
+`QDRANT_API_KEY`. A configured server failure is surfaced; storage does not
+silently switch to a different backend.
+
+The dashboard indexes reports and available images at startup into
+`crisisnav_reports_128` and `crisisnav_images_128`. Collection names include the
+embedding dimension so the default 256-dimensional retriever and the
+128-dimensional dashboard/test pipeline do not conflict. Set
+`QDRANT_COLLECTION_PREFIX` to isolate another dataset. Collections must use
+cosine distance and the expected dimension; incompatible collections produce
+an error without being recreated.
+
+Indexing synchronizes a complete snapshot per modality: stable UUID point IDs
+prevent duplicates, updated records replace old payloads/vectors, and records
+absent from the snapshot are removed. Passing an empty list clears that
+modality's collection. Use dedicated collections: do not point unrelated
+projects or concurrent dataset writers at the same prefix. Retrieval can read
+persisted vectors without calling the indexing methods again.
+
+Embedded storage supports one application process per directory; clients are
+shared within the process for Streamlit reloads. Store operations are serialized
+with a process-wide lock, and the embedded SQLite connection permits access
+from successive Streamlit script threads. For multiple processes, use a
+Qdrant server. Changing the embedding model/provider requires reindexing both
+modalities, even when vector dimensions remain the same. The existing
+per-request Gemini fallback can produce a different embedding space when the
+API is unavailable; for consistent offline runs, leave `GEMINI_API_KEY` unset.
+
+Run storage integration tests with:
+```sh
+python -m unittest discover -s tests -v
+```
+
 ### 3. Run the Streamlit Mission Control App
 ```powershell
 streamlit run app.py

@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+from qdrant_client import QdrantClient
 
 # Ensure paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -21,7 +22,8 @@ def main():
 
     print("\n=== TEST 2: MULTIMODAL RETRIEVER ===")
     reports_path = os.path.join("data", "disaster_reports.json")
-    retriever = MultimodalRetriever(embedding_dim=128)
+    client = QdrantClient(":memory:")
+    retriever = MultimodalRetriever(embedding_dim=128, qdrant_client=client)
     with open(reports_path, "r", encoding="utf-8") as f:
         reps = json.load(f)
     retriever.index_reports(reps)
@@ -64,6 +66,7 @@ def main():
     assert bench["mean_ndcg@3"] > 0, "NDCG@3 should be > 0"
     assert bench["mrr"] > 0, "MRR should be > 0"
 
+    client.close()
     print("\n[SUCCESS] ALL TESTS PASSED SUCCESSFULLY!")
 
 if __name__ == "__main__":

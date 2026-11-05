@@ -10,4 +10,5 @@ venv/
 .DS_Store
 *.tmp
 temp_upload.png
-
+data/qdrant_storage/
+qdrant_storage/

@@ -1,16 +1,15 @@
 """
 Multimodal Geospatial Incident & Damage Retriever
 Provides semantic vector search across incident dispatch texts and reconnaissance images.
-Supports CLIP/Gemini embedding generation, Qdrant/LanceDB abstraction, and hybrid graph scoring.
+Uses Gemini or deterministic text embeddings, visual features, and persistent Qdrant search.
 """
 
 import os
-import json
-import math
 import hashlib
 from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 from PIL import Image
+from .qdrant_store import QdrantVectorStore
 
 try:
     import google.generativeai as genai
@@ -22,13 +21,15 @@ except ImportError:
 class MultimodalRetriever:
     """
     Multimodal vector index and retriever for crisis dispatch reports and damage images.
-    Implements cosine similarity indexing with support for text, visual, and multimodal queries.
+    Stores embeddings and metadata in Qdrant for text, visual, and multimodal queries.
     """
-    def __init__(self, embedding_dim: int = 256, api_key: Optional[str] = None):
+    def __init__(self, embedding_dim: int = 256, api_key: Optional[str] = None,
+                 qdrant_client=None, collection_prefix: Optional[str] = None):
+        if embedding_dim <= 0:
+            raise ValueError("embedding_dim must be positive")
+        self.store = QdrantVectorStore(embedding_dim, qdrant_client, collection_prefix)
         self.embedding_dim = embedding_dim
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.reports_index: List[Dict[str, Any]] = []
-        self.images_index: List[Dict[str, Any]] = []
         self._setup_api()
 
     def _setup_api(self):
@@ -37,13 +38,6 @@ class MultimodalRetriever:
                 genai.configure(api_key=self.api_key)
             except Exception:
                 pass
-
-    def _cosine_similarity(self, v1: np.ndarray, v2: np.ndarray) -> float:
-        norm1 = np.linalg.norm(v1)
-        norm2 = np.linalg.norm(v2)
-        if norm1 == 0 or norm2 == 0:
-            return 0.0
-        return float(np.dot(v1, v2) / (norm1 * norm2))
 
     def compute_text_embedding(self, text: str) -> np.ndarray:
         """
@@ -149,65 +143,65 @@ class MultimodalRetriever:
         return vec
 
     def index_reports(self, reports: List[Dict[str, Any]]) -> None:
-        """Indexes crisis dispatch reports."""
-        self.reports_index = []
-        for r in reports:
-            text_corpus = f"{r.get('incident_type', '')} {r.get('text', '')} {r.get('action_required', '')} {' '.join(r.get('affected_edges', []))}"
-            emb = self.compute_text_embedding(text_corpus)
-            self.reports_index.append({
-                "report_id": r.get("report_id"),
-                "data": r,
-                "embedding": emb,
-                "text_corpus": text_corpus
+        """Synchronize the complete report snapshot into Qdrant."""
+        records = []
+        seen = set()
+        for report in reports:
+            report_id = report.get("report_id")
+            if not report_id or report_id in seen:
+                raise ValueError("Each report requires a unique, non-empty report_id")
+            seen.add(report_id)
+            text = f"{report.get('incident_type', '')} {report.get('text', '')} {report.get('action_required', '')} {' '.join(report.get('affected_edges', []))}"
+            records.append({
+                "id": report_id,
+                "embedding": self.compute_text_embedding(text),
+                "payload": {"report_id": report_id, "report": report, "text_corpus": text},
             })
+        self.store.replace("reports", records)
 
     def index_images(self, image_metadata: List[Dict[str, Any]]) -> None:
-        """Indexes damage reconnaissance images."""
-        self.images_index = []
-        for im in image_metadata:
-            path = im.get("image_path")
-            emb = self.compute_image_embedding(path)
-            self.images_index.append({
-                "image_id": im.get("image_id", os.path.basename(path)),
-                "path": path,
-                "associated_report": im.get("associated_report"),
-                "hazard_type": im.get("hazard_type"),
-                "embedding": emb
+        """Synchronize the complete image snapshot into Qdrant."""
+        records = []
+        seen = set()
+        for image in image_metadata:
+            path = image.get("image_path")
+            if not path or not os.path.isfile(path):
+                raise ValueError(f"Image file does not exist: {path!r}")
+            image_id = image.get("image_id") or os.path.basename(path)
+            if image_id in seen:
+                raise ValueError("Each image requires a unique image_id (or filename)")
+            seen.add(image_id)
+            records.append({
+                "id": image_id,
+                "embedding": self.compute_image_embedding(path),
+                "payload": {"image_id": image_id, "path": path,
+                            "associated_report": image.get("associated_report"),
+                            "hazard_type": image.get("hazard_type")},
             })
+        self.store.replace("images", records)
 
     def retrieve_reports(self, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
-        """Semantic search over indexed dispatch reports."""
-        if not self.reports_index:
+        """Search Qdrant, including reports persisted by previous app runs."""
+        if top_k <= 0:
             return []
-
-        q_emb = self.compute_text_embedding(query)
-        scored = []
-        for item in self.reports_index:
-            sim = self._cosine_similarity(q_emb, item["embedding"])
-            scored.append((sim, item["data"]))
-
-        scored.sort(key=lambda x: x[0], reverse=True)
-        return [{"score": round(sim, 4), "report": rep} for sim, rep in scored[:top_k]]
+        matches = self.store.search("reports", self.compute_text_embedding(query), top_k)
+        return [{"score": round(hit.score, 4), "report": hit.payload["report"]}
+                for hit in matches]
 
     def retrieve_images(self, query_text: Optional[str] = None, query_image_path: Optional[str] = None, top_k: int = 3) -> List[Dict[str, Any]]:
-        """Multimodal retrieval over damage images."""
-        if not self.images_index:
+        """Search persisted image vectors using the existing multimodal features."""
+        if top_k <= 0:
             return []
-
         if query_image_path and os.path.exists(query_image_path):
-            q_emb = self.compute_image_embedding(query_image_path)
+            embedding = self.compute_image_embedding(query_image_path)
         elif query_text:
-            q_emb = self.compute_text_embedding(query_text)
+            embedding = self.compute_text_embedding(query_text)
         else:
             return []
-
-        scored = []
-        for item in self.images_index:
-            sim = self._cosine_similarity(q_emb, item["embedding"])
-            scored.append((sim, item))
-
-        scored.sort(key=lambda x: x[0], reverse=True)
-        return [{"score": round(sim, 4), "image_id": it["image_id"], "path": it["path"], "hazard_type": it["hazard_type"]} for sim, it in scored[:top_k]]
+        matches = self.store.search("images", embedding, top_k)
+        return [{"score": round(hit.score, 4), "image_id": hit.payload["image_id"],
+                 "path": hit.payload["path"], "hazard_type": hit.payload.get("hazard_type")}
+                for hit in matches]
 
     def retrieve_hybrid_context(
         self,
