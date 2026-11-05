@@ -5,6 +5,7 @@ Dijkstra/A* routing with hazard penalties, k-shortest paths, and Pyvis export.
 """
 
 import json
+import copy
 import math
 import os
 from typing import Dict, List, Optional, Tuple, Any
@@ -19,6 +20,7 @@ class CrisisSpatialGraph:
         self.graph = nx.DiGraph()
         self.metadata: Dict[str, Any] = {}
         self.edge_lookup: Dict[str, Tuple[str, str]] = {}
+        self._baseline_edges = {}
         self.node_lookup: Dict[str, Dict[str, Any]] = {}
         
         if network_json_path and os.path.exists(network_json_path):
@@ -91,6 +93,45 @@ class CrisisSpatialGraph:
             self.graph.add_edge(v, u, **reverse_attrs)
             self.edge_lookup[reverse_attrs["id"]] = (v, u)
 
+        self._baseline_edges = {(u, v): copy.deepcopy(data) for u, v, data in self.graph.edges(data=True)}
+
+    def apply_incident_reports(self, reports):
+        """Apply every active incident; resolving one cannot clear another.
+
+        Resolved reports clear their own baseline restrictions. Reports on other
+        roads leave the original network intact, and repeated runs are identical.
+        """
+        for (u, v), data in self._baseline_edges.items():
+            self.graph[u][v].clear()
+            self.graph[u][v].update(copy.deepcopy(data))
+        by_edge = {}
+        for report in reports:
+            for edge in report.get("cleared_edges", []):
+                by_edge.setdefault(edge.removesuffix("_REV"), [])
+            for edge in report.get("affected_edges", []):
+                by_edge.setdefault(edge.removesuffix("_REV"), []).append(report)
+        updates = []
+        for edge_id, related in by_edge.items():
+            active = [r for r in related if r.get("incident_status", "active") != "resolved"]
+            flood = max((float(r.get("flood_depth_cm", 0)) for r in active), default=0)
+            damage = max((float(r.get("damage_severity", 0)) for r in active), default=0)
+            closed = any(r.get("road_closed", False) for r in active) or damage >= 0.85
+            status = "severely_damaged" if damage >= 0.85 else ("blocked" if closed else ("flooded" if flood > 0 else ("caution" if damage > 0.25 else "open")))
+            if self.update_edge_damage(edge_id, status, damage, flood, traversable=not closed):
+                for key in (edge_id, f"{edge_id}_REV"):
+                    if key in self.edge_lookup:
+                        u, v = self.edge_lookup[key]
+                        self.graph[u][v]["hazard_risk"] = max(damage, min(flood / 100, 1))
+                updates.append(f"{edge_id}: {status}, flood={flood:g}cm, damage={damage:.0%}")
+        return updates
+
+    def node_hazards(self, node_id):
+        edges = [data for _, _, data in self.graph.edges(node_id, data=True)]
+        return {
+            "flood_depth_cm": max((e.get("flood_depth_cm", 0) for e in edges), default=0),
+            "damage_severity": max((e.get("damage_severity", 0) for e in edges), default=0),
+        }
+
     def calculate_edge_weight(
         self,
         u: str,
@@ -118,7 +159,7 @@ class CrisisSpatialGraph:
             "ambulance": 20.0,         # 20cm max safe water clearance
             "high_clearance_truck": 60.0,
             "rescue_boat": 999.0,
-            "civilian_car": 12.0
+            "civilian_car": 15.0
         }.get(vehicle_type, 20.0)
 
         if avoid_hazards:
@@ -126,10 +167,6 @@ class CrisisSpatialGraph:
                 return float("inf")
             if damage >= 0.85: # Structural collapse / severed span
                 return float("inf")
-            # If traversing through a designated hazard node, block passage
-            for endpoint in [u, v]:
-                if endpoint in ["N_INT_VN_PURAV", "N_INT_SUMAN_NAGAR"]:
-                    return float("inf")
 
         # Dynamic penalty multiplier
         # Cost = base_time * (1 + 8*damage + 4*risk + flood_penalty)
@@ -151,7 +188,7 @@ class CrisisSpatialGraph:
         target_ids = [edge_id, f"{edge_id}_REV"]
         
         for u, v, data in self.graph.edges(data=True):
-            if data.get("id") in target_ids or edge_id in data.get("id", ""):
+            if data.get("id") in target_ids:
                 data["status"] = status
                 data["damage_severity"] = min(max(damage_severity, 0.0), 1.0)
                 data["flood_depth_cm"] = max(flood_depth_cm, 0.0)
@@ -382,12 +419,12 @@ class CrisisSpatialGraph:
                 border_color = "#FEF08A"
                 size = 34
                 short_label = f"[TARGET] {short_label}"
-            elif nid == "N_INT_VN_PURAV":
+            elif self.node_hazards(nid)["flood_depth_cm"] > 20:
                 color = "#0284C7" # Water Inundation Hazard
                 border_color = "#67E8F9"
                 size = 28
-                short_label = "VN Purav [FLOOD]"
-            elif nid == "N_INT_SUMAN_NAGAR":
+                short_label += " [FLOOD]"
+            elif self.node_hazards(nid)["damage_severity"] >= 0.85:
                 color = "#EF4444" # Critical Structural Shear Failure
                 border_color = "#FCA5A5"
                 size = 28

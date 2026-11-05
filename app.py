@@ -10,6 +10,7 @@ import re
 import json
 import base64
 import hashlib
+import copy
 from typing import Dict, Any, List, Optional
 import streamlit as st
 import folium
@@ -46,6 +47,8 @@ from src.multimodal_retriever import MultimodalRetriever
 from src.agent_workflow import CrisisResponseAgent
 from src.explainability import ReasoningChainVisualizer
 from src.evaluation import run_benchmark_suite, CRISIS_BENCHMARK_DATASET
+from src.incident_repository import IncidentRepository
+from src.incident_ui import render_incident_manager
 
 # ==============================================================================
 # STREAMLIT CONFIGURATION - CLEAN FULL-CANVAS LAYOUT (NO SIDEBAR, NO EMOJIS)
@@ -339,6 +342,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+incident_reports_path = os.getenv("INCIDENT_REPORTS_PATH", "").strip() or os.path.join(current_dir, "data", "incident_reports.json")
+if not os.path.isabs(incident_reports_path):
+    incident_reports_path = os.path.join(current_dir, incident_reports_path)
+
 # ==============================================================================
 # SYSTEM INITIALIZATION & CACHING (Chembur, Mumbai Network Mesh)
 # ==============================================================================
@@ -350,13 +357,18 @@ def get_data_fingerprint() -> str:
         if os.path.exists(p):
             with open(p, "rb") as f:
                 h.update(f.read())
+    if os.path.exists(incident_reports_path):
+        with open(incident_reports_path, "rb") as f:
+            h.update(f.read())
     return h.hexdigest()[:16]
 
 @st.cache_resource(show_spinner=False)
 def load_crisis_system(mesh_fingerprint: str):
     data_dir = os.path.join(current_dir, "data")
     osm_path = os.path.join(data_dir, "sample_osm_network.json")
-    reports_path = os.path.join(data_dir, "disaster_reports.json")
+    reports_path = incident_reports_path
+    if not os.path.exists(reports_path):
+        reports_path = os.path.join(data_dir, "disaster_reports.json")
     
     # 1. Spatial Graph Engine
     graph = CrisisSpatialGraph(osm_path)
@@ -372,6 +384,8 @@ def load_crisis_system(mesh_fingerprint: str):
         # Index Recon Images
         img_meta = []
         for rep in reports_data:
+            if rep.get("incident_status", "active") == "resolved":
+                continue
             img_rel = rep.get("image_ref")
             if img_rel:
                 full_path = os.path.join(current_dir, img_rel)
@@ -387,6 +401,8 @@ def load_crisis_system(mesh_fingerprint: str):
     else:
         reports_data = []
 
+    graph.apply_incident_reports(reports_data)
+
     # 3. Agent & Reasoning Engine
     agent = CrisisResponseAgent(graph, retriever, api_key=api_key)
     try:
@@ -396,21 +412,16 @@ def load_crisis_system(mesh_fingerprint: str):
 
     return graph, retriever, agent, visualizer, reports_data
 
-graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(get_data_fingerprint())
-
-# Fail-safe Cache Verification: ensure central hazards (VN Purav flood and Suman Nagar shear) are actively loaded in memory
-e_vn = graph_store.graph.get_edge_data("N_CHEMBUR_NAKA", "N_INT_VN_PURAV") or {}
-e_suman = graph_store.graph.get_edge_data("N_CHEMBUR_NAKA", "N_INT_SUMAN_NAGAR") or {}
-if (
-    "N_CHEMBUR_NAKA" not in graph_store.graph.nodes
-    or "N_CAMPUS_VESIT" not in graph_store.graph.nodes
-    or len(graph_store.graph.nodes) < 16
-    or e_vn.get("status") != "flooded"
-    or e_suman.get("status") != "severely_damaged"
-):
-    st.cache_resource.clear()
-    st.cache_data.clear()
-    graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(get_data_fingerprint() + "_sync_v2")
+mesh_fingerprint = get_data_fingerprint()
+graph_store, retriever, agent, visualizer, disaster_reports = load_crisis_system(mesh_fingerprint)
+# Cached Qdrant is shared safely; each session gets its own mutable route graph.
+graph_store = copy.deepcopy(graph_store)
+agent = CrisisResponseAgent(graph_store, retriever, api_key=os.getenv("GEMINI_API_KEY"))
+visualizer = ReasoningChainVisualizer(graph_store, api_key=os.getenv("GEMINI_API_KEY"))
+if st.session_state.get("mesh_fingerprint") != mesh_fingerprint:
+    st.session_state.pop("current_state", None)
+    st.session_state.pop("benchmark_results", None)
+    st.session_state.mesh_fingerprint = mesh_fingerprint
 
 # ==============================================================================
 # SESSION STATE AUTO-SANITIZER (Purge stale legacy session memory)
@@ -535,7 +546,7 @@ with top_col_right:
         <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; height: 100%; padding-top: 5px;">
             <span class="status-pill pill-green"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34D399; box-shadow: 0 0 6px #34D399;"></span>CHEMBUR MESH ONLINE</span>
             <span class="status-pill pill-cyan"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #38BDF8;"></span>{len(graph_store.graph.nodes)} NODES</span>
-            <span class="status-pill pill-amber"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #FBBF24;"></span>{len(disaster_reports)} HAZARD ALERTS</span>
+            <span class="status-pill pill-amber"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #FBBF24;"></span>{sum(1 for r in disaster_reports if r.get("incident_status", "active") != "resolved" and (r.get("flood_depth_cm", 0) > 0 or r.get("damage_severity", 0) > 0.25 or r.get("road_closed", False)))} ACTIVE HAZARDS</span>
         </div>
         """, unsafe_allow_html=True)
     with btn_box:
@@ -608,12 +619,22 @@ st.markdown(f"""
 # ==============================================================================
 # MISSION CONTROL CENTER (Unified Command & Scenario Launchpad)
 # ==============================================================================
+incident_roads = {
+    data["id"]: {"name": data["name"], "nodes": (u, v)}
+    for u, v, data in graph_store.graph.edges(data=True)
+    if not data["id"].endswith("_REV")
+}
+render_incident_manager(IncidentRepository(
+    incident_reports_path,
+    os.path.join(current_dir, "data", "disaster_reports.json"), incident_roads,
+))
+
 # 1. Preset Crisis Scenarios (Quick 1-Click Launch for Mumbai Chembur)
 st.markdown('<div class="panel-heading">Rapid Crisis Scenarios (Mumbai Chembur)</div>', unsafe_allow_html=True)
 p_col1, p_col2, p_col3, p_col4, p_col5, p_col6 = st.columns([1.0, 1.0, 1.0, 1.0, 1.15, 0.75])
 
 with p_col1:
-    if st.button("Flood: Central VN Purav Bypass", use_container_width=True, help="Chembur Naka to Zen Hospital avoiding 75cm flood on central VN Purav Marg"):
+    if st.button("Flood: Central VN Purav Bypass", use_container_width=True, help="Calculate the current Chembur Naka to Zen Hospital route"):
         st.session_state.active_scenario = "flood_bypass"
         st.session_state.directive_input = "Find fastest safe ambulance route from Chembur Naka to Zen Multi Speciality Hospital avoiding flooded streets"
         st.session_state.vehicle_type = "ambulance"
@@ -631,7 +652,7 @@ with p_col1:
         st.rerun()
 
 with p_col2:
-    if st.button("Bridge: Suman Nagar Detour", use_container_width=True, help="Convoy from Chembur Naka to Surana Hospital avoiding 98% shear damage on Suman Nagar flyover"):
+    if st.button("Bridge: Suman Nagar Detour", use_container_width=True, help="Calculate the current convoy route to Surana Hospital"):
         st.session_state.active_scenario = "bridge_detour"
         st.session_state.directive_input = "Route heavy emergency convoy from Chembur Naka to Surana Sethia Hospital avoiding fractured Suman Nagar flyover"
         st.session_state.vehicle_type = "high_clearance_truck"
@@ -842,7 +863,11 @@ with tab_mission:
     r_time = primary_route.get("estimated_travel_time_min", 0.0) if primary_route else 0.0
     r_dist = primary_route.get("total_distance_km", 0.0) if primary_route else 0.0
     r_conf = int(current_state.get("confidence_score", 0.0) * 100)
-    bypassed_count = len(current_state.get("retrieved_incidents", []))
+    bypassed_count = sum(
+        1 for u, v, data in graph_store.graph.edges(data=True)
+        if not data["id"].endswith("_REV")
+        and graph_store.calculate_edge_weight(u, v, data, current_state.get("vehicle_type", "ambulance")) == float("inf")
+    )
     is_air_evac = bool(primary_route and primary_route.get("is_aerial_evacuation"))
 
     origin_id = current_state.get("extracted_origin", "N_CHEMBUR_NAKA")
@@ -1175,15 +1200,9 @@ with tab_mission:
             is_origin = bool(active_origin and nid == active_origin)
             is_target = bool(active_target and nid == active_target)
             
-            # Central hazards (Shell Colony and Amar Mahal are strictly excluded from hazards)
-            is_flood_hazard = (nid == "N_INT_VN_PURAV" or ("vn_purav" in nid.lower() and status in ["partially_flooded", "flooded"]))
-            if "shell" in nid.lower():
-                is_flood_hazard = False
-                
-            is_structural_hazard = (nid == "N_INT_SUMAN_NAGAR")
-            if "amar_mahal" in nid.lower():
-                is_structural_hazard = False
-                is_flood_hazard = False
+            hazards = graph_store.node_hazards(nid)
+            is_flood_hazard = hazards["flood_depth_cm"] > 20
+            is_structural_hazard = hazards["damage_severity"] >= 0.85
 
             # Select high-tech icon design and dimensions
             if is_origin:
@@ -1444,10 +1463,10 @@ with tab_mission:
             nd = graph_store.graph.nodes.get(nid, {})
             name = nd.get("name", nid)
             ntype = nd.get("type", "").upper()
-            if nid == "N_INT_VN_PURAV":
-                return f"{name} [CENTRAL FLOOD HAZARD]"
-            elif nid == "N_INT_SUMAN_NAGAR":
-                return f"{name} [CENTRAL FLYOVER COLLAPSE]"
+            if graph_store.node_hazards(nid)["flood_depth_cm"] > 20:
+                return f"{name} [FLOOD ON ADJACENT ROAD]"
+            elif graph_store.node_hazards(nid)["damage_severity"] >= 0.85:
+                return f"{name} [STRUCTURAL HAZARD ON ADJACENT ROAD]"
             elif nid == "N_CAMPUS_VESIT":
                 return f"{name} [ACADEMIC CAMPUS]"
             elif nd.get("type") == "hospital":
@@ -1474,8 +1493,8 @@ with tab_mission:
         sel_img_path = os.path.join(current_dir, "data", "damage_images", sel_img_name)
         
         # Telemetry styling & badges
-        is_flood = (sel_node_id == "N_INT_VN_PURAV")
-        is_struct = (sel_node_id == "N_INT_SUMAN_NAGAR")
+        is_flood = graph_store.node_hazards(sel_node_id)["flood_depth_cm"] > 20
+        is_struct = graph_store.node_hazards(sel_node_id)["damage_severity"] >= 0.85
         is_campus = (sel_node_id == "N_CAMPUS_VESIT")
         is_hosp = (sel_data.get("type") == "hospital")
         
@@ -1608,11 +1627,11 @@ with tab_mission:
                 </div>
                 <div class="directive-item">
                     <span style="color: #34D399; font-weight: bold;">[OK]</span>
-                    <span>Traversing verified high-elevation arterial spine above active flood waterlines.</span>
+                    <span>Selected corridor satisfies the configured vehicle restrictions in the current incident snapshot.</span>
                 </div>
                 <div class="directive-item">
                     <span style="color: #FBBF24; font-weight: bold;">[BYPASS]</span>
-                    <span>Bypassed Central VN Purav Marg (75cm flood) and fractured Central Suman Nagar Flyover.</span>
+                    <span>Active road restrictions are applied from all incident reports; resolved incidents no longer block roads.</span>
                 </div>
                 <div class="directive-item">
                     <span style="color: #38BDF8; font-weight: bold;">[TRIAGE]</span>

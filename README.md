@@ -162,6 +162,26 @@ Run storage integration tests with:
 python -m unittest discover -s tests -v
 ```
 
+### Incident management
+
+Open **Incident management** above the scenario buttons to create or edit an
+incident. Select its affected roads, flood depth, structural damage, source,
+severity, closure flag, and active/resolved status, then choose **Save incident**.
+The current route recalculates and Qdrant is synchronized on the next app run.
+
+Operator edits are saved atomically in `data/incident_reports.json`, initialized
+from the bundled reports on first save. This local registry and its lock file
+are ignored by Git. Set `INCIDENT_REPORTS_PATH` to use another registry location.
+Concurrent stale edits are rejected rather than overwriting
+another operator's changes. Restarting the app preserves the local registry.
+
+Routing applies the entire registry, regardless of semantic search ranking.
+Resolved reports stay in history but are excluded from report search and image
+indexing. Resolving an incident clears its road restrictions only when no other
+active report on that road imposes them. Explicit road closures and severe
+structural damage block all vehicles; flood depth uses the selected vehicle's
+clearance. The old permanent junction exclusions have been removed.
+
 ### 3. Run the Streamlit Mission Control App
 ```powershell
 streamlit run app.py

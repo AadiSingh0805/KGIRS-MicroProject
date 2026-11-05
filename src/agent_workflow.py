@@ -325,7 +325,7 @@ class CrisisResponseAgent:
         if any(w in q_lower for w in ["boat", "zodiac", "raft"]):
             state["vehicle_type"] = "rescue_boat"
         elif any(w in q_lower for w in ["truck", "heavy vehicle", "unimog"]):
-            state["vehicle_type"] = "heavy_truck"
+            state["vehicle_type"] = "high_clearance_truck"
         elif any(w in q_lower for w in ["car", "sedan", "civilian"]):
             state["vehicle_type"] = "civilian_car"
         elif "ambulance" in q_lower:
@@ -369,26 +369,16 @@ class CrisisResponseAgent:
         matched_imgs = self.retriever.retrieve_images(query_text=query, query_image_path=img_path, top_k=2)
         state["retrieved_images"] = matched_imgs
 
-        graph_updates = []
-        for match in matched_reports:
-            rep = match["report"]
-            for eid in rep.get("affected_edges", []):
-                status = "severely_damaged" if rep.get("damage_severity", 0) > 0.8 else ("flooded" if rep.get("flood_depth_cm", 0) > 30 else "caution")
-                updated = self.graph_store.update_edge_damage(
-                    edge_id=eid,
-                    status=status,
-                    damage_severity=rep.get("damage_severity", 0.5),
-                    flood_depth_cm=rep.get("flood_depth_cm", 0.0)
-                )
-                if updated:
-                    graph_updates.append(f"Updated Edge {eid}: Status={status}, Dmg={rep.get('damage_severity')}, Flood={rep.get('flood_depth_cm')}cm")
+        # All active incidents govern routing, independently of semantic rank.
+        reports = self.retriever.store.reports_snapshot()
+        graph_updates = self.graph_store.apply_incident_reports(reports)
 
         state["graph_updates"] = graph_updates
 
         trace.append({
             "step": "Multimodal Hazard Assessment",
             "module": "Dynamic Graph Synchronization",
-            "details": f"Retrieved {len(matched_reports)} incident dispatches and {len(matched_imgs)} aerial imagery matches. Dynamically updated {len(graph_updates)} graph edges with real-time hazard constraints."
+            "details": f"Retrieved {len(matched_reports)} incident dispatches and {len(matched_imgs)} aerial imagery matches. Applied {len(graph_updates)} road updates from the full incident registry."
         })
         return state
 

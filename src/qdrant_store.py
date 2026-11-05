@@ -92,5 +92,21 @@ class QdrantVectorStore:
             return []
         return self.client.query_points(
             collection_name=self.collections[kind], query=vector.tolist(),
+            query_filter=models.Filter(must_not=[models.FieldCondition(
+                key="report.incident_status", match=models.MatchValue(value="resolved")
+            )]) if kind == "reports" else None,
             limit=top_k, with_payload=True, with_vectors=False,
         ).points
+
+    @_synchronized
+    def reports_snapshot(self):
+        reports = []
+        offset = None
+        while True:
+            points, offset = self.client.scroll(
+                collection_name=self.collections["reports"], limit=128,
+                offset=offset, with_payload=True, with_vectors=False,
+            )
+            reports.extend(point.payload["report"] for point in points)
+            if offset is None:
+                return reports

@@ -12,3 +12,5 @@ venv/
 temp_upload.png
 data/qdrant_storage/
 qdrant_storage/
+data/incident_reports.json
+data/incident_reports.json.lock
