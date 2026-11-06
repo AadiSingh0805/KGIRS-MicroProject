@@ -57,7 +57,7 @@ class CrisisResponseAgent:
         self.graph_store = graph_store
         self.retriever = retriever
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.candidate_models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest", "gemini-3.8-flash"]
+        self.candidate_models = ["gemini-3.1-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"]
         self.model = None
 
         if self.api_key and _GENAI_AVAILABLE:

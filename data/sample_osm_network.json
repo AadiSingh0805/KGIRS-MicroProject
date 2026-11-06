@@ -285,11 +285,11 @@
       "distance_km": 0.38,
       "base_speed_kmh": 35,
       "elevation_m": 15.5,
-      "status": "open",
-      "damage_severity": 0.02,
-      "flood_depth_cm": 0,
-      "hazard_risk": 0.02,
-      "traversable": true,
+      "status": "flooded",
+      "damage_severity": 0.85,
+      "flood_depth_cm": 75,
+      "hazard_risk": 0.95,
+      "traversable": false,
       "geometry": [
         [
           19.0585,
@@ -727,11 +727,11 @@
       "distance_km": 0.9,
       "base_speed_kmh": 60,
       "elevation_m": 22,
-      "status": "open",
-      "damage_severity": 0.02,
-      "flood_depth_cm": 0,
-      "hazard_risk": 0.02,
-      "traversable": true,
+      "status": "flooded",
+      "damage_severity": 0.85,
+      "flood_depth_cm": 75,
+      "hazard_risk": 0.95,
+      "traversable": false,
       "geometry": [
         [
           19.0585,
@@ -803,11 +803,11 @@
       "distance_km": 0.75,
       "base_speed_kmh": 20,
       "elevation_m": 4.5,
-      "status": "open",
-      "damage_severity": 0.02,
-      "flood_depth_cm": 0,
-      "hazard_risk": 0.02,
-      "traversable": true,
+      "status": "flooded",
+      "damage_severity": 0.85,
+      "flood_depth_cm": 75,
+      "hazard_risk": 0.95,
+      "traversable": false,
       "geometry": [
         [
           19.0585,
@@ -1031,11 +1031,11 @@
       "distance_km": 1.85,
       "base_speed_kmh": 40,
       "elevation_m": 15,
-      "status": "open",
-      "damage_severity": 0.02,
-      "flood_depth_cm": 0,
-      "hazard_risk": 0.02,
-      "traversable": true,
+      "status": "flooded",
+      "damage_severity": 0.85,
+      "flood_depth_cm": 75,
+      "hazard_risk": 0.95,
+      "traversable": false,
       "geometry": [
         [
           19.0463,
@@ -1056,6 +1056,40 @@
         [
           19.0585,
           72.9005
+        ]
+      ]
+    },
+    {
+      "id": "E_VESIT_TO_FREEWAY",
+      "source": "N_CAMPUS_VESIT",
+      "target": "N_BRIDGE_FREEWAY",
+      "name": "Panjarpol Elevated Bypass (Collector's Colony - Freeway)",
+      "road_type": "primary",
+      "lanes": 4,
+      "distance_km": 2.1,
+      "base_speed_kmh": 50,
+      "elevation_m": 22,
+      "status": "open",
+      "damage_severity": 0.01,
+      "flood_depth_cm": 0,
+      "hazard_risk": 0.01,
+      "traversable": true,
+      "geometry": [
+        [
+          19.0463,
+          72.8872
+        ],
+        [
+          19.0482,
+          72.8945
+        ],
+        [
+          19.0501,
+          72.9015
+        ],
+        [
+          19.0518,
+          72.9085
         ]
       ]
     },

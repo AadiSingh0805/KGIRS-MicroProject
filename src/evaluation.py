@@ -151,12 +151,15 @@ class CrisisLLMJudge:
         if self.api_key and _GENAI_AVAILABLE:
             try:
                 genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel("gemini-2.5-flash")
+                self.model = genai.GenerativeModel("gemini-3.1-flash")
             except Exception:
                 try:
-                    self.model = genai.GenerativeModel("gemini-1.5-flash")
+                    self.model = genai.GenerativeModel("gemini-3.1-flash-lite")
                 except Exception:
-                    self.model = None
+                    try:
+                        self.model = genai.GenerativeModel("gemini-2.5-flash")
+                    except Exception:
+                        self.model = None
 
     def evaluate_response(
         self,

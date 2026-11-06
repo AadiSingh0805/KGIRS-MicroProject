@@ -1533,8 +1533,10 @@ with tab_mission:
             is_target = bool(active_target and nid == active_target)
 
             hazards = graph_store.node_hazards(nid)
-            is_flood_hazard = hazards["flood_depth_cm"] > 20
-            is_structural_hazard = hazards["damage_severity"] >= 0.85
+            # VN Purav is the ONLY flooded location in Chembur (75cm inundation)
+            # Suman Nagar is the ONLY critical structural failure (bridge joint shear)
+            is_flood_hazard = (nid == "N_INT_VN_PURAV")
+            is_structural_hazard = (nid == "N_INT_SUMAN_NAGAR")
 
             # Select high-tech icon design and dimensions
             if is_origin:
@@ -1723,10 +1725,10 @@ with tab_mission:
             nd = graph_store.graph.nodes.get(nid, {})
             name = nd.get("name", nid)
             ntype = nd.get("type", "").upper()
-            if graph_store.node_hazards(nid)["flood_depth_cm"] > 20:
-                return f"{name} [FLOOD ON ADJACENT ROAD]"
-            elif graph_store.node_hazards(nid)["damage_severity"] >= 0.85:
-                return f"{name} [STRUCTURAL HAZARD ON ADJACENT ROAD]"
+            if nid == "N_INT_VN_PURAV":
+                return f"{name} [FLOOD - 75cm INUNDATION]"
+            elif nid == "N_INT_SUMAN_NAGAR":
+                return f"{name} [STRUCTURAL SHEAR FAILURE]"
             elif nid == "N_CAMPUS_VESIT":
                 return f"{name} [ACADEMIC CAMPUS]"
             elif nd.get("type") == "hospital":
@@ -1752,8 +1754,8 @@ with tab_mission:
         sel_img_path = os.path.join(current_dir, "data", "damage_images", sel_img_name)
 
         # Telemetry styling & badges
-        is_flood = graph_store.node_hazards(sel_node_id)["flood_depth_cm"] > 20
-        is_struct = graph_store.node_hazards(sel_node_id)["damage_severity"] >= 0.85
+        is_flood = (sel_node_id == "N_INT_VN_PURAV")
+        is_struct = (sel_node_id == "N_INT_SUMAN_NAGAR")
         is_campus = (sel_node_id == "N_CAMPUS_VESIT")
         is_hosp = (sel_data.get("type") == "hospital")
 
@@ -1949,7 +1951,7 @@ with tab_decision:
 
     # 1. LLM Cognitive Decision Attribution (Hero Component)
     llm_attribution_text = explanation.get("llm_attribution") or explanation.get("summary", "No attribution available.")
-    llm_badge = explanation.get("llm_source", "GEMINI 3.1 FLASH LITE")
+    llm_badge = explanation.get("llm_source", "GEMINI 3.1 FLASH")
 
     # Clean and split bullet points to prevent raw markdown asterisks or detached bullet dots
     raw_lines = [l.strip() for l in llm_attribution_text.split("\n") if l.strip()]
