@@ -6,8 +6,25 @@ import os
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+from contextlib import contextmanager
+from threading import RLock
 
-import portalocker
+try:
+    import portalocker
+    _PORTALOCKER_AVAILABLE = True
+except ImportError:
+    _PORTALOCKER_AVAILABLE = False
+
+_THREAD_LOCK = RLock()
+
+@contextmanager
+def _safe_lock(lock_path: str, timeout: int = 5):
+    if _PORTALOCKER_AVAILABLE:
+        with portalocker.Lock(lock_path, timeout=timeout):
+            yield
+    else:
+        with _THREAD_LOCK:
+            yield
 
 
 class IncidentRepository:
@@ -43,7 +60,7 @@ class IncidentRepository:
         report["location_ref"] = edges[0]
         report["timestamp"] = datetime.now(timezone.utc).isoformat()
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with portalocker.Lock(str(self.path) + ".lock", timeout=5):
+        with _safe_lock(str(self.path) + ".lock", timeout=5):
             reports, revision = self.load()
             if revision != expected_revision:
                 raise ValueError("Incidents changed while you were editing. Reload the page and try again.")
